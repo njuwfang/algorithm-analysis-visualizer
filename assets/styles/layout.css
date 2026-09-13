@@ -1,0 +1,455 @@
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: grid;
+  grid-template-columns: auto minmax(160px, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  min-height: 72px;
+  padding: 10px clamp(18px, 4vw, 64px);
+  color: var(--ink);
+  background: rgba(245, 248, 249, 0.94);
+  border-bottom: 1px solid rgba(217, 228, 232, 0.95);
+  box-shadow: none;
+  backdrop-filter: blur(12px);
+}
+
+.route-summary {
+  grid-column: 2;
+  min-width: 0;
+  padding-left: 16px;
+  border-left: 1px solid var(--border);
+}
+
+.route-context {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  color: var(--brand);
+  font-size: 0.75rem;
+  font-weight: 750;
+}
+
+.route-context span,
+.route-summary h1 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.route-context-separator {
+  flex: 0 0 auto;
+  color: var(--faint);
+}
+
+.route-summary h1 {
+  margin: 2px 0 0;
+  font-size: clamp(0.96rem, 1.4vw, 1.16rem);
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+}
+
+.header-pager {
+  display: flex;
+  grid-column: 3;
+  gap: 7px;
+}
+
+.course-nav {
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: 220;
+  width: min(88vw, 320px);
+  padding: 22px 18px;
+  overflow-y: auto;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.98);
+  border-right: 1px solid var(--border);
+  box-shadow: var(--shadow-2);
+  transform: translateX(-105%);
+  transition: transform 180ms ease;
+}
+
+body.nav-open {
+  overflow: hidden;
+}
+
+body.nav-open .course-nav {
+  transform: translateX(0);
+}
+
+.nav-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 210;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  pointer-events: none;
+  background: rgba(20, 36, 45, 0.38);
+  border: 0;
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+
+body.nav-open .nav-backdrop {
+  pointer-events: auto;
+  opacity: 1;
+}
+
+.course-nav-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 2px 17px;
+  border-bottom: 1px solid var(--border);
+}
+
+.course-nav-heading h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.lesson-main {
+  width: min(100%, var(--content-max));
+  margin: 0 auto;
+  padding: 14px clamp(18px, 4vw, 64px) 50px;
+}
+
+.lab-shell,
+.generalize-panel {
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 24px rgba(27, 56, 68, 0.055);
+}
+
+.lab-toolbar {
+  display: grid;
+  grid-template-columns: minmax(360px, 1fr) minmax(150px, 0.34fr) auto;
+  align-items: end;
+  gap: 16px;
+  padding: 16px 18px;
+  background: rgba(255, 255, 255, 0.78);
+  border-bottom: 1px solid var(--border);
+}
+
+.input-form,
+.scenario-block,
+.mode-block {
+  min-width: 0;
+}
+
+.stage-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(340px, 0.85fr);
+  height: clamp(320px, 38vh, 390px);
+  min-height: 0;
+}
+
+.stage-panel {
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: #fff;
+}
+
+.visualization-panel {
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--border);
+}
+
+.visualization {
+  display: grid;
+  flex: 1 1 auto;
+  place-items: safe center;
+  min-height: 0;
+  padding: 14px 18px;
+  overflow: auto;
+  background:
+    linear-gradient(rgba(63, 94, 168, 0.038) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(63, 94, 168, 0.038) 1px, transparent 1px),
+    var(--surface-subtle);
+  background-size: 24px 24px;
+}
+
+.code-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.transport-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 60px;
+  padding: 10px 18px;
+  background: #fff;
+  border-top: 1px solid var(--border);
+}
+
+.trace-summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(220px, 0.65fr);
+  border-top: 1px solid var(--border);
+}
+
+.trace-summary-item {
+  min-width: 0;
+  padding: 15px 18px 17px;
+}
+
+.trace-summary-item + .trace-summary-item {
+  border-left: 1px solid var(--border);
+}
+
+.count-panel {
+  background: #f0f8f7;
+}
+
+.generalize-panel {
+  margin-top: 16px;
+}
+
+.generalize-heading {
+  padding: 17px 20px 0;
+}
+
+.generalize-heading h2 {
+  margin: 0;
+  font-size: 1.12rem;
+}
+
+body.embed-mode .course-nav,
+body.embed-mode .nav-backdrop {
+  display: none;
+}
+
+body.embed-mode .topbar {
+  position: static;
+  grid-template-columns: minmax(0, 1fr);
+  min-height: 0;
+  padding: 10px 14px;
+}
+
+body.embed-mode .nav-button,
+body.embed-mode .header-pager,
+body.embed-mode .route-context {
+  display: none;
+}
+
+body.embed-mode .route-summary {
+  display: block;
+  grid-row: auto;
+  grid-column: 1;
+  padding: 0;
+  border: 0;
+}
+
+body.embed-mode .route-summary h1 {
+  margin: 0;
+  font-size: 1.25rem;
+  white-space: normal;
+}
+
+body.embed-mode .lesson-main {
+  width: 100%;
+  padding: 14px;
+}
+
+@media (max-width: 980px) {
+  .lab-toolbar {
+    grid-template-columns: minmax(320px, 1fr) minmax(150px, 0.42fr);
+  }
+
+  .mode-block {
+    grid-column: 1 / -1;
+  }
+
+  .stage-grid {
+    grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.75fr);
+  }
+
+  .trace-summary {
+    grid-template-columns: minmax(0, 1fr) minmax(210px, 0.75fr);
+  }
+}
+
+@media (max-width: 760px) {
+  .topbar {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 10px;
+  }
+
+  .route-context {
+    display: none;
+  }
+
+  .lesson-main {
+    padding: 12px 14px 36px;
+  }
+
+  .lab-shell {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .lab-toolbar {
+    order: 1;
+  }
+
+  .stage-grid {
+    display: contents;
+    min-height: 0;
+  }
+
+  .visualization-panel {
+    order: 3;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  #traceControls,
+  #activityControls {
+    order: 4;
+  }
+
+  .code-panel {
+    order: 5;
+    max-height: 280px;
+    border-top: 1px solid var(--border);
+  }
+
+  .trace-summary {
+    order: 6;
+  }
+
+  .visualization {
+    flex: none;
+    height: clamp(300px, 55vh, 420px);
+    min-height: 0;
+    padding: 18px 12px;
+  }
+}
+
+@media (max-width: 580px) {
+  .topbar {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 8px;
+    min-height: 58px;
+    padding: 8px 10px;
+  }
+
+  .nav-button span:last-child {
+    display: none;
+  }
+
+  .header-pager {
+    grid-row: 1;
+    grid-column: 2;
+    justify-content: flex-end;
+    min-width: 0;
+  }
+
+  .top-pager-button {
+    min-width: 0;
+    max-width: 136px;
+    padding-inline: 8px;
+  }
+
+  .top-pager-direction {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .top-pager-name {
+    max-width: 106px;
+    font-size: 0.75rem;
+  }
+
+  .route-summary {
+    grid-row: 2;
+    grid-column: 1 / -1;
+    padding: 3px 4px 0;
+    border-left: 0;
+  }
+
+  .route-summary h1 {
+    margin: 0;
+    font-size: 0.96rem;
+  }
+
+  .lab-toolbar {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 13px;
+    padding: 14px;
+  }
+
+  .mode-block {
+    grid-column: auto;
+  }
+
+  .visualization {
+    height: 300px;
+    min-height: 300px;
+  }
+
+  .code-panel {
+    max-height: 240px;
+  }
+
+  .transport-bar {
+    flex-wrap: wrap;
+    padding-inline: 12px;
+  }
+
+  .timeline-control {
+    order: 2;
+    width: 100%;
+  }
+
+  .trace-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .trace-summary-item + .trace-summary-item,
+  .count-panel {
+    grid-column: auto;
+    border-top: 1px solid var(--border);
+    border-left: 0;
+  }
+
+}
+
+@media (min-width: 761px) and (max-height: 820px) {
+  .lesson-main {
+    padding-top: 12px;
+  }
+
+  .lab-toolbar {
+    padding-block: 10px;
+  }
+
+  .stage-grid {
+    height: 318px;
+    min-height: 0;
+  }
+
+  .visualization {
+    min-height: 0;
+    padding-block: 12px;
+  }
+}

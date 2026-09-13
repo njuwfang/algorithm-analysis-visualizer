@@ -1,0 +1,9 @@
+# Installed dependencies
+node_modules/
+
+# Generated static build
+dist/
+
+# Logs
+*.log
+npm-debug.log*

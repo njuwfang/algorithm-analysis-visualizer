@@ -1,0 +1,17 @@
+{
+  "name": "analysis-of-algorithms-visualizations",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A self-contained static course site for algorithm visualizations and analysis.",
+  "scripts": {
+    "serve": "python3 -m http.server 8080",
+    "validate": "node scripts/validate.mjs",
+    "test": "node --test",
+    "build": "node scripts/build.mjs",
+    "check": "npm run validate && npm test && npm run build"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

@@ -1,260 +1,125 @@
-# Analysis of Algorithms — Interactive Lab
+# Analysis of Algorithms Visualizations
 
-A dependency-free teaching companion for the lecture deck **03_Analysis_of_Algorithms.pdf**. It keeps the deck's analytical sequence visible:
+A reusable, self-contained static website for teaching algorithm execution and analysis. The current Lecture 03 modules preserve one repeated workflow:
 
-1. choose the input-size parameter;
-2. identify the basic operation;
-3. consider best, average, and worst cases;
-4. count the basic operation with a sum or recurrence;
-5. state the order of growth.
+> **Trace → Count → Generalize**
 
-The site contains five interactive modules:
+The redesign separates the course shell from lecture content, so later lectures can be added without copying the entire application.
 
-- Maximum element
-- Element uniqueness
+## Lecture 03
+
+The supplied lecture is represented by three modules that benefit most from tracing:
+
 - Number of binary digits — iterative
-- Tower of Hanoi — guided recursive solution and practice puzzle
+- Tower of Hanoi
 - Number of binary digits — recursive
 
-Everything runs in the browser. There is no build step, package manager, framework, analytics script, or external CDN.
+Each lesson keeps the custom input, one example chooser, visualization, lecture pseudocode, selected-operation count, and mathematical model in a compact shared shell. Supporting analysis is available on demand instead of occupying the default screen.
 
-## Quick start in WSL
-
-Open WSL, extract the project, and run a small local web server:
+## Run in WSL
 
 ```bash
-cd /path/to/analysis-visualizer
 ./serve.sh
 ```
 
-Then open this address in your Windows browser:
+Open:
 
 ```text
 http://localhost:8080
 ```
 
-`localhost` normally works directly with WSL 2. If it does not, find the WSL address with:
+A server is required because the browser loads native ES modules. No installation or build step is required for local teaching.
+
+## Quality checks
+
+Node 20 or newer is needed only for repository checks:
 
 ```bash
-hostname -I
+npm run validate
+npm test
+npm run build
+npm run check
 ```
 
-Then open `http://<that-address>:8080`.
+`npm run build` creates a clean deployable site in `dist/`.
 
-To stop the server, return to the WSL terminal and press `Ctrl+C`.
+## GitHub Pages
 
-### Optional Node-based server
+1. Push the project to a GitHub repository.
+2. Open **Settings → Pages**.
+3. Choose **Deploy from a branch**, then select the repository root.
 
-Node is not required, but either of these also works:
+Alternatively, run `npm run build` and publish the generated `dist/` directory with any static host.
 
-```bash
-npx serve .
-```
-
-or
-
-```bash
-npx http-server .
-```
-
-Those commands may download a package the first time. The included `serve.sh` script uses Python and does not require a project dependency.
-
-## Project structure
+The canonical route format is:
 
 ```text
-analysis-visualizer/
-├── index.html                  Main page
-├── standalone.html            One-file version for direct upload
-├── styles.css                 Responsive layout and visualizations
-├── app.js                     Algorithms, traces, controls, and rendering
-├── favicon.svg                Browser tab icon
-├── serve.sh                   One-command WSL development server
-├── embed-example.html         Example iframe integration
-├── README.md                  This guide
-├── .nojekyll                  GitHub Pages compatibility
-└── .github/workflows/
-    └── deploy-pages.yml       Optional GitHub Pages deployment
+https://YOUR_USERNAME.github.io/REPOSITORY/#/03-analysis/binary-iterative
 ```
 
-All asset paths are relative, so the folder can be hosted at a domain root or under a subdirectory.
+Because routing uses the URL hash and the vendored KaTeX distribution renders formulas locally, the site works from a project subdirectory without server rewrites or external runtime services.
 
-## Fastest deployment: upload one file
-
-`standalone.html` contains the HTML, CSS, JavaScript, and icon in one file. Rename it to a suitable page name, upload it to your website, and link to it directly. Use the multi-file version when you want easier customization or iframe examples.
-
-## Put it inside an existing personal website
-
-Copy the entire folder into the directory your site publishes. Typical examples:
+## Direct links and embedding
 
 ```text
-my-website/public/algorithm-lab/
-my-website/static/algorithm-lab/
-my-website/docs/algorithm-lab/
+#/03-analysis/binary-iterative
+#/03-analysis/hanoi
+#/03-analysis/binary-recursive
 ```
 
-After the site is deployed, the visualizer will be available at a URL such as:
+Iframe-friendly link:
 
 ```text
-https://example.com/algorithm-lab/
+?embed=1&module=hanoi
 ```
 
-Do not copy only `index.html`; it also needs `styles.css` and `app.js` beside it.
-
-### Link to a particular algorithm
-
-Each module has a stable hash URL:
-
-```text
-/algorithm-lab/#max-element
-/algorithm-lab/#unique-element
-/algorithm-lab/#binary-iterative
-/algorithm-lab/#hanoi
-/algorithm-lab/#binary-recursive
-```
-
-You can link from a slide, lesson page, or LMS directly to the relevant module.
-
-## Embed one module in a page
-
-Use `embed=1` to hide the site header and nonessential navigation. Select a module either with a query parameter or hash.
+Example:
 
 ```html
 <iframe
-  src="/algorithm-lab/?embed=1&module=hanoi"
-  title="Tower of Hanoi interactive visualization"
+  src="https://YOUR_USERNAME.github.io/REPOSITORY/?embed=1&amp;module=hanoi"
+  title="Tower of Hanoi analysis visualization"
   width="100%"
-  height="820"
+  height="900"
   loading="lazy"
-  style="border:0; border-radius:16px;"
+  style="border:0"
 ></iframe>
 ```
 
-Available module values:
+## Architecture
 
 ```text
-max-element
-unique-element
-binary-iterative
-hanoi
-binary-recursive
+visualization/
+├── index.html
+├── AGENTS.md
+├── assets/styles/
+├── src/core/
+├── src/lectures/
+│   ├── registry.js
+│   └── 03-analysis/
+├── docs/
+├── templates/
+├── tests/
+└── scripts/
 ```
 
-See `embed-example.html` for a complete example.
+The shared shell renders any module that satisfies the module contract. See:
 
-## Deploy with GitHub Pages
+- `AGENTS.md` for the concise repository rules
+- `docs/ADD_A_LECTURE.md` for the authoring workflow
+- `docs/STYLE_GUIDE.md` for website and visualization conventions
+- `docs/SOURCE_NOTES.md` for documented Lecture 03 interpretation choices
 
-### Option A: deploy from a branch
+## Add a lecture
 
-1. Create a GitHub repository.
-2. Put these files at the repository root.
-3. Push the repository.
-4. Open **Settings → Pages**.
-5. Under **Build and deployment**, select **Deploy from a branch**.
-6. Choose the branch and the `/ (root)` folder.
+1. Copy the files in `templates/`.
+2. Create a folder under `src/lectures/`.
+3. Implement deterministic traces and renderers.
+4. Register the lecture in `src/lectures/registry.js`.
+5. Add tests and run `npm run check`.
 
-The included `.nojekyll` file makes GitHub Pages serve the static files without Jekyll processing.
+Navigation, direct links, the header pager, and embedding are generated by the shared shell.
 
-### Option B: use the included GitHub Actions workflow
+## Browser support
 
-The file `.github/workflows/deploy-pages.yml` deploys the repository as a static Pages site.
-
-1. In **Settings → Pages**, select **GitHub Actions** as the source.
-2. Push to the `main` branch.
-3. Open the **Actions** tab to watch the deployment.
-
-If your default branch has a different name, edit the `branches` entry in the workflow.
-
-## Deploy with Netlify, Cloudflare Pages, or Vercel
-
-This is a plain static site.
-
-- **Build command:** leave empty
-- **Output/publish directory:** `.`
-- **Framework preset:** none / other / static HTML
-
-Upload the folder directly, or connect the Git repository. No environment variables are required.
-
-## Deploy with a conventional web server
-
-Copy the directory under the web root.
-
-For Nginx, a typical target could be:
-
-```bash
-sudo mkdir -p /var/www/html/algorithm-lab
-sudo cp -r ./* /var/www/html/algorithm-lab/
-```
-
-For Apache, use the equivalent directory under `DocumentRoot`.
-
-The visualizer does not need server-side routing, a database, PHP, or Node in production.
-
-## Customize the teaching content
-
-### Change prepared inputs
-
-In `app.js`, find the relevant module in the `modules` array. Edit `defaultInput` and `presets`:
-
-```js
-defaultInput: "4, 7, 2, 9, 5",
-presets: [
-  { label: "Mixed", value: "4, 7, 2, 9, 5" },
-  { label: "Descending", value: "9, 7, 5, 3, 1" }
-]
-```
-
-### Change pseudocode wording
-
-Edit the module's `pseudocode` array. Set `basic: true` on the line that contains the operation being counted.
-
-```js
-pseudocode: [
-  { line: 1, text: "max ← A[0]" },
-  { line: 2, text: "for i ← 1 to n − 1 do" },
-  { line: 3, text: "if A[i] > max", indent: 1, basic: true }
-]
-```
-
-### Change formulas and checklist language
-
-Each module contains a `formula` function and a `checklist` array. Those are the best places to align terminology with future versions of your slides.
-
-### Change colors and spacing
-
-Edit the custom properties at the top of `styles.css`:
-
-```css
-:root {
-  --brand: #0f5d73;
-  --accent: #e78f2f;
-  --success: #2c7a59;
-  --danger: #b83a42;
-}
-```
-
-## Classroom controls
-
-- **Previous / Next:** move one trace state at a time.
-- **Play / Pause:** run the trace automatically.
-- **Speed:** change the automatic-play delay.
-- **Reset:** return to the initial state.
-- **Left / Right arrow keys:** step while focus is not inside a form control.
-- **Space:** play or pause while focus is not inside a form control.
-- **Tower practice:** select a source peg and then a destination peg; illegal moves are rejected.
-
-## A note about integer division
-
-The binary-digit modules visualize division by 2 as integer division for positive integers. This makes the execution concrete for inputs that are not powers of two, while the recursive mathematical panel preserves the deck's `n = 2^k` substitution case.
-
-## Test before publishing
-
-Run the local server and check:
-
-1. every module opens;
-2. Previous, Next, Play, Pause, and Reset work;
-3. invalid input produces a readable error;
-4. Tower practice rejects a larger disk on a smaller disk;
-5. the page remains usable at phone and projector widths;
-6. your deployed URL serves `styles.css` and `app.js` without 404 errors.
-
-A blank or unstyled page after deployment usually means the three main files were not copied into the same directory.
+The site targets current evergreen browsers with native ES modules, CSS Grid, and modern JavaScript. KaTeX and its math fonts are stored in the repository; there are no external runtime requests, analytics scripts, or CDNs.

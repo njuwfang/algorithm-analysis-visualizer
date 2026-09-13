@@ -3,193 +3,146 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Interactive companion visualizer for teaching analysis of nonrecursive and recursive algorithms.">
-  <meta name="theme-color" content="#0f3d56">
-  <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <title>Analysis of Algorithms — Interactive Lab</title>
-  <link rel="stylesheet" href="styles.css">
+  <meta name="description" content="Lecture-aligned visualizations for learning algorithm analysis.">
+  <meta name="theme-color" content="#263d72">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E">
+  <title>Analysis of Algorithms</title>
+  <link rel="stylesheet" href="./assets/vendor/katex/katex.min.css?v=0.18.7">
+  <link rel="stylesheet" href="./assets/styles/tokens.css?v=20260913-10">
+  <link rel="stylesheet" href="./assets/styles/base.css?v=20260913-10">
+  <link rel="stylesheet" href="./assets/styles/layout.css?v=20260913-10">
+  <link rel="stylesheet" href="./assets/styles/components.css?v=20260913-10">
+  <link rel="stylesheet" href="./assets/styles/visualizations.css?v=20260913-10">
 </head>
 <body>
-  <a class="skip-link" href="#main-content">Skip to the visualizer</a>
+  <a class="skip-link" href="#lessonMain">Skip to the lecture</a>
 
-  <header class="site-header">
-    <div class="brand-block">
-      <div class="brand-mark" aria-hidden="true">A<span>Θ</span></div>
-      <div>
-        <p class="eyebrow">Teaching companion</p>
-        <h1>Analysis of Algorithms</h1>
-        <p class="subtitle">Predict → Step → Count → Generalize</p>
+  <header class="topbar">
+    <button id="navToggle" class="nav-button" type="button" aria-label="Open lecture navigation" aria-controls="courseNav" aria-expanded="false">
+      <span class="nav-menu-icon" aria-hidden="true"></span>
+      <span>Lectures</span>
+    </button>
+
+    <div class="route-summary" aria-live="polite">
+      <div class="route-context">
+        <span id="topLectureLabel">Lecture 03</span>
+        <span class="route-context-separator" aria-hidden="true">·</span>
+        <span id="topModuleLabel">Analysis of Algorithms</span>
       </div>
+      <h1 id="lessonTitle">Number of Binary Digits — Iterative</h1>
     </div>
-    <div class="header-actions">
-      <button id="helpButton" class="button button-quiet" type="button" aria-haspopup="dialog">
-        Teaching guide
-      </button>
-    </div>
+
+    <nav class="header-pager" aria-label="Previous and next algorithm">
+      <button id="previousModuleButton" class="top-pager-button" type="button"></button>
+      <button id="nextModuleButton" class="top-pager-button" type="button"></button>
+    </nav>
   </header>
 
-  <nav class="module-nav" aria-label="Algorithm modules">
-    <div id="moduleTabs" class="module-tabs"></div>
-  </nav>
-
-  <main id="main-content" class="app-shell" tabindex="-1">
-    <section class="module-heading" aria-labelledby="moduleTitle">
+  <button id="navBackdrop" class="nav-backdrop" type="button" aria-label="Close lecture navigation" tabindex="-1"></button>
+  <aside id="courseNav" class="course-nav" aria-label="Lecture navigation" aria-hidden="true" inert>
+    <div class="course-nav-heading">
       <div>
-        <p id="moduleKicker" class="eyebrow"></p>
-        <h2 id="moduleTitle"></h2>
-        <p id="moduleDescription" class="module-description"></p>
+        <p class="eyebrow">Course</p>
+        <h2>Lectures</h2>
       </div>
-      <div id="moduleBadge" class="complexity-badge" aria-label="Order of growth"></div>
+      <button id="navClose" class="icon-button" type="button" aria-label="Close lecture navigation">×</button>
+    </div>
+    <nav id="lectureNavigation"></nav>
+  </aside>
+
+  <main id="lessonMain" class="lesson-main" tabindex="-1">
+    <section class="lab-shell" aria-label="Interactive algorithm lab">
+      <div class="lab-toolbar">
+        <form id="inputForm" class="input-form" novalidate>
+          <div class="field-heading">
+            <label id="inputLabel" for="algorithmInput">Input</label>
+            <span id="inputHint" class="field-hint"></span>
+          </div>
+          <div class="input-cluster">
+            <input id="algorithmInput" name="algorithmInput" type="text" autocomplete="off" spellcheck="false" aria-describedby="inputHint inputError">
+            <button class="button button-primary" type="submit">Apply</button>
+          </div>
+          <p id="inputError" class="field-error" role="alert" hidden></p>
+        </form>
+
+        <div class="scenario-block">
+          <label class="field-label" for="scenarioSelect">Example</label>
+          <select id="scenarioSelect" class="scenario-select"></select>
+        </div>
+
+        <div id="modeBlock" class="mode-block" hidden>
+          <span class="field-label">Mode</span>
+          <div id="modeButtons" class="segmented-control" role="group" aria-label="Activity mode"></div>
+        </div>
+      </div>
+
+      <div class="stage-grid">
+        <article class="stage-panel visualization-panel" aria-labelledby="visualizationTitle">
+          <header class="panel-heading">
+            <h2 id="visualizationTitle">Visualization</h2>
+            <span id="stepCounter" class="step-counter">Step 0 / 0</span>
+          </header>
+          <div id="visualization" class="visualization"></div>
+        </article>
+
+        <article class="stage-panel code-panel" aria-labelledby="pseudocodeTitle">
+          <header class="panel-heading">
+            <h2 id="pseudocodeTitle">Pseudocode</h2>
+            <span id="activeLineBadge" class="line-badge">Ready</span>
+          </header>
+          <ol id="pseudocode" class="pseudocode" aria-label="Algorithm pseudocode"></ol>
+        </article>
+      </div>
+
+      <div id="traceControls" class="transport-bar" aria-label="Trace controls">
+        <button id="previousButton" class="icon-button" type="button" aria-label="Previous step">←</button>
+        <button id="playButton" class="button button-primary play-button" type="button" aria-label="Play trace">
+          <span id="playIcon" aria-hidden="true">▶</span>
+          <span id="playLabel">Play</span>
+        </button>
+        <button id="nextButton" class="icon-button" type="button" aria-label="Next step">→</button>
+        <label class="timeline-control" for="stepRange">
+          <span class="sr-only">Trace position</span>
+          <input id="stepRange" type="range" min="0" max="0" value="0" step="1">
+        </label>
+        <button id="resetButton" class="button button-quiet" type="button">Restart</button>
+      </div>
+
+      <div id="activityControls" class="transport-bar" hidden></div>
+
+      <section class="trace-summary" aria-label="Trace and count">
+        <article class="trace-summary-item action-panel">
+          <p class="section-label">Trace</p>
+          <p id="stepMessage" class="signal-copy"></p>
+        </article>
+        <article class="trace-summary-item count-panel">
+          <p class="section-label">Count</p>
+          <dl id="metrics" class="metrics"></dl>
+        </article>
+      </section>
     </section>
 
-    <section class="setup-card card" aria-labelledby="setupTitle">
-      <div class="card-heading compact-heading">
-        <div>
-          <p class="step-label">1 · Prepare</p>
-          <h3 id="setupTitle">Choose the input</h3>
-        </div>
-        <div id="scenarioButtons" class="scenario-buttons" aria-label="Prepared scenarios"></div>
-      </div>
-
-      <form id="inputForm" class="input-form" novalidate>
-        <label id="inputLabel" for="algorithmInput"></label>
-        <div class="input-row">
-          <input id="algorithmInput" name="algorithmInput" type="text" autocomplete="off" spellcheck="false">
-          <button class="button button-primary" type="submit">Apply input</button>
-        </div>
-        <p id="inputHint" class="input-hint"></p>
-        <p id="inputError" class="input-error" role="alert" hidden></p>
-      </form>
-
-      <div id="modeSwitcher" class="mode-switcher" hidden>
-        <span class="mode-label">Tower mode</span>
-        <div class="segmented-control" role="group" aria-label="Tower of Hanoi mode">
-          <button id="guidedModeButton" class="segment is-active" type="button" aria-pressed="true">Guided solution</button>
-          <button id="practiceModeButton" class="segment" type="button" aria-pressed="false">Practice puzzle</button>
-        </div>
-      </div>
-    </section>
-
-    <section class="workspace-grid">
-      <article class="card pseudocode-card" aria-labelledby="pseudocodeTitle">
-        <div class="card-heading">
-          <div>
-            <p class="step-label">2 · Trace</p>
-            <h3 id="pseudocodeTitle">Pseudocode</h3>
-          </div>
-          <span id="activeLineBadge" class="line-badge">Ready</span>
-        </div>
-        <ol id="pseudocode" class="pseudocode" aria-label="Algorithm pseudocode"></ol>
-        <div class="legend" aria-label="Pseudocode legend">
-          <span><i class="legend-swatch active-swatch"></i> active line</span>
-          <span><i class="legend-swatch basic-swatch"></i> basic operation</span>
-        </div>
-      </article>
-
-      <article class="card visualization-card" aria-labelledby="visualizationTitle">
-        <div class="card-heading">
-          <div>
-            <p class="step-label">3 · Observe</p>
-            <h3 id="visualizationTitle">Visualization</h3>
-          </div>
-          <span id="stepCounter" class="step-counter">Step 0 / 0</span>
-        </div>
-
-        <div id="visualization" class="visualization" aria-live="polite"></div>
-
-        <div id="timelineControls" class="timeline-controls" aria-label="Visualization controls">
-          <button id="previousButton" class="icon-button" type="button" aria-label="Previous step" title="Previous step">
-            <span aria-hidden="true">←</span>
-          </button>
-          <button id="playButton" class="button button-primary play-button" type="button" aria-label="Play visualization">
-            <span id="playIcon" aria-hidden="true">▶</span>
-            <span id="playLabel">Play</span>
-          </button>
-          <button id="nextButton" class="icon-button" type="button" aria-label="Next step" title="Next step">
-            <span aria-hidden="true">→</span>
-          </button>
-          <button id="resetButton" class="button button-quiet" type="button">Reset</button>
-          <label class="speed-control" for="speedRange">
-            <span>Speed</span>
-            <input id="speedRange" type="range" min="250" max="1600" value="850" step="50">
-          </label>
-        </div>
-
-        <div id="practiceControls" class="practice-controls" hidden>
-          <button id="undoMoveButton" class="button button-quiet" type="button">Undo move</button>
-          <button id="restartPuzzleButton" class="button button-primary" type="button">Restart puzzle</button>
-        </div>
-      </article>
-
-      <aside class="card count-card" aria-labelledby="countTitle">
-        <div class="card-heading">
-          <div>
-            <p class="step-label">4 · Count</p>
-            <h3 id="countTitle">Operation counter</h3>
-          </div>
-        </div>
-        <div id="metrics" class="metrics"></div>
-        <div class="status-panel">
-          <p class="status-label">Current action</p>
-          <p id="stepMessage" class="step-message">Apply an input to begin.</p>
-        </div>
-        <div class="prompt-panel">
-          <p class="status-label">Ask students</p>
-          <p id="teachingPrompt" class="teaching-prompt"></p>
-        </div>
-      </aside>
-    </section>
-
-    <section class="analysis-grid">
-      <article class="card model-card" aria-labelledby="modelTitle">
-        <div class="card-heading">
-          <div>
-            <p class="step-label">5 · Generalize</p>
-            <h3 id="modelTitle">Mathematical model</h3>
-          </div>
-        </div>
-        <div id="formulaPanel" class="formula-panel"></div>
-      </article>
-
-      <article class="card checklist-card" aria-labelledby="checklistTitle">
-        <div class="card-heading">
-          <div>
-            <p class="step-label">Analysis checklist</p>
-            <h3 id="checklistTitle">Connect the trace to the slides</h3>
-          </div>
-        </div>
+    <section class="generalize-panel" aria-labelledby="generalizeTitle">
+      <header class="generalize-heading">
+        <p class="section-label">Generalize</p>
+        <h2 id="generalizeTitle">Mathematical model</h2>
+      </header>
+      <div id="formulaPanel" class="formula-panel"></div>
+      <details class="analysis-details">
+        <summary>
+          <span>Lecture analysis</span>
+          <small>Input size, basic operation, cases, and conclusion</small>
+        </summary>
         <dl id="analysisChecklist" class="analysis-checklist"></dl>
-      </article>
+      </details>
     </section>
 
-    <p id="liveStatus" class="sr-only" aria-live="polite"></p>
   </main>
 
-  <footer class="site-footer">
-    <p>Static, dependency-free, and ready to embed in a course or personal website.</p>
-    <p><a href="README.md">Deployment and customization guide</a></p>
-  </footer>
+  <p id="liveStatus" class="sr-only" aria-live="polite"></p>
+  <noscript><div class="noscript-message">This site requires JavaScript.</div></noscript>
 
-  <dialog id="helpDialog" class="help-dialog">
-    <form method="dialog">
-      <button class="dialog-close" value="close" aria-label="Close teaching guide">×</button>
-      <p class="eyebrow">Suggested classroom routine</p>
-      <h2>Use each visualization as an analysis checkpoint</h2>
-      <ol class="guide-steps">
-        <li><strong>Predict.</strong> Ask what happens next before advancing.</li>
-        <li><strong>Step.</strong> Move one meaningful operation at a time.</li>
-        <li><strong>Count.</strong> Keep the slide’s basic operation visible.</li>
-        <li><strong>Generalize.</strong> Turn the observed pattern into a sum or recurrence.</li>
-        <li><strong>Compare.</strong> Change the input to discuss best, average, or worst cases.</li>
-      </ol>
-      <p class="dialog-note">Tip: append <code>?embed=1&amp;module=hanoi</code> to the URL for an iframe-friendly view.</p>
-    </form>
-  </dialog>
-
-  <noscript>
-    <div class="noscript-message">This visualizer requires JavaScript. Enable JavaScript and reload the page.</div>
-  </noscript>
-
-  <script src="app.js" defer></script>
+  <script src="./assets/vendor/katex/katex.min.js?v=0.18.7"></script>
+  <script type="module" src="./src/main.js?v=20260913-9"></script>
 </body>
 </html>
