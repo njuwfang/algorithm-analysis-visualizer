@@ -1,4 +1,4 @@
-import { escapeHtml, parsePositiveInteger } from "../../core/utils.js?v=20260913-2";
+import { escapeHtml, parsePositiveInteger } from "../../core/utils.js?v=20260915-5";
 
 export function buildBinaryRecursiveTrace(original) {
   const trace = [];

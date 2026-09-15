@@ -49,7 +49,9 @@ test("course navigation stays in the header without site branding or presentatio
   assert.match(header, /<h1 id="lessonTitle"/);
   assert.match(header, /id="previousModuleButton"/);
   assert.match(header, /id="nextModuleButton"/);
+  assert.match(header, /aria-label="Previous and next visualization"/);
   assert.match(header, />Lectures</);
+  assert.match(html, /aria-label="Interactive lecture visualization"/);
   assert.doesNotMatch(html, /slideReference|>Slides /);
   assert.doesNotMatch(html, /predictLabel|teachingPrompt|>Predict</);
   assert.doesNotMatch(html, /lecturePill|lessonObjective/);
@@ -71,6 +73,16 @@ test("visualizations keep a stable viewport and scroll only on overflow", async 
   assert.match(layout, /\.stage-grid\s*\{[^}]*height:\s*clamp\(/s);
   assert.match(layout, /\.visualization\s*\{[^}]*overflow:\s*auto/s);
   assert.match(app, /revealActiveVisualization/);
+});
+
+
+test("inline mathematics delegates horizontal overflow to the pseudocode panel", async () => {
+  const components = await readFile(new URL("assets/styles/components.css", root), "utf8");
+  const pseudocodeRule = components.match(/\.pseudocode\s*\{([^}]*)\}/)?.[1] ?? "";
+  const codeMathRule = components.match(/\.code-math\s*\{([^}]*)\}/)?.[1] ?? "";
+
+  assert.match(pseudocodeRule, /overflow:\s*auto/);
+  assert.doesNotMatch(codeMathRule, /overflow/);
 });
 
 

@@ -83,3 +83,4 @@ On narrow screens, place playback controls directly after the visualization and 
 - `visualizations.css`: algorithm-specific drawing primitives
 
 Prefer existing tokens and components. Add a new token only when it represents a reusable semantic role.
+Keep a visualization's private selectors together in a commented, name-prefixed section, and use section-level custom properties for repeated geometry. Split styles by lecture only when several lecture folders make that boundary useful; a one-off stylesheet that is still loaded on every route does not improve isolation.

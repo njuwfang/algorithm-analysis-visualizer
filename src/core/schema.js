@@ -31,6 +31,9 @@ export function validateModule(module, lectureId) {
   for (const key of ["title", "shortTitle", "summary", "complexity", "objective"]) {
     assert(typeof module[key] === "string" && module[key].trim(), `${prefix}.${key} is required.`);
   }
+  if (module.codeTitle !== undefined) {
+    assert(typeof module.codeTitle === "string" && module.codeTitle.trim(), `${prefix}.codeTitle must be a non-empty string.`);
+  }
 
   assert(module.source && typeof module.source.slides === "string" && module.source.slides.trim(), `${prefix}.source.slides is required.`);
   assert(module.input && typeof module.input === "object", `${prefix}.input is required.`);
@@ -60,7 +63,14 @@ export function validateModule(module, lectureId) {
   for (const [index, line] of module.pseudocode.entries()) {
     assert(Number.isInteger(line?.line), `${prefix}.pseudocode[${index}].line must be an integer.`);
     assert(!pseudocodeLines.has(line.line), `${prefix} has duplicate pseudocode line ${line.line}.`);
-    assert(typeof line.text === "string" && line.text.trim(), `${prefix}.pseudocode[${index}].text is required.`);
+    const hasText = typeof line.text === "string" && line.text.trim();
+    const hasLatex = typeof line.latex === "string" && line.latex.trim();
+    assert(hasText || hasLatex, `${prefix}.pseudocode[${index}] needs text or latex.`);
+    assert(!(hasText && hasLatex), `${prefix}.pseudocode[${index}] cannot define both text and latex.`);
+    if (line.basicLabel !== undefined) {
+      assert(line.basic === true, `${prefix}.pseudocode[${index}].basicLabel requires basic: true.`);
+      assert(typeof line.basicLabel === "string" && line.basicLabel.trim(), `${prefix}.pseudocode[${index}].basicLabel must be a non-empty string.`);
+    }
     pseudocodeLines.add(line.line);
     hasBasicOperation ||= line.basic === true;
   }

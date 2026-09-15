@@ -1,4 +1,4 @@
-import { escapeHtml, formatNumber, parseArray } from "../../core/utils.js?v=20260913-2";
+import { escapeHtml, formatNumber, parseArray } from "../../core/utils.js?v=20260915-5";
 
 export function buildMaxElementTrace(values) {
   const trace = [];

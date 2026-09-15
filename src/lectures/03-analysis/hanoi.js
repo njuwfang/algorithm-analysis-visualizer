@@ -4,7 +4,7 @@ import {
   escapeHtml,
   makeInitialPegs,
   parseDiskCount
-} from "../../core/utils.js?v=20260913-2";
+} from "../../core/utils.js?v=20260915-5";
 
 export function buildHanoiTrace(n) {
   const trace = [];

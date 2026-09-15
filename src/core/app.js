@@ -1,5 +1,5 @@
-import { lectures, routes, resolveRoute, routeHash } from "../lectures/registry.js?v=20260913-9";
-import { bounded, escapeHtml } from "./utils.js?v=20260913-2";
+import { lectures, routes, resolveRoute, routeHash } from "../lectures/registry.js?v=20260915-5";
+import { bounded, escapeHtml } from "./utils.js?v=20260915-5";
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
@@ -24,6 +24,7 @@ const dom = {
   modeBlock: $("#modeBlock"),
   modeButtons: $("#modeButtons"),
   visualization: $("#visualization"),
+  pseudocodeTitle: $("#pseudocodeTitle"),
   pseudocode: $("#pseudocode"),
   activeLineBadge: $("#activeLineBadge"),
   stepCounter: $("#stepCounter"),
@@ -94,7 +95,7 @@ function renderCourseNavigation() {
           <span class="lecture-number">${escapeHtml(lecture.number)}</span>
           <div>
             <strong>${escapeHtml(lecture.title)}</strong>
-            <small>${lecture.modules.length} algorithm${lecture.modules.length === 1 ? "" : "s"}</small>
+            <small>${lecture.modules.length} visualization${lecture.modules.length === 1 ? "" : "s"}</small>
           </div>
         </div>
         <div class="course-module-list">${moduleLinks}</div>
@@ -111,6 +112,9 @@ function renderLessonMetadata() {
   dom.topLectureLabel.textContent = `Lecture ${lecture.number}`;
   dom.topModuleLabel.textContent = lecture.title;
   dom.lessonTitle.textContent = module.title;
+  const codeTitle = module.codeTitle ?? "Pseudocode";
+  dom.pseudocodeTitle.textContent = codeTitle;
+  dom.pseudocode.setAttribute("aria-label", codeTitle);
 
   const previous = routes[routeIndex - 1] ?? null;
   const next = routes[routeIndex + 1] ?? null;
@@ -135,8 +139,8 @@ function renderPagerButton(button, route, direction) {
   if (!route) {
     button.disabled = true;
     button.dataset.route = "";
-    button.setAttribute("aria-label", `No ${direction.toLowerCase()} algorithm`);
-    button.title = `No ${direction.toLowerCase()} algorithm`;
+    button.setAttribute("aria-label", `No ${direction.toLowerCase()} visualization`);
+    button.title = `No ${direction.toLowerCase()} visualization`;
     button.innerHTML = content;
     return;
   }
@@ -176,9 +180,26 @@ function renderPseudocode() {
   const module = currentModule();
   dom.pseudocode.innerHTML = module.pseudocode.map((line) => `
     <li class="code-line ${line.indent ? `code-indent-${line.indent}` : ""} ${line.basic ? "is-basic" : ""}" data-code-line="${line.line}" data-line-number="${line.line}">
-      <span class="code-text">${escapeHtml(line.text)}</span>
-      ${line.basic ? '<span class="basic-operation-label">basic operation</span>' : ""}
+      ${line.latex
+        ? `<span class="code-text code-math" data-code-latex="${escapeHtml(line.latex)}"></span>`
+        : `<span class="code-text">${escapeHtml(line.text)}</span>`}
+      ${line.basic ? `<span class="basic-operation-label">${escapeHtml(line.basicLabel ?? "basic operation")}</span>` : ""}
     </li>`).join("");
+
+  $$('[data-code-latex]', dom.pseudocode).forEach((element) => {
+    const latex = element.dataset.codeLatex;
+    if (!window.katex?.render) {
+      element.textContent = latex;
+      return;
+    }
+    window.katex.render(latex, element, {
+      displayMode: false,
+      output: "htmlAndMathml",
+      strict: "warn",
+      throwOnError: false,
+      trust: false
+    });
+  });
 }
 
 function renderAnalysisChecklist() {
@@ -258,7 +279,7 @@ function renderActivityControls() {
 
 function revealActiveVisualization() {
   const active = $(
-    ".array-item.is-current, .matrix-cell.is-current, .ladder-row.is-active, .recursion-frame.is-active, .recurrence-step.is-active, .hanoi-call-frame.is-active",
+    ".array-item.is-current, .matrix-cell.is-current, .ladder-row.is-active, .recursion-frame.is-active, .recurrence-step.is-active, .hanoi-call-frame.is-active, .master-level.is-active",
     dom.visualization
   );
   if (!active) return;

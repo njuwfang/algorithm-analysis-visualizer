@@ -34,6 +34,20 @@ Each state needs:
 
 The shell supplies input handling, prepared scenarios, pseudocode highlighting, playback, keyboard controls, counters, formulas, routing, and embedding.
 
+For a worked process that is not an algorithm, such as a theorem decision rule, set the optional `codeTitle` field so the shared panel receives an accurate heading:
+
+```js
+codeTitle: "Theorem cases"
+```
+
+When a line is mathematical rather than pseudocode, provide `latex` instead of `text`:
+
+```js
+{ line: 4, latex: "d < \\log_b a \\Longrightarrow \\mathrm{O}(n^{\\log_b a})" }
+```
+
+If the counted quantity is not literally a basic operation, pair `basic: true` with a concise `basicLabel`, such as `"level work"`.
+
 Write the mathematical model as LaTeX. The vendored KaTeX distribution renders HTML and MathML locally, so formulas remain available offline and on GitHub Pages:
 
 ```js

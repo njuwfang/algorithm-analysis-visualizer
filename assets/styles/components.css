@@ -374,6 +374,15 @@
   overflow-wrap: anywhere;
 }
 
+.code-math {
+  padding-block: 1px;
+  white-space: nowrap;
+}
+
+.code-math .katex {
+  font-size: 0.96em;
+}
+
 .code-line::before {
   content: attr(data-line-number);
   position: absolute;

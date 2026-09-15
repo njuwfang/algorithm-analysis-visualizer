@@ -1,5 +1,5 @@
-import { lecture03 } from "./03-analysis/index.js?v=20260913-9";
-import { validateRegistry } from "../core/schema.js?v=20260913-9";
+import { lecture03 } from "./03-analysis/index.js?v=20260915-5";
+import { validateRegistry } from "../core/schema.js?v=20260915-5";
 
 export const lectures = [lecture03];
 validateRegistry(lectures);

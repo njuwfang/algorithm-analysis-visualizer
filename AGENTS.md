@@ -88,6 +88,10 @@ Each module exports one object:
 }
 ```
 
+For a worked process that is not pseudocode, optional `codeTitle` replaces the shared panel heading (for example, `"Theorem cases"`).
+Within `pseudocode`, a mathematical line may provide `latex` instead of `text`; the shared shell renders it with local KaTeX.
+When `basic: true` marks a counted quantity that is not an executed operation, use `basicLabel` to name it accurately.
+
 Optional hands-on behavior uses:
 
 ```js

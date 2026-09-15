@@ -82,6 +82,27 @@ test("requires a LaTeX mathematical model", () => {
 });
 
 
+test("validates an optional code-panel title", () => {
+  assert.equal(validateModule({ ...hanoiModule, codeTitle: "Recursive procedure" }, "03-analysis"), true);
+  assert.throws(
+    () => validateModule({ ...hanoiModule, codeTitle: " " }, "03-analysis"),
+    /codeTitle must be a non-empty string/
+  );
+});
+
+
+test("validates an optional counted-quantity label", () => {
+  const pseudocode = hanoiModule.pseudocode.map((line, index) => index === 0
+    ? { ...line, basic: true, basicLabel: "disk move" }
+    : line);
+  assert.equal(validateModule({ ...hanoiModule, pseudocode }, "03-analysis"), true);
+  assert.throws(
+    () => validateModule({ ...hanoiModule, pseudocode: [{ line: 1, text: "work", basicLabel: "work" }] }, "03-analysis"),
+    /basicLabel requires basic: true/
+  );
+});
+
+
 test("unpublished reference modules retain the shared contract", () => {
   assert.equal(validateModule(maxElementModule, "03-analysis"), true);
   assert.equal(validateModule(uniqueElementModule, "03-analysis"), true);

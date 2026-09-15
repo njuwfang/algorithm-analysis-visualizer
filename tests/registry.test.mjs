@@ -11,7 +11,8 @@ test("registry exposes unique lecture/module routes", () => {
   const publishedLecture03Routes = [
     "03-analysis/binary-iterative",
     "03-analysis/hanoi",
-    "03-analysis/binary-recursive"
+    "03-analysis/binary-recursive",
+    "03-analysis/master-theorem"
   ];
   assert.deepEqual(keys.slice(0, publishedLecture03Routes.length), publishedLecture03Routes);
   assert.ok(!keys.includes("03-analysis/max-element"));

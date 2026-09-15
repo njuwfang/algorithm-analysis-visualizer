@@ -8,11 +8,14 @@ The redesign separates the course shell from lecture content, so later lectures 
 
 ## Lecture 03
 
-The supplied lecture is represented by three modules that benefit most from tracing:
+Lecture 03 currently publishes four modules:
 
 - Number of binary digits — iterative
 - Tower of Hanoi
 - Number of binary digits — recursive
+- Master Theorem
+
+The first three follow `03_Analysis_of_Algorithms.pdf`. The Master Theorem is an instructor-requested extension placed in Lecture 03; it is not sourced from the supplied Lecture 03 deck. The teaching assumptions are recorded in `docs/SOURCE_NOTES.md`.
 
 Each lesson keeps the custom input, one example chooser, visualization, lecture pseudocode, selected-operation count, and mathematical model in a compact shared shell. Supporting analysis is available on demand instead of occupying the default screen.
 
@@ -65,6 +68,7 @@ Because routing uses the URL hash and the vendored KaTeX distribution renders fo
 #/03-analysis/binary-iterative
 #/03-analysis/hanoi
 #/03-analysis/binary-recursive
+#/03-analysis/master-theorem
 ```
 
 Iframe-friendly link:

@@ -24,7 +24,7 @@ test("loads the vendored KaTeX renderer without a CDN", async () => {
 });
 
 
-test("KaTeX parses every module formula", async () => {
+test("KaTeX parses every mathematical line and formula state", async () => {
   const source = await readFile(new URL("assets/vendor/katex/katex.min.js", root), "utf8");
   const context = { self: {} };
   vm.runInNewContext(source, context);
@@ -35,16 +35,38 @@ test("KaTeX parses every module formula", async () => {
     uniqueElementModule
   ];
   for (const module of modules) {
-    const input = module.input.parse(module.input.default);
-    const model = module.model(module.buildTrace(input)[0]);
-    const rendered = context.self.katex.renderToString(model.latex, {
-      output: "htmlAndMathml",
-      strict: "error",
-      throwOnError: true,
-      trust: false
-    });
+    for (const [index, line] of module.pseudocode.entries()) {
+      if (!line.latex) continue;
+      assert.doesNotThrow(
+        () => context.self.katex.renderToString(line.latex, {
+          output: "htmlAndMathml",
+          strict: "error",
+          throwOnError: true,
+          trust: false
+        }),
+        `${module.id}, mathematical line ${index}`
+      );
+    }
 
-    assert.match(rendered, /class="katex-mathml"/, module.id);
-    assert.match(rendered, /class="katex-html"/, module.id);
+    const extraInputs = module.id === "master-theorem"
+      ? ["2, 2, 0.5, 16", "2, 4, 0.5, 64", "1, 4, 0.5, 64", "3, 2, 1, 16"]
+      : [];
+    const inputs = new Set([module.input.default, ...module.input.presets.map((preset) => preset.value), ...extraInputs]);
+    for (const raw of inputs) {
+      const input = module.input.parse(raw);
+      const trace = module.buildTrace(input);
+      for (const [index, step] of trace.entries()) {
+        const model = module.model(step);
+        const rendered = context.self.katex.renderToString(model.latex, {
+          output: "htmlAndMathml",
+          strict: "error",
+          throwOnError: true,
+          trust: false
+        });
+
+        assert.match(rendered, /class="katex-mathml"/, `${module.id}, ${raw}, state ${index}`);
+        assert.match(rendered, /class="katex-html"/, `${module.id}, ${raw}, state ${index}`);
+      }
+    }
   }
 });
