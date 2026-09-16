@@ -1,4 +1,4 @@
-import { parsePositiveInteger } from "../../core/utils.js?v=20260915-5";
+import { parsePositiveInteger } from "../../core/utils.js?v=20260916-1";
 
 export function buildBinaryIterativeTrace(original) {
   const trace = [];

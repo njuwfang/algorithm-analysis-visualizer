@@ -1,3 +1,3 @@
-import { startApp } from "./core/app.js?v=20260915-5";
+import { startApp } from "./core/app.js?v=20260916-7";
 
 startApp();

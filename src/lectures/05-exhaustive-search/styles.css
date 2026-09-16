@@ -1,0 +1,463 @@
+/* Lecture 05: traveling salesman */
+.tsp-layout {
+  display: grid;
+  grid-template-columns: minmax(285px, 1fr) minmax(180px, 0.55fr);
+  align-items: center;
+  gap: 14px;
+  width: min(100%, 900px);
+}
+
+.tsp-graph-panel {
+  min-width: 0;
+}
+
+.tsp-graph {
+  display: block;
+  width: 100%;
+  max-height: 265px;
+}
+
+.tsp-edge {
+  stroke: #b6c4ca;
+  stroke-width: 2;
+}
+
+.tsp-edge-label rect {
+  fill: #fff;
+  stroke: var(--border);
+}
+
+.tsp-edge-label text {
+  fill: var(--muted);
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.tsp-edge-group.tsp-is-active .tsp-edge {
+  stroke: var(--accent);
+  stroke-width: 5;
+}
+
+.tsp-edge-group.tsp-is-active .tsp-edge-label rect {
+  fill: var(--accent-soft);
+  stroke: var(--accent);
+}
+
+.tsp-edge-group.tsp-is-active .tsp-edge-label text {
+  fill: #6d430f;
+}
+
+.tsp-city circle {
+  fill: #fff;
+  stroke: var(--brand);
+  stroke-width: 3;
+}
+
+.tsp-city text {
+  fill: var(--brand-deep);
+  font-family: var(--sans);
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.tsp-city.tsp-is-start circle {
+  fill: var(--brand-soft);
+}
+
+.tsp-search-panel {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+}
+
+.tsp-current,
+.tsp-best {
+  display: grid;
+  gap: 2px;
+  padding: 8px 9px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.tsp-current small,
+.tsp-current span,
+.tsp-best span {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 0.65rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tsp-current strong,
+.tsp-best strong {
+  overflow: hidden;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tsp-best {
+  background: var(--teal-soft);
+  border-color: #a9d9d5;
+}
+
+.tsp-candidates {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tsp-candidate {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 32px;
+  gap: 5px;
+  padding: 5px 7px;
+  color: var(--faint);
+  background: rgba(255, 255, 255, 0.66);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-family: var(--mono);
+  font-size: 0.65rem;
+}
+
+.tsp-candidate span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tsp-candidate.tsp-is-evaluated {
+  color: var(--ink);
+}
+
+.tsp-candidate.tsp-is-current {
+  color: #6d430f;
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.tsp-candidate.tsp-is-best {
+  color: #176c67;
+  border-color: var(--teal);
+}
+
+/* Lecture 05: knapsack */
+.knapsack-visual {
+  display: grid;
+  gap: 10px;
+  width: min(100%, 860px);
+}
+
+.knapsack-items {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(76px, 1fr));
+  gap: 7px;
+}
+
+.knapsack-item {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 3px 5px;
+  min-width: 0;
+  padding: 8px;
+  color: var(--faint);
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-family: var(--mono);
+  font-size: 0.65rem;
+}
+
+.knapsack-item strong,
+.knapsack-item small {
+  grid-column: 1 / -1;
+}
+
+.knapsack-item strong {
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 0.72rem;
+}
+
+.knapsack-item small {
+  color: inherit;
+  font-family: var(--sans);
+  font-weight: 750;
+}
+
+.knapsack-item.is-excluded {
+  opacity: 0.62;
+}
+
+.knapsack-item.is-included {
+  color: #176c67;
+  background: var(--teal-soft);
+  border-color: var(--teal);
+}
+
+.knapsack-evaluation {
+  display: grid;
+  gap: 7px;
+  padding: 9px 11px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--success);
+  border-radius: 8px;
+}
+
+.knapsack-evaluation.is-infeasible {
+  background: var(--danger-soft);
+  border-color: #edc2c7;
+  border-left-color: var(--danger);
+}
+
+.knapsack-evaluation-heading,
+.knapsack-totals,
+.knapsack-best {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.knapsack-evaluation-heading span,
+.knapsack-totals,
+.knapsack-best span,
+.knapsack-best small {
+  color: var(--muted);
+  font-size: 0.69rem;
+}
+
+.knapsack-evaluation-heading strong {
+  color: var(--success);
+  font-size: 0.72rem;
+}
+
+.knapsack-evaluation.is-infeasible .knapsack-evaluation-heading strong {
+  color: var(--danger);
+}
+
+.knapsack-capacity {
+  height: 10px;
+  overflow: hidden;
+  background: var(--surface-strong);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+}
+
+.knapsack-capacity span {
+  display: block;
+  width: var(--capacity-fill);
+  height: 100%;
+  background: var(--teal);
+}
+
+.knapsack-evaluation.is-infeasible .knapsack-capacity span {
+  background: var(--danger);
+}
+
+.knapsack-best {
+  padding: 8px 10px;
+  background: var(--brand-soft);
+  border: 1px solid #c7d3ed;
+  border-radius: 8px;
+}
+
+.knapsack-best strong {
+  color: var(--brand-deep);
+  font-family: var(--mono);
+}
+
+/* Lecture 05: assignment */
+.assignment-visual {
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) minmax(160px, 0.48fr);
+  align-items: center;
+  gap: 18px;
+  width: min(100%, 760px);
+}
+
+.assignment-matrix {
+  display: grid;
+  grid-template-columns: 34px repeat(var(--assignment-size), minmax(42px, 58px));
+  justify-content: center;
+  gap: 5px;
+  border: 0;
+  border-spacing: 0;
+}
+
+.assignment-matrix thead,
+.assignment-matrix tbody,
+.assignment-matrix tr {
+  display: contents;
+}
+
+.assignment-corner,
+.assignment-column-label,
+.assignment-row-label,
+.assignment-cell {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  min-height: 38px;
+  border-radius: 7px;
+}
+
+.assignment-column-label,
+.assignment-row-label {
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 820;
+}
+
+.assignment-cell {
+  color: var(--ink);
+  background: #fff;
+  border: 1px solid var(--border);
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  font-weight: 760;
+}
+
+.assignment-cell.is-best {
+  border-color: var(--brand);
+}
+
+.assignment-cell.is-current {
+  color: #176c67;
+  background: var(--teal-soft);
+  border-color: var(--teal);
+  outline: 2px solid rgba(231, 143, 47, 0.72);
+  outline-offset: -2px;
+}
+
+.assignment-cell.is-complete {
+  color: #205f44;
+  background: var(--success-soft);
+  border-color: var(--success);
+  outline: 0;
+}
+
+.assignment-reading {
+  display: grid;
+  gap: 8px;
+}
+
+.assignment-current,
+.assignment-best {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  padding: 10px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.assignment-current {
+  border-left: 4px solid var(--accent);
+}
+
+.assignment-best {
+  background: var(--brand-soft);
+  border-color: #c7d3ed;
+  border-left: 4px solid var(--brand);
+}
+
+.assignment-current span,
+.assignment-best span,
+.assignment-current small,
+.assignment-best small {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 0.66rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.assignment-current strong,
+.assignment-best strong {
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 0.8rem;
+}
+
+@media (max-width: 620px) {
+  .assignment-visual {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .assignment-reading {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .assignment-matrix {
+    grid-template-columns: 28px repeat(var(--assignment-size), minmax(38px, 50px));
+    gap: 3px;
+  }
+
+  .assignment-corner,
+  .assignment-column-label,
+  .assignment-row-label,
+  .assignment-cell {
+    min-height: 32px;
+  }
+
+  .tsp-layout {
+    grid-template-columns: 1fr;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  .tsp-graph {
+    height: 154px;
+  }
+
+  .tsp-search-panel {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 5px;
+  }
+
+  .tsp-candidates {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .tsp-best {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .tsp-candidate {
+    grid-template-columns: minmax(0, 1fr) 22px;
+  }
+}
+
+@media (max-width: 680px) {
+  .knapsack-items {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .knapsack-best small {
+    display: none;
+  }
+}
+
+@media (min-width: 761px) and (max-height: 820px) {
+  .knapsack-visual {
+    gap: 8px;
+  }
+
+  .tsp-graph {
+    max-height: 225px;
+  }
+}

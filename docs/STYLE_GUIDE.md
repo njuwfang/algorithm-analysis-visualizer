@@ -80,7 +80,8 @@ On narrow screens, place playback controls directly after the visualization and 
 - `base.css`: reset and global behavior
 - `layout.css`: page shell and responsive layout
 - `components.css`: controls, cards, code, formulas, navigation
-- `visualizations.css`: algorithm-specific drawing primitives
+- `visualizations.css`: shared visualization primitives used by multiple lectures and the module template
+- `src/lectures/NN-topic/styles.css`: private drawing and responsive rules for that lecture
 
 Prefer existing tokens and components. Add a new token only when it represents a reusable semantic role.
-Keep a visualization's private selectors together in a commented, name-prefixed section, and use section-level custom properties for repeated geometry. Split styles by lecture only when several lecture folders make that boundary useful; a one-off stylesheet that is still loaded on every route does not improve isolation.
+Keep a visualization's private selectors together in a commented, name-prefixed section, and use section-level custom properties for repeated geometry. Keep lecture-specific rules beside the lecture modules; do not grow the shared stylesheet with selectors used by only one lecture.

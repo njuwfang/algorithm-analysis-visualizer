@@ -1,7 +1,9 @@
-import { lecture03 } from "./03-analysis/index.js?v=20260915-5";
-import { validateRegistry } from "../core/schema.js?v=20260915-5";
+import { lecture03 } from "./03-analysis/index.js?v=20260916-1";
+import { lecture04 } from "./04-brute-force/index.js?v=20260916-7";
+import { lecture05 } from "./05-exhaustive-search/index.js?v=20260916-1";
+import { validateRegistry } from "../core/schema.js?v=20260916-1";
 
-export const lectures = [lecture03];
+export const lectures = [lecture03, lecture04, lecture05];
 validateRegistry(lectures);
 
 export const routes = lectures.flatMap((lecture) =>
@@ -14,6 +16,24 @@ export const routes = lectures.flatMap((lecture) =>
 
 export const routeMap = new Map(routes.map((route) => [route.key, route]));
 export const moduleIdMap = new Map(routes.map((route) => [route.module.id, route]));
+
+export function neighboringRoutes(route) {
+  const currentLectureRoutes = routes.filter(
+    (candidate) => candidate.lecture.id === route.lecture.id
+  );
+  const routeIndex = currentLectureRoutes.findIndex(
+    (candidate) => candidate.key === route.key
+  );
+
+  if (routeIndex < 0) {
+    return { previous: null, next: null };
+  }
+
+  return {
+    previous: currentLectureRoutes[routeIndex - 1] ?? null,
+    next: currentLectureRoutes[routeIndex + 1] ?? null
+  };
+}
 
 export function firstRoute() {
   return routes[0];

@@ -1,14 +1,14 @@
 # Analysis of Algorithms Visualizations
 
-A reusable, self-contained static website for teaching algorithm execution and analysis. The current Lecture 03 modules preserve one repeated workflow:
+A reusable, self-contained static website for teaching algorithm execution and analysis. Lectures 03–05 preserve one repeated workflow:
 
 > **Trace → Count → Generalize**
 
 The redesign separates the course shell from lecture content, so later lectures can be added without copying the entire application.
 
-## Lecture 03
+## Published lectures
 
-Lecture 03 currently publishes four modules:
+Lecture 03 — Analysis of Algorithms:
 
 - Number of binary digits — iterative
 - Tower of Hanoi
@@ -16,6 +16,19 @@ Lecture 03 currently publishes four modules:
 - Master Theorem
 
 The first three follow `03_Analysis_of_Algorithms.pdf`. The Master Theorem is an instructor-requested extension placed in Lecture 03; it is not sourced from the supplied Lecture 03 deck. The teaching assumptions are recorded in `docs/SOURCE_NOTES.md`.
+
+Lecture 04 — Brute-Force Algorithms:
+
+- Selection Sort
+- Bubble Sort
+- Brute-Force String Matching
+- Brute-Force Closest Pair
+
+Lecture 05 — Exhaustive Search:
+
+- Traveling Salesman Problem
+- Knapsack — exhaustive subsets
+- Assignment — exhaustive permutations
 
 Each lesson keeps the custom input, one example chooser, visualization, lecture pseudocode, selected-operation count, and mathematical model in a compact shared shell. Supporting analysis is available on demand instead of occupying the default screen.
 
@@ -69,6 +82,13 @@ Because routing uses the URL hash and the vendored KaTeX distribution renders fo
 #/03-analysis/hanoi
 #/03-analysis/binary-recursive
 #/03-analysis/master-theorem
+#/04-brute-force/selection-sort
+#/04-brute-force/bubble-sort
+#/04-brute-force/string-matching
+#/04-brute-force/closest-pair
+#/05-exhaustive-search/traveling-salesman
+#/05-exhaustive-search/exhaustive-knapsack
+#/05-exhaustive-search/assignment
 ```
 
 Iframe-friendly link:
@@ -100,7 +120,9 @@ visualization/
 ├── src/core/
 ├── src/lectures/
 │   ├── registry.js
-│   └── 03-analysis/
+│   ├── 03-analysis/          # modules and lecture-local styles.css
+│   ├── 04-brute-force/       # modules and lecture-local styles.css
+│   └── 05-exhaustive-search/ # modules and lecture-local styles.css
 ├── docs/
 ├── templates/
 ├── tests/
@@ -112,7 +134,7 @@ The shared shell renders any module that satisfies the module contract. See:
 - `AGENTS.md` for the concise repository rules
 - `docs/ADD_A_LECTURE.md` for the authoring workflow
 - `docs/STYLE_GUIDE.md` for website and visualization conventions
-- `docs/SOURCE_NOTES.md` for documented Lecture 03 interpretation choices
+- `docs/SOURCE_NOTES.md` for documented source mappings and interpretation choices
 
 ## Add a lecture
 

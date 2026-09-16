@@ -1,4 +1,4 @@
-import { escapeHtml, formatNumber } from "../../core/utils.js?v=20260915-5";
+import { escapeHtml, formatNumber } from "../../core/utils.js?v=20260916-1";
 
 const MAX_DEPTH = 6;
 const EQUALITY_TOLERANCE = 1e-10;

@@ -9,10 +9,12 @@ src/lectures/04-sorting/
 ├── index.js
 ├── insertion-sort.js
 ├── merge-sort.js
-└── quicksort.js
+├── quicksort.js
+└── styles.css
 ```
 
 Use lowercase, hyphenated identifiers. Once published, treat identifiers as permanent URLs.
+Keep selectors used only by this lecture in its local `styles.css`; reserve `assets/styles/` for shared shell, component, and visualization primitives. Add the lecture stylesheet to `index.html` after the shared stylesheets so the static GitHub Pages build can load it.
 
 ## 2. Implement each module
 

@@ -1,5 +1,5 @@
-import { lectures, routes, resolveRoute, routeHash } from "../lectures/registry.js?v=20260915-5";
-import { bounded, escapeHtml } from "./utils.js?v=20260915-5";
+import { lectures, neighboringRoutes, routes, resolveRoute, routeHash } from "../lectures/registry.js?v=20260916-7";
+import { bounded, escapeHtml } from "./utils.js?v=20260916-1";
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
@@ -55,6 +55,7 @@ const state = {
   stepIndex: 0,
   mode: "trace",
   activityState: null,
+  expandedLectureId: null,
   playing: false,
   timer: null
 };
@@ -80,6 +81,7 @@ function announce(message) {
 
 function renderCourseNavigation() {
   dom.lectureNavigation.innerHTML = lectures.map((lecture) => {
+    const expanded = state.expandedLectureId === lecture.id;
     const moduleLinks = lecture.modules.map((module) => {
       const key = `${lecture.id}/${module.id}`;
       const selected = state.route?.key === key;
@@ -90,15 +92,17 @@ function renderCourseNavigation() {
     }).join("");
 
     return `
-      <section class="lecture-group ${state.route?.lecture.id === lecture.id ? "is-current" : ""}">
-        <div class="lecture-group-heading">
+      <section class="lecture-group ${state.route?.lecture.id === lecture.id ? "is-current" : ""} ${expanded ? "is-expanded" : ""}">
+        <button class="lecture-group-heading" type="button" data-lecture-toggle="${escapeHtml(lecture.id)}"
+            aria-expanded="${expanded}" aria-controls="lecture-modules-${escapeHtml(lecture.id)}">
           <span class="lecture-number">${escapeHtml(lecture.number)}</span>
-          <div>
+          <span class="lecture-group-copy">
             <strong>${escapeHtml(lecture.title)}</strong>
             <small>${lecture.modules.length} visualization${lecture.modules.length === 1 ? "" : "s"}</small>
-          </div>
-        </div>
-        <div class="course-module-list">${moduleLinks}</div>
+          </span>
+          <span class="lecture-toggle-icon" aria-hidden="true">›</span>
+        </button>
+        <div id="lecture-modules-${escapeHtml(lecture.id)}" class="course-module-list" ${expanded ? "" : "hidden"}>${moduleLinks}</div>
       </section>`;
   }).join("");
 }
@@ -106,7 +110,7 @@ function renderCourseNavigation() {
 function renderLessonMetadata() {
   const module = currentModule();
   const lecture = currentLecture();
-  const routeIndex = routes.findIndex((route) => route.key === state.route.key);
+  const { previous, next } = neighboringRoutes(state.route);
 
   document.title = `${module.title} · Analysis of Algorithms`;
   dom.topLectureLabel.textContent = `Lecture ${lecture.number}`;
@@ -116,8 +120,6 @@ function renderLessonMetadata() {
   dom.pseudocodeTitle.textContent = codeTitle;
   dom.pseudocode.setAttribute("aria-label", codeTitle);
 
-  const previous = routes[routeIndex - 1] ?? null;
-  const next = routes[routeIndex + 1] ?? null;
   renderPagerButton(dom.previousModuleButton, previous, "Previous");
   renderPagerButton(dom.nextModuleButton, next, "Next");
 }
@@ -125,7 +127,7 @@ function renderLessonMetadata() {
 function renderPagerButton(button, route, direction) {
   const pointsBackward = direction === "Previous";
   const arrow = pointsBackward ? "←" : "→";
-  const destination = route?.module.shortTitle ?? (pointsBackward ? "Start" : "End");
+  const destination = route?.module.shortTitle ?? (pointsBackward ? "First in lecture" : "Last in lecture");
   const copy = `
     <span class="top-pager-copy">
       <small class="top-pager-direction">${direction}</small>
@@ -279,7 +281,7 @@ function renderActivityControls() {
 
 function revealActiveVisualization() {
   const active = $(
-    ".array-item.is-current, .matrix-cell.is-current, .ladder-row.is-active, .recursion-frame.is-active, .recurrence-step.is-active, .hanoi-call-frame.is-active, .master-level.is-active",
+    "[data-active-visual], .array-item.is-current, .matrix-cell.is-current, .ladder-row.is-active, .recursion-frame.is-active, .recurrence-step.is-active, .hanoi-call-frame.is-active, .master-level.is-active",
     dom.visualization
   );
   if (!active) return;
@@ -489,6 +491,10 @@ function openRouteKey(key) {
 }
 
 function setNavigationOpen(open, { restoreFocus = false } = {}) {
+  if (open) {
+    state.expandedLectureId = null;
+    renderCourseNavigation();
+  }
   dom.body.classList.toggle("nav-open", open);
   dom.navToggle.setAttribute("aria-expanded", String(open));
   dom.navToggle.setAttribute("aria-label", open ? "Close lecture navigation" : "Open lecture navigation");
@@ -500,6 +506,17 @@ function setNavigationOpen(open, { restoreFocus = false } = {}) {
 
 function bindEvents() {
   dom.lectureNavigation.addEventListener("click", (event) => {
+    const lectureToggle = event.target.closest("[data-lecture-toggle]");
+    if (lectureToggle) {
+      const lectureId = lectureToggle.dataset.lectureToggle;
+      state.expandedLectureId = state.expandedLectureId === lectureId ? null : lectureId;
+      renderCourseNavigation();
+      const updatedToggle = $$('[data-lecture-toggle]', dom.lectureNavigation)
+        .find((button) => button.dataset.lectureToggle === lectureId);
+      updatedToggle?.focus();
+      return;
+    }
+
     const link = event.target.closest("[data-route]");
     if (link) {
       setNavigationOpen(false);

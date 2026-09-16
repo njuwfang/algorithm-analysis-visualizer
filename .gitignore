@@ -4,6 +4,9 @@ node_modules/
 # Generated static build
 dist/
 
+# Local teaching notes and practice
+course-materials/
+
 # Logs
 *.log
 npm-debug.log*

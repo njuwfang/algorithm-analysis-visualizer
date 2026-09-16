@@ -1,7 +1,7 @@
-import { binaryIterativeModule } from "./binary-iterative.js?v=20260915-5";
-import { hanoiModule } from "./hanoi.js?v=20260915-5";
-import { binaryRecursiveModule } from "./binary-recursive.js?v=20260915-5";
-import { masterTheoremModule } from "./master-theorem.js?v=20260915-5";
+import { binaryIterativeModule } from "./binary-iterative.js?v=20260916-1";
+import { hanoiModule } from "./hanoi.js?v=20260916-1";
+import { binaryRecursiveModule } from "./binary-recursive.js?v=20260916-1";
+import { masterTheoremModule } from "./master-theorem.js?v=20260916-1";
 
 export const lecture03 = {
   id: "03-analysis",

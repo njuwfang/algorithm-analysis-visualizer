@@ -63,6 +63,17 @@ test("course navigation stays in the header without site branding or presentatio
   assert.doesNotMatch(layout, /presentation-mode|lesson-pager/);
 });
 
+test("lecture navigation starts collapsed and expands one lecture at a time", async () => {
+  const app = await readFile(new URL("src/core/app.js", root), "utf8");
+
+  assert.match(app, /expandedLectureId:\s*null/);
+  assert.match(app, /data-lecture-toggle=/);
+  assert.match(app, /aria-expanded="\$\{expanded\}"/);
+  assert.match(app, /aria-controls="lecture-modules-/);
+  assert.match(app, /\$\{expanded \? "" : "hidden"\}/);
+  assert.match(app, /state\.expandedLectureId === lectureId \? null : lectureId/);
+});
+
 
 test("visualizations keep a stable viewport and scroll only on overflow", async () => {
   const [app, layout] = await Promise.all([
@@ -85,6 +96,27 @@ test("inline mathematics delegates horizontal overflow to the pseudocode panel",
   assert.doesNotMatch(codeMathRule, /overflow/);
 });
 
+test("pseudocode indentation keeps line numbers aligned and supports three levels", async () => {
+  const components = await readFile(new URL("assets/styles/components.css", root), "utf8");
+
+  for (const [level, padding] of [[1, 24], [2, 40], [3, 56]]) {
+    const rule = components.match(new RegExp(`\\.code-indent-${level}\\s*\\{([^}]*)\\}`))?.[1] ?? "";
+    assert.match(rule, new RegExp(`padding-left:\\s*${padding}px`));
+    assert.doesNotMatch(rule, /margin-left/);
+  }
+});
+
+test("sorting states use labels and shapes in addition to color", async () => {
+  const styles = await readFile(new URL("src/lectures/04-brute-force/styles.css", root), "utf8");
+
+  assert.match(styles, /\.sort-item\.is-sorted::before\s*\{[^}]*content:\s*"✓"/s);
+  assert.match(styles, /\.sort-item\.is-compared\s*\{[^}]*border-style:\s*dashed/s);
+  assert.match(styles, /\.sort-item\.is-compared::before\s*\{[^}]*content:\s*"CMP"/s);
+  assert.match(styles, /\.sort-item\.is-minimum\s*\{[^}]*border-style:\s*double/s);
+  assert.match(styles, /\.sort-item\.is-minimum::before\s*\{[^}]*content:\s*"MIN"/s);
+  assert.match(styles, /\.sort-item\.is-current::before\s*\{[^}]*content:\s*"NOW"/s);
+});
+
 
 test("every local page and stylesheet asset reference exists", async () => {
   const html = await readFile(new URL("index.html", root), "utf8");
@@ -95,14 +127,7 @@ test("every local page and stylesheet asset reference exists", async () => {
     await assert.doesNotReject(access(new URL(asset, root)), `missing page asset: ${asset}`);
   }
 
-  const stylesheets = [
-    "assets/styles/tokens.css",
-    "assets/styles/base.css",
-    "assets/styles/layout.css",
-    "assets/styles/components.css",
-    "assets/styles/visualizations.css",
-    "assets/vendor/katex/katex.min.css"
-  ];
+  const stylesheets = pageAssets.filter((asset) => asset.endsWith(".css"));
   for (const stylesheet of stylesheets) {
     const stylesheetUrl = new URL(stylesheet, root);
     const css = await readFile(stylesheetUrl, "utf8");

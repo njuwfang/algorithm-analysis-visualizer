@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { lectures, routes, resolveRoute, routeHash } from "../src/lectures/registry.js";
+import { lectures, neighboringRoutes, routes, resolveRoute, routeHash } from "../src/lectures/registry.js";
 
 
 test("registry exposes unique lecture/module routes", () => {
@@ -14,9 +14,33 @@ test("registry exposes unique lecture/module routes", () => {
     "03-analysis/binary-recursive",
     "03-analysis/master-theorem"
   ];
-  assert.deepEqual(keys.slice(0, publishedLecture03Routes.length), publishedLecture03Routes);
+  const expectedRoutes = [
+    ...publishedLecture03Routes,
+    "04-brute-force/selection-sort",
+    "04-brute-force/bubble-sort",
+    "04-brute-force/string-matching",
+    "04-brute-force/closest-pair",
+    "05-exhaustive-search/traveling-salesman",
+    "05-exhaustive-search/exhaustive-knapsack",
+    "05-exhaustive-search/assignment"
+  ];
+  assert.deepEqual(keys, expectedRoutes);
   assert.ok(!keys.includes("03-analysis/max-element"));
   assert.ok(!keys.includes("03-analysis/unique-element"));
+});
+
+test("previous and next routes stay inside the current lecture", () => {
+  for (const lecture of lectures) {
+    const lectureRoutes = routes.filter((route) => route.lecture.id === lecture.id);
+
+    for (const [index, route] of lectureRoutes.entries()) {
+      const { previous, next } = neighboringRoutes(route);
+      assert.equal(previous?.key ?? null, lectureRoutes[index - 1]?.key ?? null);
+      assert.equal(next?.key ?? null, lectureRoutes[index + 1]?.key ?? null);
+      assert.ok(!previous || previous.lecture.id === lecture.id);
+      assert.ok(!next || next.lecture.id === lecture.id);
+    }
+  }
 });
 
 
