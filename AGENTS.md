@@ -30,6 +30,33 @@ Before implementing a lecture:
 
 Never silently correct the lecture. If code needs a concrete convention the slides omit—such as integer division—make the choice visible and document it. Do not add outside examples, links, claims, or algorithms unless the user asks for them.
 
+## Local course materials
+
+`course-materials/` is an ignored instructor workspace. Edit only the named material, and preserve instructor-edited or released files unless revision is explicit. Use the current request, the stated lecture coverage, and then current local materials as authority. Older course repositories are pattern libraries only; do not inherit their schedule, grading, or AI policy.
+
+Assume that students initially need support with tracing, recursion, logarithms, and summations. Keep the final standard, but introduce one reasoning move at a time:
+
+**worked example → guided completion → near transfer → independent problem**
+
+- Start with concrete values, then introduce notation.
+- State the input size, case, counted operation, base case, and cost assumptions.
+- Move from trace to count, count to a sum or recurrence, and model to tight order before asking students to combine them.
+- Fade hints only after student work shows readiness. Include some constructed responses; choices alone can hide weak reasoning.
+- Avoid unsupported prediction, vague commands, and blanks that only copy the prompt.
+
+Keep each artifact focused:
+
+- **Notes:** one idea, one fully worked numeric example, defined symbols, only the needed prerequisite refresh, and a short checklist.
+- **Learning practice:** teach a method with thinking steps, repetition, answer choices, and accessible solutions when useful. Direct rehearsal is appropriate because the purpose is learning with feedback, not measuring unaided mastery.
+- **Quiz practice:** make the quiz's scope and reasoning forms familiar, with more scaffolding and examples than the quiz itself. Use different values or instances, identify any optional material, and include solutions for self-checking.
+- **Assignments:** use a few self-contained problems with numbered deliverables to assess connected analysis and explanation. They may revisit a practiced algorithm when the required evidence goes beyond selecting an answer. Every required clause must appear in the key and rubric; subjective visualization evaluation should be optional or evidence-based.
+- **Quizzes:** sample individual mastery under the stated time and tool rules. Use familiar question forms but new small instances, fewer cues than practice, and some independently produced work.
+- **Keys:** verified answers, accepted equivalents, concise criteria, common errors, carry-through guidance, and a fast-grading path.
+
+State AI status per artifact and keep any record proportional, text-accessible, and separate from the mathematical score. Do not require paid AI access. Do not require screenshots, color, mouse use, or a fillable PDF; provide selectable text and an equivalent-document option. Visualization tasks must identify the text trace and remain answerable without sight.
+
+Before release, solve every item; check notation, exact counts, recurrences, and tight `Θ` bounds; verify workload and where students begin; confirm that support matches the artifact's purpose; and synchronize the student version, key, rubric, and generated formats. Declare one editable source authoritative, but never overwrite an instructor-edited derivative without asking.
+
 ## Concise lesson anatomy
 
 The default view should contain only:

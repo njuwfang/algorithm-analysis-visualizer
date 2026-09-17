@@ -154,7 +154,7 @@ visualization/
 └── scripts/
 ```
 
-`dist/` is generated and ignored; edit the source files above and rebuild it. `course-materials/` is also ignored so local notes, practice, and assignment drafts can stay inside the project without entering commits.
+`dist/` is generated and ignored; edit the source files above and rebuild it. `course-materials/` is an ignored, undeployed workspace for teaching materials. See [AGENTS.md](./AGENTS.md#local-course-materials) for its authoring rules; older course repositories are references only.
 
 The shared shell renders any module that satisfies the module contract. See:
 
