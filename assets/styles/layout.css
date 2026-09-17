@@ -330,10 +330,14 @@ body.embed-mode .lesson-main {
     order: 6;
   }
 
-  .visualization {
+  .visualization,
+  .text-trace {
     flex: none;
     height: clamp(300px, 55vh, 420px);
     min-height: 0;
+  }
+
+  .visualization {
     padding: 18px 12px;
   }
 }
@@ -402,7 +406,8 @@ body.embed-mode .lesson-main {
     grid-column: auto;
   }
 
-  .visualization {
+  .visualization,
+  .text-trace {
     height: 300px;
     min-height: 300px;
   }

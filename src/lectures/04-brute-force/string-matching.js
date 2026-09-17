@@ -164,7 +164,7 @@ function renderStringMatching(step) {
     const classes = ["string-cell", isMatched ? "is-matched" : "", isCurrent ? "is-current" : ""]
       .filter(Boolean)
       .join(" ");
-    return `<span class="${classes}" ${isCurrent ? 'data-active-visual="true"' : ""} aria-label="T[${index}] ${escapeHtml(visibleCharacter(character))}">
+    return `<span class="${classes}" ${isCurrent ? 'data-active-visual="true"' : ""} role="img" aria-label="T[${index}] ${escapeHtml(visibleCharacter(character))}">
       <small>${index}</small>${escapeHtml(visibleCharacter(character))}
     </span>`;
   }).join("");
@@ -179,7 +179,7 @@ function renderStringMatching(step) {
     const classes = ["string-cell", "is-pattern", isMatched ? "is-matched" : "", isCurrent ? "is-current" : ""]
       .filter(Boolean)
       .join(" ");
-    return `<span class="${classes}" aria-label="P[${patternIndex}] ${escapeHtml(visibleCharacter(step.pattern[patternIndex]))}">
+    return `<span class="${classes}" role="img" aria-label="P[${patternIndex}] ${escapeHtml(visibleCharacter(step.pattern[patternIndex]))}">
       ${escapeHtml(visibleCharacter(step.pattern[patternIndex]))}
     </span>`;
   }).join("");
@@ -202,11 +202,64 @@ function renderStringMatching(step) {
         <span class="string-row-label">Pattern P</span>
         <div class="string-cells">${patternCells}</div>
       </div>
-      <div class="string-key" aria-label="Visualization key">
+      <div class="string-key" role="group" aria-label="Visualization key">
         <span><i class="key-swatch is-current"></i> compared now</span>
         <span><i class="key-swatch is-matched"></i> matching prefix</span>
       </div>
     </div>`;
+}
+
+function describeStringMatching(step) {
+  const result = step.found === null
+    ? "Search in progress"
+    : step.found >= 0
+      ? `Found at text index ${step.found}`
+      : "Pattern not found";
+  const alignmentEnd = step.alignment + step.pattern.length - 1;
+  const currentComparison = step.patternIndex === null
+    ? "none"
+    : `P[${step.patternIndex}] = “${visibleCharacter(step.pattern[step.patternIndex])}” and `
+      + `T[${step.textIndex}] = “${visibleCharacter(step.text[step.textIndex])}”`;
+  const comparisonResult = step.phase === "compare"
+    ? step.matches ? "match" : "mismatch"
+    : step.phase === "advance"
+      ? "match confirmed; j advanced"
+      : "not evaluated at this step";
+  const nextComparison = step.phase === "advance" && step.matchedPrefix < step.pattern.length
+    ? `P[${step.matchedPrefix}] with T[${step.alignment + step.matchedPrefix}]`
+    : step.phase === "align" || step.phase === "initial"
+      ? `P[0] with T[${step.alignment}]`
+      : "none";
+  const matchingRange = step.phase === "complete" && step.found >= 0
+    ? `T[${step.found}] through T[${step.found + step.pattern.length - 1}]`
+    : "none";
+
+  return {
+    summary: step.message,
+    state: [
+      {
+        label: "Text T",
+        value: [...step.text].map((character, index) => `T[${index}] = “${visibleCharacter(character)}”`).join("; ")
+      },
+      {
+        label: "Pattern P",
+        value: [...step.pattern].map((character, index) => `P[${index}] = “${visibleCharacter(character)}”`).join("; ")
+      },
+      { label: "Alignment", value: `i = ${step.alignment}` },
+      {
+        label: "Aligned text range",
+        value: `P[0] through P[${step.pattern.length - 1}] align with T[${step.alignment}] through T[${alignmentEnd}]`
+      },
+      { label: "Matching prefix", value: `${step.matchedPrefix} of ${step.pattern.length} characters` },
+      { label: "Current comparison", value: currentComparison },
+      { label: "Comparison result", value: comparisonResult },
+      { label: "Next comparison", value: nextComparison },
+      { label: "Matching text range", value: matchingRange },
+      { label: "Character comparisons", value: String(step.comparisons) },
+      { label: "Alignments examined", value: String(step.alignments) },
+      { label: "Result", value: result }
+    ]
+  };
 }
 
 export const stringMatchingModule = {
@@ -236,6 +289,7 @@ export const stringMatchingModule = {
   ],
   buildTrace: buildStringMatchingTrace,
   render: renderStringMatching,
+  describe: describeStringMatching,
   metrics(step) {
     return [{ label: "Character comparisons", value: step.comparisons, emphasis: true }];
   },

@@ -36,7 +36,7 @@ The default view should contain only:
 
 1. Lecture context in the shared header and one algorithm title.
 2. One custom-input control and one compact example chooser.
-3. The visualization beside the lecture pseudocode.
+3. The visualization or equivalent text trace beside the lecture pseudocode.
 4. Previous, play/pause, next, timeline, and restart controls.
 5. One strip for the current event and named-operation count.
 6. The sum or recurrence that generalizes the trace.
@@ -61,6 +61,7 @@ Avoid repeating the same title, workflow, complexity, count, or explanation in m
 - Prepared inputs are deterministic and chosen to expose meaningful cases.
 - Invalid input errors are specific, readable, and preserve the last valid trace.
 - Keyboard stepping and reduced-motion preferences must remain usable.
+- Every visual trace state has an equivalent structured text state. A student must be able to identify the event, active pseudocode, relevant values and relationships, and named-operation count without seeing the drawing.
 
 ## Technical invariants
 
@@ -69,6 +70,8 @@ Avoid repeating the same title, workflow, complexity, count, or explanation in m
 - Keep published routes stable: `#/LECTURE_ID/MODULE_ID`.
 - Keep shared behavior in `src/core/`; lecture folders contain lecture-specific content and rendering.
 - New algorithm behavior starts with a pure deterministic trace and receives a test.
+- Edit source files, not generated `dist/` copies. The build recreates `dist/`, which remains ignored.
+- `course-materials/` is an intentionally ignored local workspace. Do not edit or stage its notes, practice, or assignment drafts unless the user explicitly requests that specific material.
 - Treat existing working-tree changes as user work; do not overwrite unrelated edits.
 
 ## Module contract
@@ -82,55 +85,76 @@ Each module exports one object:
   pseudocode,
   buildTrace(input),
   render(step),
+  describe(step),
   metrics(step),
   model(step),
   analysis
 }
 ```
 
+`describe(step)` is pure and deterministic and returns `{ summary, state, details? }`, where `state` is a non-empty array of `{ label, value }` strings. It is the complete nonvisual equivalent of the current drawing: include indexed values, active candidates or calls, retained results, and relationships that would otherwise be communicated only through position, shape, or color.
+
+The ordered `state` label set must be unique and identical at every trace step. Keep the same label for the same concept and use values such as `"none"`, `"not evaluated"`, or `"complete"` before or after a field is active. Metric labels must likewise be unique and stable. If a state row repeats a metric label, its value and meaning must be identical because the shell displays that row in the Count region rather than twice.
+
+Optional `details` is an ordered array of supplemental relationship sentences. The shell tracks these positions as `Relationship 1`, `Relationship 2`, and so on, so a surviving position must retain the same meaning. Put anything whose before-and-after change matters in `state` with an explicit stable label.
+
 For a worked process that is not pseudocode, optional `codeTitle` replaces the shared panel heading (for example, `"Theorem cases"`).
-Within `pseudocode`, a mathematical line may provide `latex` instead of `text`; the shared shell renders it with local KaTeX.
+Within `pseudocode`, a mathematical line may provide `latex` instead of `text`; it must also provide a concise `spoken` equivalent for step announcements. The shared shell renders the formula with local KaTeX.
 When `basic: true` marks a counted quantity that is not an executed operation, use `basicLabel` to name it accurately.
 
 Optional hands-on behavior uses:
 
 ```js
-activity: { id, label, create, render, reduce, metrics, controls }
+activity: { id, label, create, render, describe, reduce, metrics, controls }
 ```
 
+`activity.describe(state)` follows the same pure, deterministic `{ summary, state, details? }` contract and keeps its labels stable across reducer states. Interactive elements inside `activity.render(state)` must also expose their current value and action through native controls or equivalent keyboard semantics. Preserve focus when an activity rerenders.
+
 `model(step)` returns `{ latex, notes }`. Author the mathematical model in LaTeX; the shared shell renders it with the repository-local KaTeX distribution, never a CDN.
+
+## Nonvisual trace behavior
+
+- The shell builds one canonical snapshot from active pseudocode, `describe(step)`, optional relationships, and `metrics(step)`.
+- **Changes this step** always compares with the immediately preceding algorithm step, regardless of the order in which a student visits steps.
+- The text view keeps the current event and at most four meaningful changed state values visible. Put any additional changed values under a collapsed **More changes** disclosure, and put the exact state, metrics, and relationships under one collapsed **Full state and relationships** disclosure.
+- Manual Previous, Next, Restart, and timeline changes announce only the step position and event, active pseudocode, and primary count through the one shared status region. Exact changes remain browseable in the text view. **Repeat step** repeats that same concise announcement.
+- Autoplay announces only start, pause, and completion. Do not queue an announcement for every moving frame.
+- Keep the text-trace container and its labeled regions mounted while values update. Do not add a visited-step history or competing read-aloud actions.
+- A modal lecture drawer pauses playback, traps keyboard focus while open, and restores focus on close. Pointer-only backdrops stay hidden from assistive technology.
+- Automated schema and source tests catch structural regressions; they do not establish WCAG conformance or prove what a particular screen reader speaks.
 
 ## Repository map
 
 ```text
-src/core/                 Shared shell, routing, validation, utilities
+src/core/                 Shared shell, routing, validation, trace deltas, utilities
 src/lectures/             One folder per lecture
 src/lectures/registry.js  Course-wide lecture registry
 assets/styles/            Shared layout, components, and visual primitives
 templates/                Copy-ready lecture and module starters
-tests/                    Pure Node trace, schema, and route tests
+tests/                    Pure Node trace, schema, route, and accessibility tests
 docs/                     Authoring, source notes, and visual guidance
 ```
 
 ## Add or revise a lecture
 
-1. Audit the source and update `docs/SOURCE_NOTES.md`.
+1. For lecture-content changes, audit the source and update `docs/SOURCE_NOTES.md`.
 2. Copy the templates or revise the relevant module in `src/lectures/NN-topic/`.
-3. Implement and test trace generation before visual rendering.
+3. Implement and test trace generation and `describe(step)` before visual rendering.
 4. Register new lectures in `src/lectures/registry.js`; never rename a published ID casually.
 5. Run `npm run check`.
-6. Inspect every direct route at 375 px, 1024 × 768, and a wide desktop size.
+6. Inspect every direct route in both visual and text views at 375 px, 1024 × 768, and a wide desktop size. Check at least an initial, transition, and final step.
+7. When focus, dialog, or announcement behavior changes, smoke-test a real browser/screen-reader pairing when available; otherwise report that manual assistive-technology validation remains outstanding.
 
 ## Commands
 
 ```bash
 ./serve.sh          # local server at http://localhost:8080
 npm run validate    # contracts and default traces
-npm test            # deterministic trace and route tests
+npm test            # trace, schema, route, and accessibility tests
 npm run build       # clean static output in dist/
 npm run check       # full deployment check
 ```
 
 ## Definition of done
 
-A change is complete only when the source mapping is documented, the direct route opens, input errors are readable, keyboard controls work, the visual and mathematical models count the lecture’s operation, deterministic tests pass, and the layout remains usable on phone and projector widths.
+A change is complete only when relevant source mapping is documented for content changes; direct routes open; invalid input preserves the last valid trace; visual, textual, and mathematical models agree on the event and counted operation; description and metric labels remain stable; keyboard controls and focus work; deterministic tests pass; and both visual and text layouts remain usable on phone and projector widths. Accessibility-affecting shell changes additionally require a real screen-reader smoke test or an explicit statement that this manual verification is still outstanding.

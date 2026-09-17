@@ -62,6 +62,16 @@ export const exampleModule = {
   ],
   buildTrace: buildExampleTrace,
   render: renderExample,
+  describe(step) {
+    return {
+      summary: step.message,
+      state: [
+        { label: "Array", value: `[${step.values.join(", ")}]` },
+        { label: "Basic operations", value: String(step.operations) }
+      ],
+      details: ["Describe relationships that a drawing otherwise communicates spatially."]
+    };
+  },
   metrics(step) {
     return [
       { label: "Basic operations", value: step.operations, emphasis: true }

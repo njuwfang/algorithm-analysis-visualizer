@@ -150,6 +150,23 @@ export const binaryIterativeModule = {
   ],
   buildTrace: buildBinaryIterativeTrace,
   render: renderBinaryIterative,
+  describe(step) {
+    const details = step.history.map((row) => (
+      `Check ${row.check}: n = ${row.n}, count = ${row.count}; n > 1 is ${row.condition ? "true" : "false"}.`
+    ));
+
+    return {
+      summary: step.message,
+      state: [
+        { label: "Original input", value: String(step.original) },
+        { label: "Current n", value: String(step.current) },
+        { label: "Digit count", value: String(step.count) },
+        { label: "Condition checks", value: String(step.comparisons) },
+        { label: "Loop repetitions", value: String(step.bodyExecutions) }
+      ],
+      ...(details.length ? { details } : {})
+    };
+  },
   metrics(step) {
     return [
       { label: "Condition checks", value: step.comparisons, emphasis: true },

@@ -152,6 +152,34 @@ export const binaryRecursiveModule = {
   ],
   buildTrace: buildBinaryRecursiveTrace,
   render: renderBinaryRecursive,
+  describe(step) {
+    const revealedDepth = Math.min(Math.max(step.calls, 1), step.chain.length);
+    const recurrenceText = (value) => value === 1
+      ? "A(1) = 0"
+      : `A(${value}) = A(${Math.floor(value / 2)}) + 1`;
+    const stack = step.stack.length
+      ? step.stack
+          .map((frame) => `BinRec(${frame.n}): ${frame.status}`)
+          .join("; ")
+      : "empty";
+    const recurrence = step.chain.slice(0, revealedDepth).map(recurrenceText);
+    const pendingRecurrence = step.chain.slice(revealedDepth).map(recurrenceText);
+
+    return {
+      summary: step.message,
+      state: [
+        { label: "Original input", value: String(step.original) },
+        { label: "Current call", value: step.current === null ? "none; execution complete" : `BinRec(${step.current})` },
+        { label: "Call stack, outermost to active", value: stack },
+        { label: "Calls made", value: String(step.calls) },
+        { label: "Additions performed", value: String(step.additions) },
+        { label: "Current result", value: step.result === null ? "pending" : String(step.result) },
+        { label: "Recurrence rows revealed", value: `${revealedDepth} of ${step.chain.length}` },
+        { label: "Pending recurrence rows", value: pendingRecurrence.length ? pendingRecurrence.join("; ") : "none" }
+      ],
+      details: recurrence
+    };
+  },
   metrics(step) {
     return [
       { label: "Additions", value: step.additions, emphasis: true }

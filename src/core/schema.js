@@ -4,10 +4,27 @@ function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
+function normalizedLabels(rows) {
+  return rows.map(({ label }) => label.trim().toLowerCase());
+}
+
+function validateStableLabels(labels, expected, prefix) {
+  const stable = labels.length === expected.length
+    && labels.every((label, index) => label === expected[index]);
+  assert(
+    stable,
+    `${prefix} labels must remain stable across trace states; expected [${expected.join(", ")}], received [${labels.join(", ")}].`
+  );
+}
+
 function validateMetrics(metrics, prefix) {
   assert(Array.isArray(metrics) && metrics.length > 0, `${prefix} must return a non-empty array.`);
+  const labels = new Set();
   for (const [index, metric] of metrics.entries()) {
     assert(typeof metric?.label === "string" && metric.label.trim(), `${prefix}[${index}].label is required.`);
+    const label = metric.label.trim().toLowerCase();
+    assert(!labels.has(label), `${prefix} has duplicate label "${metric.label}".`);
+    labels.add(label);
     assert(metric.value !== undefined && metric.value !== null, `${prefix}[${index}].value is required.`);
     if (metric.emphasis !== undefined) {
       assert(typeof metric.emphasis === "boolean", `${prefix}[${index}].emphasis must be a boolean.`);
@@ -20,6 +37,25 @@ function validateModel(model, prefix) {
   assert(Array.isArray(model?.notes), `${prefix}.notes must be an array.`);
   for (const [index, note] of model.notes.entries()) {
     assert(typeof note === "string" && note.trim(), `${prefix}.notes[${index}] must be a non-empty string.`);
+  }
+}
+
+function validateDescription(description, prefix) {
+  assert(typeof description?.summary === "string" && description.summary.trim(), `${prefix}.summary is required.`);
+  assert(Array.isArray(description?.state) && description.state.length > 0, `${prefix}.state must be a non-empty array.`);
+  const labels = new Set();
+  for (const [index, item] of description.state.entries()) {
+    assert(typeof item?.label === "string" && item.label.trim(), `${prefix}.state[${index}].label is required.`);
+    const label = item.label.trim().toLowerCase();
+    assert(!labels.has(label), `${prefix}.state has duplicate label "${item.label}".`);
+    labels.add(label);
+    assert(typeof item?.value === "string" && item.value.trim(), `${prefix}.state[${index}].value is required.`);
+  }
+  if (description.details !== undefined) {
+    assert(Array.isArray(description.details), `${prefix}.details must be an array.`);
+    for (const [index, detail] of description.details.entries()) {
+      assert(typeof detail === "string" && detail.trim(), `${prefix}.details[${index}] must be a non-empty string.`);
+    }
   }
 }
 
@@ -45,6 +81,7 @@ export function validateModule(module, lectureId) {
   assert(Array.isArray(module.pseudocode) && module.pseudocode.length > 0, `${prefix}.pseudocode is required.`);
   assert(typeof module.buildTrace === "function", `${prefix}.buildTrace must be a function.`);
   assert(typeof module.render === "function", `${prefix}.render must be a function.`);
+  assert(typeof module.describe === "function", `${prefix}.describe must be a function.`);
   assert(typeof module.metrics === "function", `${prefix}.metrics must be a function.`);
   assert(typeof module.model === "function", `${prefix}.model must be a function.`);
   assert(Array.isArray(module.analysis) && module.analysis.length > 0, `${prefix}.analysis is required.`);
@@ -67,6 +104,12 @@ export function validateModule(module, lectureId) {
     const hasLatex = typeof line.latex === "string" && line.latex.trim();
     assert(hasText || hasLatex, `${prefix}.pseudocode[${index}] needs text or latex.`);
     assert(!(hasText && hasLatex), `${prefix}.pseudocode[${index}] cannot define both text and latex.`);
+    if (hasLatex) {
+      assert(
+        typeof line.spoken === "string" && line.spoken.trim(),
+        `${prefix}.pseudocode[${index}].spoken is required for a latex line.`
+      );
+    }
     if (line.basicLabel !== undefined) {
       assert(line.basic === true, `${prefix}.pseudocode[${index}].basicLabel requires basic: true.`);
       assert(typeof line.basicLabel === "string" && line.basicLabel.trim(), `${prefix}.pseudocode[${index}].basicLabel must be a non-empty string.`);
@@ -86,6 +129,7 @@ export function validateModule(module, lectureId) {
     assert(typeof module.activity.label === "string" && module.activity.label.trim(), `${prefix}.activity.label is required.`);
     assert(typeof module.activity.create === "function", `${prefix}.activity.create must be a function.`);
     assert(typeof module.activity.render === "function", `${prefix}.activity.render must be a function.`);
+    assert(typeof module.activity.describe === "function", `${prefix}.activity.describe must be a function.`);
     assert(typeof module.activity.reduce === "function", `${prefix}.activity.reduce must be a function.`);
     assert(typeof module.activity.metrics === "function", `${prefix}.activity.metrics must be a function.`);
     assert(typeof module.activity.controls === "function", `${prefix}.activity.controls must be a function.`);
@@ -94,6 +138,8 @@ export function validateModule(module, lectureId) {
   const parsed = module.input.parse(module.input.default);
   const trace = module.buildTrace(parsed);
   assert(Array.isArray(trace) && trace.length > 0, `${prefix}.buildTrace returned no states.`);
+  let expectedStateLabels = null;
+  let expectedMetricLabels = null;
   for (const [index, state] of trace.entries()) {
     assert(typeof state.message === "string" && state.message.trim(), `${prefix} trace state ${index} needs a non-empty message.`);
     if (state.activeLabel !== undefined) {
@@ -107,7 +153,32 @@ export function validateModule(module, lectureId) {
     assert(typeof renderedState === "string" && renderedState.trim(), `${prefix}.render must return HTML for trace state ${index}.`);
 
     const metrics = module.metrics(state);
+    const description = module.describe(state);
     validateMetrics(metrics, `${prefix}.metrics for trace state ${index}`);
+    validateDescription(description, `${prefix}.describe for trace state ${index}`);
+
+    const stateLabels = normalizedLabels(description.state);
+    const metricLabels = normalizedLabels(metrics);
+    if (index === 0) {
+      expectedStateLabels = stateLabels;
+      expectedMetricLabels = metricLabels;
+    } else {
+      validateStableLabels(stateLabels, expectedStateLabels, `${prefix}.describe for trace state ${index}`);
+      validateStableLabels(metricLabels, expectedMetricLabels, `${prefix}.metrics for trace state ${index}`);
+    }
+
+    const metricsByLabel = new Map(metrics.map((metric) => [
+      metric.label.trim().toLowerCase(),
+      metric
+    ]));
+    for (const row of description.state) {
+      const metric = metricsByLabel.get(row.label.trim().toLowerCase());
+      assert(
+        !metric || row.value === String(metric.value),
+        `${prefix}.describe for trace state ${index} reuses metric label "${row.label}" with a different value.`
+      );
+    }
+
     validateModel(module.model(state), `${prefix}.model for trace state ${index}`);
   }
 
@@ -126,6 +197,7 @@ export function validateModule(module, lectureId) {
 
     const activityMetrics = module.activity.metrics(activityState);
     validateMetrics(activityMetrics, `${prefix}.activity.metrics`);
+    validateDescription(module.activity.describe(activityState), `${prefix}.activity.describe`);
     validateModel(module.model(activityState), `${prefix}.model for activity state`);
 
     const activityControls = module.activity.controls(activityState);

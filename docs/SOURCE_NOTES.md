@@ -36,6 +36,8 @@ The supplied Lecture 03 deck does not contain the Master Theorem. The module is 
 
 The module uses the explicit teaching form `T(n) = aT(n/b) + nᵈ`, assumes `n = bᵏ`, and assigns unit work to each base case. Its four prepared recurrences use the authored classroom value `n = 16`; they are examples for comparing the three possible level-work patterns, not claims about examples in the supplied deck. For readable custom trees, the interface limits `a` to 1–8, `b` to 2–8, `d` to 0–4, and powers of `b` to at most six levels.
 
+Because this restricted recurrence has positive work at every node and an exact geometric level sum, the module states tight `Θ` bounds for all three cases, not merely upper `O` bounds.
+
 The visualization is an authored recurrence-tree explanation. A segmented band represents each level: divisions show the branching density, the exact subproblem count and local work are printed beside it, and the complete band's width represents total level work. Dense levels group divisions to remain legible. Going down one level creates `a` times as many subproblems while dividing work per subproblem by `bᵈ`, so the band width changes by `a / bᵈ`. A narrowing, constant-width, or widening profile makes root, equal-level, or leaf dominance visible before the asymptotic result is shown. The module explicitly distinguishes this `n/b` recurrence form from Hanoi's `n − 1` recurrence.
 
 # Lecture 04 Source Notes

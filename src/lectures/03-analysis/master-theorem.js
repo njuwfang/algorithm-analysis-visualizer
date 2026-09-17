@@ -45,17 +45,17 @@ function formatLatexNumber(value) {
 function polynomialOrder(exponent, { logarithm = false } = {}) {
   if (nearlyEqual(exponent, 0)) {
     return logarithm
-      ? { text: "O(log n)", latex: "\\mathrm{O}(\\log n)" }
-      : { text: "O(1)", latex: "\\mathrm{O}(1)" };
+      ? { text: "Θ(log n)", latex: "\\Theta(\\log n)" }
+      : { text: "Θ(1)", latex: "\\Theta(1)" };
   }
 
   const exponentText = nearlyEqual(exponent, 1) ? "" : `^${formatNumber(exponent)}`;
   const exponentLatex = nearlyEqual(exponent, 1) ? "" : `^{${formatNumber(exponent)}}`;
   return {
-    text: logarithm ? `O(n${exponentText} log n)` : `O(n${exponentText})`,
+    text: logarithm ? `Θ(n${exponentText} log n)` : `Θ(n${exponentText})`,
     latex: logarithm
-      ? `\\mathrm{O}\\!\\left(n${exponentLatex} \\log n\\right)`
-      : `\\mathrm{O}\\!\\left(n${exponentLatex}\\right)`
+      ? `\\Theta\\!\\left(n${exponentLatex} \\log n\\right)`
+      : `\\Theta\\!\\left(n${exponentLatex}\\right)`
   };
 }
 
@@ -126,8 +126,8 @@ function resultFor(input, masterCase) {
       return polynomialOrder(roundedExponent);
     }
     return {
-      text: `O(n^log_${input.b} ${input.a})`,
-      latex: `\\mathrm{O}\\!\\left(n^{\\log_{${input.b}} ${input.a}}\\right)`
+      text: `Θ(n^log_${input.b} ${input.a})`,
+      latex: `\\Theta\\!\\left(n^{\\log_{${input.b}} ${input.a}}\\right)`
     };
   }
   if (masterCase.id === "balanced") {
@@ -246,7 +246,7 @@ function renderMasterTheorem(step) {
 
     if (!revealed) {
       return `
-        <div class="master-level is-unrevealed" aria-label="Level ${level.level} has not been revealed">
+        <div class="master-level is-unrevealed" role="img" aria-label="Level ${level.level} has not been revealed">
           <span class="master-level-index">L${level.level}</span>
           <span class="master-band-placeholder"></span>
           <span class="master-level-equation">not expanded</span>
@@ -259,7 +259,7 @@ function renderMasterTheorem(step) {
       ? "root level"
       : `${changePhrase(step.ratio)} from the preceding level`;
     return `
-      <div class="master-level ${active ? "is-active" : ""} ${dominant ? "is-dominant" : ""}"
+      <div class="master-level ${active ? "is-active" : ""} ${dominant ? "is-dominant" : ""}" role="img"
         aria-label="Level ${level.level}: ${formatWork(level.nodes)} ${level.nodes === 1 ? "subproblem" : "subproblems"}, ${formatWork(level.workPerNode)} work each, ${formatWork(level.levelWork)} total; ${previousRelation}">
         <span class="master-level-index">L${level.level}<small>${level.leaf ? "leaves" : level.level === 0 ? "root" : `size ${formatWork(level.subproblemSize)}`}</small></span>
         <span class="master-work-band" style="--band-width:${bandWidth}%;--segment-width:${segmentWidth}%" aria-hidden="true"></span>
@@ -278,7 +278,7 @@ function renderMasterTheorem(step) {
 
   return `
     <div class="master-layout">
-      <div class="master-mechanism" aria-label="Going down one level: subproblems multiply by ${step.a}, work per subproblem is divided by ${formatWork(step.perNodeDivisor)}, so total level work ${showLevelMultiplier ? `multiplies by ${formatNumber(step.ratio)}` : "is not yet revealed"}">
+      <div class="master-mechanism" role="img" aria-label="Going down one level: subproblems multiply by ${step.a}, work per subproblem is divided by ${formatWork(step.perNodeDivisor)}, so total level work ${showLevelMultiplier ? `multiplies by ${formatNumber(step.ratio)}` : "is not yet revealed"}">
         <span class="master-force master-force-structure"><small>Subproblems</small><strong>×${step.a}</strong></span>
         <span class="master-force"><small>Work each</small><strong>÷${escapeHtml(formatWork(step.perNodeDivisor))}</strong></span>
         <span class="master-force master-force-total ${showLevelMultiplier ? "is-revealed" : ""}"><small>Whole level</small><strong>${showLevelMultiplier ? `×${escapeHtml(formatNumber(step.ratio))}` : "?"}</strong><em>${showLevelMultiplier ? caseDetails.trend : "predict"}</em></span>
@@ -312,26 +312,91 @@ export const masterTheoremModule = {
     parse: parseMasterTheoremInput
   },
   pseudocode: [
-    { line: 1, latex: "T(n) = aT(n/b) + n^d, \\quad T(1)=1" },
-    { line: 2, latex: "N_i = a^i \\quad \\text{(subproblems)}" },
-    { line: 3, latex: "C_i = (n/b^i)^d \\quad \\text{(work each)}" },
-    { line: 4, latex: "W_i = N_iC_i = n^d(a/b^d)^i", basic: true, basicLabel: "level work" },
-    { line: 5, latex: "W_{i+1}/W_i = a/b^d" },
-    { line: 6, latex: "T(n) = \\sum_{i=0}^{\\log_b n} W_i" }
+    {
+      line: 1,
+      latex: "T(n) = aT(n/b) + n^d, \\quad T(1)=1",
+      spoken: "T of n equals a times T of the quantity n divided by b, plus n to the d; T of 1 equals 1"
+    },
+    {
+      line: 2,
+      latex: "N_i = a^i \\quad \\text{(subproblems)}",
+      spoken: "N sub i equals a to the i, the number of subproblems"
+    },
+    {
+      line: 3,
+      latex: "C_i = (n/b^i)^d \\quad \\text{(work each)}",
+      spoken: "C sub i equals n divided by b to the i, all raised to the d, the work per subproblem"
+    },
+    {
+      line: 4,
+      latex: "W_i = N_iC_i = n^d(a/b^d)^i",
+      spoken: "W sub i equals N sub i times C sub i, which equals n to the d times the quantity a divided by b to the d, raised to the i",
+      basic: true,
+      basicLabel: "level work"
+    },
+    {
+      line: 5,
+      latex: "W_{i+1}/W_i = a/b^d",
+      spoken: "W sub i plus 1 divided by W sub i equals a divided by b to the d"
+    },
+    {
+      line: 6,
+      latex: "T(n) = \\sum_{i=0}^{\\log_b n} W_i",
+      spoken: "T of n equals the sum of W sub i from i equals 0 through log base b of n"
+    }
   ],
   buildTrace: buildMasterTheoremTrace,
   render: renderMasterTheorem,
+  describe(step) {
+    const visibleLevels = step.levels.filter((level) => level.level <= step.revealedThrough);
+    const showOutcome = step.phase === "compare" || step.phase === "complete";
+    const current = step.levels[step.currentLevel];
+    const trend = nearlyEqual(step.ratio, 1)
+      ? "stays unchanged from one level to the next"
+      : nearlyEqual(step.ratio, 0.5)
+        ? "halves from one level to the next"
+        : nearlyEqual(step.ratio, 2)
+          ? "doubles from one level to the next"
+          : `is multiplied by ${formatNumber(step.ratio)} from one level to the next`;
+    const summary = step.phase === "compare"
+      ? `The level work ${trend}; ${CASE_DETAILS[step.masterCase].label.toLowerCase()}.`
+      : step.message;
+    const outcome = showOutcome
+      ? `${CASE_DETAILS[step.masterCase].label}; ${step.phase === "complete" ? `T(n) is in ${step.result.text}` : "the final bound has not yet been stated"}.`
+      : "not yet determined";
+
+    return {
+      summary,
+      state: [
+        { label: "Recurrence", value: `T(n) = ${step.a}T(n/${step.b}) + n^${step.d}; T(1) = 1` },
+        { label: "Levels revealed", value: `${visibleLevels.length} of ${step.levels.length}` },
+        { label: "Total levels", value: String(step.levels.length) },
+        { label: "Current level", value: String(step.currentLevel) },
+        { label: "Subproblems at current level", value: formatWork(current.nodes) },
+        { label: "Subproblem size", value: formatWork(current.subproblemSize) },
+        { label: "Work per subproblem", value: formatWork(current.workPerNode) },
+        { label: "Total current-level work", value: formatWork(current.levelWork) },
+        { label: "Level-work ratio", value: `${formatNumber(step.ratio)}; ${trend}` },
+        { label: "Conclusion", value: outcome }
+      ],
+      details: visibleLevels.map((level) => (
+        `Level ${level.level}: ${formatWork(level.nodes)} ${level.nodes === 1 ? "subproblem" : "subproblems"} of size ${formatWork(level.subproblemSize)}, ${formatWork(level.workPerNode)} work each, ${formatWork(level.levelWork)} total level work.`
+      ))
+    };
+  },
   metrics(step) {
     if (step.phase === "compare" || step.phase === "complete") {
       return [{
-        label: "Level-work trend",
-        value: nearlyEqual(step.ratio, 1) ? "unchanged" : `×${formatNumber(step.ratio)} downward`,
+        label: "Level work",
+        value: nearlyEqual(step.ratio, 1)
+          ? "ratio 1; unchanged"
+          : `ratio ${formatNumber(step.ratio)}; multiplied by ${formatNumber(step.ratio)} downward`,
         emphasis: true
       }];
     }
     const level = step.levels[step.currentLevel];
     return [
-      { label: `Level work W${level.level}`, value: formatWork(level.levelWork), emphasis: true }
+      { label: "Level work", value: `W${level.level} = ${formatWork(level.levelWork)}`, emphasis: true }
     ];
   },
   analysis: [

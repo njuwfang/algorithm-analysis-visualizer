@@ -6,6 +6,8 @@ A reusable, self-contained static website for teaching algorithm execution and a
 
 The redesign separates the course shell from lecture content, so later lectures can be added without copying the entire application.
 
+Live site: <https://njuwfang.github.io/algorithm-analysis-visualizer/>
+
 ## Published lectures
 
 Lecture 03 — Analysis of Algorithms:
@@ -31,6 +33,29 @@ Lecture 05 — Exhaustive Search:
 - Assignment — exhaustive permutations
 
 Each lesson keeps the custom input, one example chooser, visualization, lecture pseudocode, selected-operation count, and mathematical model in a compact shared shell. Supporting analysis is available on demand instead of occupying the default screen.
+
+## Accessibility
+
+Each algorithm’s trace mode has a **Show text** control beside the step counter. It opens a **Text trace** view that keeps the current event and up to four meaningful changed state values visible. Extra changes are available under **More changes**, while the exact state, operation counts, and relationships are available under **Full state and relationships**. The text does not rely on color or position.
+
+For keyboard or screen-reader study:
+
+1. Select **Show text**, or use a link with `?view=text` before the route hash.
+2. Use **Previous** and **Next** for narrated study. A manual change announces the step position and event, active pseudocode, and primary count. **Repeat step** repeats this short announcement.
+3. Browse **Changes this step** for the exact changed values. If more than four values changed, open **More changes**; open **Full state and relationships** only when the complete snapshot is needed.
+4. Treat **Play** as a visual overview: it announces start, pause, and completion, while intermediate frames stay silent to avoid a speech backlog.
+
+To open a shared link directly in the text view, add `?view=text` before the route hash:
+
+```text
+https://njuwfang.github.io/algorithm-analysis-visualizer/?view=text#/03-analysis/hanoi
+```
+
+KaTeX renders mathematical expressions with HTML and MathML. Color is supplemented by labels, outlines, or shapes, and reduced-motion preferences disable nonessential motion.
+
+The previous, next, play/pause, timeline, restart, input, activity, and lecture-navigation controls are keyboard operable. The Tower of Hanoi practice mode exposes labeled peg controls and a nonvisual current-state description even though the trace/text toggle is not shown in practice mode.
+
+Automated checks validate description schemas, stable state and metric labels, trace-delta behavior, and expected accessibility hooks. These checks do not exercise a browser or screen reader. Manual screen-reader validation is still outstanding; before classroom use, test with the student’s browser and screen reader.
 
 ## Run in WSL
 
@@ -70,7 +95,7 @@ Alternatively, run `npm run build` and publish the generated `dist/` directory w
 The canonical route format is:
 
 ```text
-https://YOUR_USERNAME.github.io/REPOSITORY/#/03-analysis/binary-iterative
+https://njuwfang.github.io/algorithm-analysis-visualizer/#/03-analysis/binary-iterative
 ```
 
 Because routing uses the URL hash and the vendored KaTeX distribution renders formulas locally, the site works from a project subdirectory without server rewrites or external runtime services.
@@ -101,7 +126,7 @@ Example:
 
 ```html
 <iframe
-  src="https://YOUR_USERNAME.github.io/REPOSITORY/?embed=1&amp;module=hanoi"
+  src="https://njuwfang.github.io/algorithm-analysis-visualizer/?embed=1&amp;module=hanoi"
   title="Tower of Hanoi analysis visualization"
   width="100%"
   height="900"
@@ -117,7 +142,7 @@ visualization/
 ├── index.html
 ├── AGENTS.md
 ├── assets/styles/
-├── src/core/
+├── src/core/                 # shell, schema, routing, and trace-delta logic
 ├── src/lectures/
 │   ├── registry.js
 │   ├── 03-analysis/          # modules and lecture-local styles.css
@@ -128,6 +153,8 @@ visualization/
 ├── tests/
 └── scripts/
 ```
+
+`dist/` is generated and ignored; edit the source files above and rebuild it. `course-materials/` is also ignored so local notes, practice, and assignment drafts can stay inside the project without entering commits.
 
 The shared shell renders any module that satisfies the module contract. See:
 
@@ -140,9 +167,11 @@ The shared shell renders any module that satisfies the module contract. See:
 
 1. Copy the files in `templates/`.
 2. Create a folder under `src/lectures/`.
-3. Implement deterministic traces and renderers.
+3. Implement deterministic traces, visual renderers, and a complete `describe(step)` text state with stable labels.
 4. Register the lecture in `src/lectures/registry.js`.
-5. Add tests and run `npm run check`.
+5. Add trace, description/delta, and route tests, then run `npm run check`.
+
+Review both visual and text views at phone, projector, and wide-desktop widths. When focus, dialog, or announcement behavior changes, also perform a real browser/screen-reader smoke test or record that it remains unverified.
 
 Navigation, direct links, the header pager, and embedding are generated by the shared shell.
 

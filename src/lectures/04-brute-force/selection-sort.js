@@ -194,6 +194,55 @@ function renderSelectionSort(step) {
     </section>`;
 }
 
+function describeSelectionSort(step) {
+  const pass = step.phase === "initial"
+    ? `Not started; ${step.values.length - 1} passes will run`
+    : step.phase === "complete"
+      ? `Complete; ${step.values.length - 1} passes finished`
+      : `${step.passIndex + 1} of ${step.values.length - 1}`;
+  const sortedPrefix = step.sortedThrough < 0
+    ? "None"
+    : `A[0] through A[${step.sortedThrough}]`;
+  const currentMinimum = step.minimumIndex === null
+    ? "none"
+    : `A[${step.minimumIndex}] = ${formatNumber(step.values[step.minimumIndex])}`;
+  const scannedElement = step.scanIndex === null
+    ? "none"
+    : `A[${step.scanIndex}] = ${formatNumber(step.values[step.scanIndex])}`;
+  const comparisonResult = step.phase === "compare"
+    ? `A[${step.scanIndex}] < A[${step.minimumIndex}] is ${step.foundSmaller ? "true" : "false"}`
+    : step.phase === "minimum"
+      ? `smaller key found; min updated to A[${step.minimumIndex}]`
+      : "not evaluated at this step";
+  const swapThisStep = step.phase === "swap"
+    ? step.selectedFrom === step.passIndex
+      ? `A[${step.passIndex}] swapped with itself`
+      : `A[${step.passIndex}] swapped with A[${step.selectedFrom}]`
+    : "none";
+
+  return {
+    summary: step.message,
+    state: [
+      {
+        label: "Array A",
+        value: step.values.map((value, index) => `A[${index}] = ${formatNumber(value)}`).join("; ")
+      },
+      { label: "Pass", value: pass },
+      { label: "Sorted prefix", value: sortedPrefix },
+      { label: "Current minimum", value: currentMinimum },
+      { label: "Scanned element", value: scannedElement },
+      { label: "Comparison result", value: comparisonResult },
+      { label: "Swap this step", value: swapThisStep },
+      {
+        label: "Order status",
+        value: step.phase === "complete" ? "Every position is in nondecreasing order" : "Sorting in progress"
+      },
+      { label: "Key comparisons", value: String(step.comparisons) },
+      { label: "Swap statements", value: String(step.swaps) }
+    ]
+  };
+}
+
 export const selectionSortModule = {
   id: "selection-sort",
   shortTitle: "Selection Sort",
@@ -222,6 +271,7 @@ export const selectionSortModule = {
   ],
   buildTrace: buildSelectionSortTrace,
   render: renderSelectionSort,
+  describe: describeSelectionSort,
   metrics(step) {
     return [
       { label: "Key comparisons", value: step.comparisons, emphasis: true },

@@ -84,7 +84,7 @@ function renderMaximum(step) {
     if (step.phase === "complete" && index === step.maxIndex) classes.push("is-final");
 
     return `
-      <div class="${classes.join(" ")}" style="--bar-height:${height}px" aria-label="A index ${index} equals ${escapeHtml(formatNumber(value))}">
+      <div class="${classes.join(" ")}" style="--bar-height:${height}px" role="img" aria-label="A index ${index} equals ${escapeHtml(formatNumber(value))}">
         <span>${escapeHtml(formatNumber(value))}</span>
         <span class="array-index">A[${index}]</span>
       </div>`;
@@ -141,6 +141,27 @@ export const maxElementModule = {
   ],
   buildTrace: buildMaxElementTrace,
   render: renderMaximum,
+  describe(step) {
+    const current = step.currentIndex === null
+      ? "none"
+      : `A[${step.currentIndex}] = ${formatNumber(step.values[step.currentIndex])}`;
+    return {
+      summary: step.message,
+      state: [
+        {
+          label: "Array A",
+          value: step.values.map((value, index) => `A[${index}] = ${formatNumber(value)}`).join("; ")
+        },
+        { label: "Processed prefix", value: `A[0] through A[${step.processedThrough}]` },
+        { label: "Current element", value: current },
+        {
+          label: "Maximum so far",
+          value: `A[${step.maxIndex}] = ${formatNumber(step.values[step.maxIndex])}`
+        },
+        { label: "Comparisons", value: String(step.comparisons) }
+      ]
+    };
+  },
   metrics(step) {
     return [
       { label: "Comparisons", value: step.comparisons, emphasis: true }

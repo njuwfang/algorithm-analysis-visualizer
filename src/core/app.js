@@ -1,4 +1,5 @@
-import { lectures, neighboringRoutes, routes, resolveRoute, routeHash } from "../lectures/registry.js?v=20260916-7";
+import { lectures, neighboringRoutes, routes, resolveRoute, routeHash } from "../lectures/registry.js?v=20260916-9";
+import { deriveTraceChanges } from "./trace-delta.js?v=20260916-1";
 import { bounded, escapeHtml } from "./utils.js?v=20260916-1";
 
 const $ = (selector, root = document) => root.querySelector(selector);
@@ -6,6 +7,7 @@ const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selec
 
 const dom = {
   body: document.body,
+  topbar: $(".topbar"),
   lessonMain: $("#lessonMain"),
   navToggle: $("#navToggle"),
   navClose: $("#navClose"),
@@ -23,7 +25,23 @@ const dom = {
   scenarioSelect: $("#scenarioSelect"),
   modeBlock: $("#modeBlock"),
   modeButtons: $("#modeButtons"),
+  visualizationTitle: $("#visualizationTitle"),
   visualization: $("#visualization"),
+  textTraceToggle: $("#textTraceToggle"),
+  textTrace: $("#textTrace"),
+  textTraceChangeSummary: $("#textTraceChangeSummary"),
+  textTraceKeyChanges: $("#textTraceKeyChanges"),
+  textTraceMoreChanges: $("#textTraceMoreChanges"),
+  textTraceMoreChangesSummary: $("#textTraceMoreChangesSummary"),
+  textTraceChanges: $("#textTraceChanges"),
+  repeatStepButton: $("#repeatStepButton"),
+  textTraceSummary: $("#textTraceSummary"),
+  textTracePosition: $("#textTracePosition"),
+  textTraceActiveCode: $("#textTraceActiveCode"),
+  textTraceStateRows: $("#textTraceStateRows"),
+  textTraceMetricRows: $("#textTraceMetricRows"),
+  textTraceDetails: $("#textTraceDetails"),
+  textTraceDetailsList: $("#textTraceDetailsList"),
   pseudocodeTitle: $("#pseudocodeTitle"),
   pseudocode: $("#pseudocode"),
   activeLineBadge: $("#activeLineBadge"),
@@ -47,6 +65,7 @@ const dom = {
 };
 
 const TRACE_DELAY = 850;
+const TEXT_TRACE_CHANGE_LIMIT = 4;
 
 const state = {
   route: null,
@@ -56,6 +75,7 @@ const state = {
   mode: "trace",
   activityState: null,
   expandedLectureId: null,
+  textTraceVisible: false,
   playing: false,
   timer: null
 };
@@ -66,10 +86,6 @@ function currentModule() {
 
 function currentLecture() {
   return state.route.lecture;
-}
-
-function currentStep() {
-  return state.trace[state.stepIndex];
 }
 
 function announce(message) {
@@ -240,12 +256,243 @@ function renderMetrics(metrics) {
     </div>`).join("");
 }
 
+function renderTraceViewToggle(activityMode) {
+  const showTextTrace = state.textTraceVisible && !activityMode;
+  dom.visualization.hidden = showTextTrace;
+  dom.textTrace.hidden = !showTextTrace;
+  dom.textTraceToggle.hidden = Boolean(activityMode);
+  dom.textTraceToggle.textContent = showTextTrace ? "Show visual" : "Show text";
+  dom.visualizationTitle.textContent = showTextTrace ? "Text trace" : "Visualization";
+}
+
+function normalizedLabel(label) {
+  return String(label).trim().toLowerCase();
+}
+
+function descriptionRows(description, metrics) {
+  const metricLabels = new Set(metrics.map(({ label }) => normalizedLabel(label)));
+  return description.state
+    .filter(({ label }) => !metricLabels.has(normalizedLabel(label)))
+    .map(({ label, value }) => ({ label: String(label), value: String(value) }));
+}
+
+function metricRows(metrics) {
+  return metrics.map(({ label, value }) => ({ label: String(label), value: String(value) }));
+}
+
+function relationshipRows(description) {
+  return (description.details ?? []).map((value, index) => ({
+    label: `Relationship ${index + 1}`,
+    value: String(value)
+  }));
+}
+
+function rowsHtml(rows) {
+  return rows.map(({ label, value }) => `
+    <div><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value)}</dd></div>`).join("");
+}
+
+function assistiveActivityStateHtml(description, metrics) {
+  const details = description.details?.map((detail) => `<li>${escapeHtml(detail)}</li>`).join("") ?? "";
+  return `
+    <section class="sr-only" aria-label="Current practice state">
+      <p>${escapeHtml(description.summary)}</p>
+      <dl>${rowsHtml([...descriptionRows(description, metrics), ...metricRows(metrics)])}</dl>
+      ${details ? `<ul>${details}</ul>` : ""}
+    </section>`;
+}
+
+function activeCodeText(module, step) {
+  const activeCode = module.pseudocode.find((line) => line.line === step.activeLine);
+  if (!activeCode) return step.activeLabel ?? "No active pseudocode line";
+  const spokenCode = activeCode.text ?? activeCode.spoken;
+  return `Line ${activeCode.line}: ${spokenCode}`;
+}
+
+function traceSnapshot(module, step, description, metrics) {
+  return [
+    { key: "shell:active-pseudocode", label: "Active pseudocode", value: activeCodeText(module, step) },
+    ...descriptionRows(description, metrics).map((row) => ({
+      ...row,
+      key: `state:${normalizedLabel(row.label)}`
+    })),
+    ...relationshipRows(description).map((row, index) => ({
+      ...row,
+      key: `relationship:${index + 1}`
+    })),
+    ...metricRows(metrics).map((row) => ({
+      ...row,
+      key: `metric:${normalizedLabel(row.label)}`
+    }))
+  ];
+}
+
+function traceContextAt(index = state.stepIndex) {
+  const module = currentModule();
+  const step = state.trace[index];
+  const description = module.describe(step);
+  const metrics = module.metrics(step);
+  const snapshot = traceSnapshot(module, step, description, metrics);
+  let changes = [];
+
+  if (index > 0) {
+    const previousStep = state.trace[index - 1];
+    const previousDescription = module.describe(previousStep);
+    const previousMetrics = module.metrics(previousStep);
+    changes = deriveTraceChanges(
+      traceSnapshot(module, previousStep, previousDescription, previousMetrics),
+      snapshot
+    );
+  }
+
+  return { index, module, step, description, metrics, changes };
+}
+
+function syncDefinitionList(list, rows) {
+  const existing = new Map(
+    Array.from(list.children).map((row) => [row.dataset.traceRow, row])
+  );
+  const retained = new Set();
+
+  rows.forEach(({ label, value }, index) => {
+    const key = normalizedLabel(label);
+    let row = existing.get(key);
+    if (!row) {
+      row = document.createElement("div");
+      row.dataset.traceRow = key;
+      row.append(document.createElement("dt"), document.createElement("dd"));
+    }
+    row.querySelector("dt").textContent = label;
+    row.querySelector("dd").textContent = value;
+    retained.add(key);
+
+    const currentAtIndex = list.children[index];
+    if (currentAtIndex !== row) list.insertBefore(row, currentAtIndex ?? null);
+  });
+
+  for (const [key, row] of existing) {
+    if (!retained.has(key)) row.remove();
+  }
+}
+
+function syncTextList(list, items) {
+  items.forEach((item, index) => {
+    let row = list.children[index];
+    if (!row) {
+      row = document.createElement("li");
+      list.append(row);
+    }
+    row.textContent = item;
+  });
+  while (list.children.length > items.length) list.lastElementChild.remove();
+}
+
+function changeValue({ from, to }) {
+  if (from === null) return `Added: ${to}`;
+  if (to === null) return `Removed; previously ${from}`;
+  return `From ${from}; now ${to}`;
+}
+
+function renderTraceActiveCode(module, step) {
+  const activeCode = module.pseudocode.find((line) => line.line === step.activeLine);
+  if (!activeCode) {
+    dom.textTraceActiveCode.textContent = step.activeLabel ?? "No pseudocode line; the trace is complete.";
+    return;
+  }
+  if (!activeCode.latex) {
+    dom.textTraceActiveCode.textContent = `Line ${activeCode.line}: ${activeCode.text}`;
+    return;
+  }
+
+  dom.textTraceActiveCode.replaceChildren(document.createTextNode(`Line ${activeCode.line}: `));
+  const formula = document.createElement("span");
+  dom.textTraceActiveCode.append(formula);
+  if (!window.katex?.render) {
+    formula.textContent = activeCode.latex;
+    return;
+  }
+  window.katex.render(activeCode.latex, formula, {
+    displayMode: false,
+    output: "htmlAndMathml",
+    strict: "warn",
+    throwOnError: false,
+    trust: false
+  });
+}
+
+function meaningfulStateChanges(context) {
+  const omittedLabels = new Set([
+    normalizedLabel("Active pseudocode"),
+    ...context.metrics.map(({ label }) => normalizedLabel(label))
+  ]);
+
+  return context.changes.filter(({ label }) => (
+    !omittedLabels.has(normalizedLabel(label))
+    && !/^Relationship \d+$/i.test(label)
+  ));
+}
+
+function renderTextTrace(context) {
+  const { index, module, step, description, metrics } = context;
+  const changes = meaningfulStateChanges(context);
+  const keyChanges = changes.slice(0, TEXT_TRACE_CHANGE_LIMIT);
+  const remainingChanges = changes.slice(TEXT_TRACE_CHANGE_LIMIT);
+
+  if (index === 0) {
+    dom.textTraceChangeSummary.textContent = "Initial state. Nothing has changed yet.";
+  } else if (changes.length === 0) {
+    dom.textTraceChangeSummary.textContent = "No state values changed; the event or count advanced.";
+  } else if (remainingChanges.length === 0) {
+    dom.textTraceChangeSummary.textContent = `${changes.length} state ${changes.length === 1 ? "value changed" : "values changed"}.`;
+  } else {
+    dom.textTraceChangeSummary.textContent = `Showing ${keyChanges.length} of ${changes.length} changed state values.`;
+  }
+
+  syncDefinitionList(dom.textTraceKeyChanges, keyChanges.map((change) => ({
+    label: change.label,
+    value: changeValue(change)
+  })));
+  syncDefinitionList(dom.textTraceChanges, remainingChanges.map((change) => ({
+    label: change.label,
+    value: changeValue(change)
+  })));
+  dom.textTraceKeyChanges.hidden = keyChanges.length === 0;
+  dom.textTraceMoreChanges.hidden = remainingChanges.length === 0;
+  dom.textTraceMoreChangesSummary.textContent = `${remainingChanges.length} more ${remainingChanges.length === 1 ? "change" : "changes"}`;
+  dom.textTraceSummary.textContent = description.summary;
+  dom.textTracePosition.textContent = `Step ${index + 1} of ${state.trace.length}`;
+  renderTraceActiveCode(module, step);
+  syncDefinitionList(dom.textTraceStateRows, descriptionRows(description, metrics));
+  syncDefinitionList(dom.textTraceMetricRows, metricRows(metrics));
+
+  const details = description.details ?? [];
+  syncTextList(dom.textTraceDetailsList, details);
+  dom.textTraceDetails.hidden = details.length === 0;
+}
+
+function primaryCountText(metrics) {
+  const selected = metrics.filter(({ emphasis }) => emphasis);
+  const counts = selected.length ? selected : metrics.slice(0, 1);
+  return counts.map(({ label, value }) => `${label}: ${value}`).join(". ");
+}
+
+function stepSummaryAnnouncement(context, lead = "Step") {
+  const position = `${lead} ${context.index + 1} of ${state.trace.length}.`;
+  const count = primaryCountText(context.metrics);
+  return `${position} ${context.description.summary} ${activeCodeText(context.module, context.step)}.${count ? ` Current count. ${count}.` : ""}`;
+}
+
 function renderActiveLine(activeLine, activeLabel = null) {
   let activeElement = null;
   $$(".code-line", dom.pseudocode).forEach((line) => {
     const active = Number(line.dataset.codeLine) === activeLine;
     line.classList.toggle("is-active", active);
-    if (active) activeElement = line;
+    if (active) {
+      line.setAttribute("aria-current", "step");
+      activeElement = line;
+    } else {
+      line.removeAttribute("aria-current");
+    }
   });
 
   if (state.mode !== "trace") {
@@ -319,38 +566,57 @@ function revealActiveVisualization() {
   });
 }
 
-function renderCurrent({ shouldAnnounce = false } = {}) {
+function renderCurrent({ shouldAnnounce = false, announcementLead = "Step" } = {}) {
   const module = currentModule();
   const activityMode = state.mode !== "trace" && module.activity;
   const focusedActivityValue = document.activeElement?.closest?.("[data-activity-value]")?.dataset.activityValue;
+  const focusedControlAction = document.activeElement
+    ?.closest?.("#activityControls [data-activity-action]")
+    ?.dataset.activityAction;
 
   dom.traceControls.hidden = Boolean(activityMode);
   dom.activityControls.hidden = !activityMode;
 
   if (activityMode) {
     const activity = module.activity;
-    dom.visualization.innerHTML = activity.render(state.activityState);
-    renderMetrics(activity.metrics(state.activityState));
+    const metrics = activity.metrics(state.activityState);
+    const description = activity.describe(state.activityState);
+    dom.visualization.innerHTML = `${assistiveActivityStateHtml(description, metrics)}${activity.render(state.activityState)}`;
+    renderMetrics(metrics);
     renderFormula(module.model(state.activityState));
     renderActiveLine(null);
     renderActivityControls();
     dom.stepCounter.textContent = "Practice mode";
     dom.stepMessage.textContent = state.activityState.message;
+    renderTraceViewToggle(true);
     if (focusedActivityValue !== undefined) {
       window.requestAnimationFrame(() => {
-        $$('[data-activity-value]', dom.visualization)
-          .find((target) => target.dataset.activityValue === focusedActivityValue)
-          ?.focus();
+        const target = $$('[data-activity-value]', dom.visualization)
+          .find((candidate) => candidate.dataset.activityValue === focusedActivityValue);
+        if (target) target.focus();
+        else $("button:not([disabled])", dom.activityControls)?.focus();
+      });
+    } else if (focusedControlAction !== undefined) {
+      window.requestAnimationFrame(() => {
+        const matchingControl = $$('[data-activity-action]', dom.activityControls)
+          .find((control) => control.dataset.activityAction === focusedControlAction && !control.disabled);
+        (matchingControl ?? $("button:not([disabled])", dom.activityControls))?.focus();
       });
     }
-    if (shouldAnnounce) announce(state.activityState.message);
+    if (shouldAnnounce) {
+      const countSummary = metrics.map(({ label, value }) => `${label}: ${value}`).join(". ");
+      announce(`${description.summary} ${countSummary}.`);
+    }
     return;
   }
 
-  const step = currentStep();
+  const context = traceContextAt();
+  const { step, metrics, description } = context;
   dom.visualization.innerHTML = module.render(step);
-  renderMetrics(module.metrics(step));
+  renderMetrics(metrics);
   renderFormula(module.model(step));
+  renderTextTrace(context);
+  renderTraceViewToggle(false);
   renderActiveLine(step.activeLine, step.activeLabel);
   dom.stepCounter.textContent = `Step ${state.stepIndex + 1} / ${state.trace.length}`;
   dom.stepMessage.textContent = step.message;
@@ -359,8 +625,8 @@ function renderCurrent({ shouldAnnounce = false } = {}) {
   dom.stepRange.setAttribute("aria-valuetext", `Step ${state.stepIndex + 1} of ${state.trace.length}`);
   dom.previousButton.disabled = state.stepIndex === 0;
   dom.nextButton.disabled = state.stepIndex >= state.trace.length - 1;
-  revealActiveVisualization();
-  if (shouldAnnounce) announce(step.message);
+  if (!state.textTraceVisible) revealActiveVisualization();
+  if (shouldAnnounce) announce(stepSummaryAnnouncement(context, announcementLead));
 }
 
 function clearInputError() {
@@ -375,18 +641,19 @@ function showInputError(message) {
   dom.input.setAttribute("aria-invalid", "true");
 }
 
-function applyInput(raw = dom.input.value) {
+function applyInput(raw = dom.input.value, { announcementLead = "Loaded step" } = {}) {
   stopPlayback();
   const module = currentModule();
 
   try {
     const parsed = module.input.parse(raw);
+    const trace = module.buildTrace(parsed);
     state.parsedInput = parsed;
-    state.trace = module.buildTrace(parsed);
+    state.trace = trace;
     state.stepIndex = 0;
     state.activityState = module.activity ? module.activity.create(parsed) : null;
     clearInputError();
-    renderCurrent({ shouldAnnounce: true });
+    renderCurrent({ shouldAnnounce: true, announcementLead });
   } catch (error) {
     showInputError(error instanceof Error ? error.message : "The input could not be read.");
   }
@@ -412,9 +679,9 @@ function renderInputModeButtons() {
   });
 }
 
-function goToStep(index, { shouldAnnounce = true } = {}) {
+function goToStep(index, { shouldAnnounce = true, announcementLead = "Step" } = {}) {
   state.stepIndex = bounded(index, 0, state.trace.length - 1);
-  renderCurrent({ shouldAnnounce });
+  renderCurrent({ shouldAnnounce, announcementLead });
 }
 
 function stopPlayback() {
@@ -428,15 +695,25 @@ function stopPlayback() {
   dom.playButton.setAttribute("aria-label", "Play trace");
 }
 
+function finishPlayback() {
+  stopPlayback();
+  const context = traceContextAt();
+  announce(`Autoplay complete at step ${context.index + 1} of ${state.trace.length}. ${context.description.summary} Use Previous and Next to review exact changes.`);
+}
+
 function scheduleNextStep() {
   if (!state.playing) return;
   state.timer = window.setTimeout(() => {
     if (state.stepIndex >= state.trace.length - 1) {
-      stopPlayback();
+      finishPlayback();
       return;
     }
     goToStep(state.stepIndex + 1, { shouldAnnounce: false });
-    scheduleNextStep();
+    if (state.stepIndex >= state.trace.length - 1) {
+      finishPlayback();
+    } else {
+      scheduleNextStep();
+    }
   }, TRACE_DELAY);
 }
 
@@ -444,6 +721,8 @@ function togglePlayback() {
   if (state.mode !== "trace") return;
   if (state.playing) {
     stopPlayback();
+    const context = traceContextAt();
+    announce(`Autoplay paused at step ${context.index + 1} of ${state.trace.length}. ${context.description.summary}`);
     return;
   }
 
@@ -452,6 +731,7 @@ function togglePlayback() {
   dom.playIcon.textContent = "❚❚";
   dom.playLabel.textContent = "Pause";
   dom.playButton.setAttribute("aria-label", "Pause trace");
+  announce(`Autoplay started at step ${state.stepIndex + 1} of ${state.trace.length}. Intermediate steps are silent. Press Pause, then use Previous and Next for exact changes.`);
   scheduleNextStep();
 }
 
@@ -475,7 +755,7 @@ function setRoute(route, { updateUrl = true } = {}) {
   renderPseudocode();
   renderAnalysisChecklist();
   clearInputError();
-  applyInput(route.module.input.default);
+  applyInput(route.module.input.default, { announcementLead: `Loaded ${route.module.title}, step` });
 
   if (updateUrl) {
     const hash = routeHash(route);
@@ -491,11 +771,14 @@ function openRouteKey(key) {
 }
 
 function setNavigationOpen(open, { restoreFocus = false } = {}) {
+  if (open) stopPlayback();
   if (open) {
     state.expandedLectureId = null;
     renderCourseNavigation();
   }
   dom.body.classList.toggle("nav-open", open);
+  dom.topbar.inert = open;
+  dom.lessonMain.inert = open;
   dom.navToggle.setAttribute("aria-expanded", String(open));
   dom.navToggle.setAttribute("aria-label", open ? "Close lecture navigation" : "Open lecture navigation");
   dom.courseNav.setAttribute("aria-hidden", String(!open));
@@ -550,9 +833,27 @@ function bindEvents() {
     if (button) setMode(button.dataset.mode);
   });
 
+  dom.textTraceToggle.addEventListener("click", () => {
+    stopPlayback();
+    state.textTraceVisible = !state.textTraceVisible;
+    const url = new URL(window.location.href);
+    if (state.textTraceVisible) url.searchParams.set("view", "text");
+    else url.searchParams.delete("view");
+    window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+    renderCurrent();
+    if (state.textTraceVisible) {
+      window.requestAnimationFrame(() => dom.textTrace.focus());
+    }
+  });
+
+  dom.repeatStepButton.addEventListener("click", () => {
+    stopPlayback();
+    announce(stepSummaryAnnouncement(traceContextAt(), "Current step"));
+  });
+
   dom.previousButton.addEventListener("click", () => {
     stopPlayback();
-    goToStep(state.stepIndex - 1);
+    goToStep(state.stepIndex - 1, { announcementLead: "Back to step" });
   });
   dom.nextButton.addEventListener("click", () => {
     stopPlayback();
@@ -560,12 +861,15 @@ function bindEvents() {
   });
   dom.resetButton.addEventListener("click", () => {
     stopPlayback();
-    goToStep(0);
+    goToStep(0, { announcementLead: "Restarted at step" });
   });
   dom.playButton.addEventListener("click", togglePlayback);
   dom.stepRange.addEventListener("input", () => {
     stopPlayback();
     goToStep(Number(dom.stepRange.value), { shouldAnnounce: false });
+  });
+  dom.stepRange.addEventListener("change", () => {
+    renderCurrent({ shouldAnnounce: true, announcementLead: "Moved to step" });
   });
   [dom.visualization, dom.activityControls].forEach((container) => {
     container.addEventListener("click", (event) => {
@@ -596,13 +900,14 @@ function bindEvents() {
   });
 
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && dom.body.classList.contains("nav-open")) {
+    if (event.key === "Escape" && !event.altKey && !event.ctrlKey && !event.metaKey && dom.body.classList.contains("nav-open")) {
       setNavigationOpen(false, { restoreFocus: true });
       return;
     }
 
-    if (event.key === "Tab" && dom.body.classList.contains("nav-open")) {
-      const focusable = $$('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])', dom.courseNav);
+    if (event.key === "Tab" && !event.altKey && !event.ctrlKey && !event.metaKey && dom.body.classList.contains("nav-open")) {
+      const focusable = $$('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])', dom.courseNav)
+        .filter((element) => !element.closest("[hidden]") && element.getAttribute("aria-hidden") !== "true");
       const first = focusable[0];
       const last = focusable.at(-1);
       if (!first || !last) return;
@@ -616,7 +921,9 @@ function bindEvents() {
       return;
     }
 
-    if (event.target.closest("input, button, textarea, select, summary, a, [role='button']")) return;
+    if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+
+    if (event.target.closest("#textTrace, input, button, textarea, select, summary, a, [role='button']")) return;
 
     if (state.mode !== "trace") return;
 
@@ -627,10 +934,7 @@ function bindEvents() {
     } else if (event.key === "ArrowLeft") {
       event.preventDefault();
       stopPlayback();
-      goToStep(state.stepIndex - 1);
-    } else if (event.key === " ") {
-      event.preventDefault();
-      togglePlayback();
+      goToStep(state.stepIndex - 1, { announcementLead: "Back to step" });
     }
   });
 }
@@ -639,6 +943,7 @@ export function startApp() {
   bindEvents();
   const params = new URLSearchParams(window.location.search);
   if (params.get("embed") === "1") dom.body.classList.add("embed-mode");
+  state.textTraceVisible = params.get("view") === "text";
 
   const initialRoute = resolveRoute({ hash: window.location.hash, search: window.location.search });
   setRoute(initialRoute, { updateUrl: false });
@@ -650,6 +955,7 @@ export function startApp() {
     getState: () => ({
       route: state.route.key,
       mode: state.mode,
+      view: state.textTraceVisible ? "text" : "visual",
       stepIndex: state.stepIndex,
       traceLength: state.trace.length
     })

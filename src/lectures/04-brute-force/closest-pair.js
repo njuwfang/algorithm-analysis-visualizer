@@ -157,6 +157,52 @@ function renderClosestPair(step) {
     </div>`;
 }
 
+function describePair(step, pair, squared) {
+  if (!pair) return "None";
+  const [leftIndex, rightIndex] = pair;
+  const left = step.points[leftIndex];
+  const right = step.points[rightIndex];
+  return `${left.label} (${formatNumber(left.x)}, ${formatNumber(left.y)}) and `
+    + `${right.label} (${formatNumber(right.x)}, ${formatNumber(right.y)}); squared distance ${formatNumber(squared)}`;
+}
+
+function describeClosestPair(step) {
+  let currentCalculation = "none";
+  let decision = "No pair has been evaluated";
+  if (step.currentPair) {
+    const [leftIndex, rightIndex] = step.currentPair;
+    const left = step.points[leftIndex];
+    const right = step.points[rightIndex];
+    const pairLabel = `${left.label}–${right.label}`;
+    currentCalculation = `(${formatNumber(left.x)} - ${formatNumber(right.x)})² + `
+      + `(${formatNumber(left.y)} - ${formatNumber(right.y)})² = ${formatNumber(step.currentSquared)}`;
+    decision = step.improves
+      ? `${pairLabel} becomes the closest pair found so far`
+      : `${pairLabel} does not replace the closest pair found so far`;
+  } else if (step.phase === "complete") {
+    decision = `All ${step.pairsChecked} unordered pairs evaluated; return the closest pair`;
+  }
+
+  return {
+    summary: step.message,
+    state: [
+      {
+        label: "Points",
+        value: step.points.map((point) => `${point.label} = (${formatNumber(point.x)}, ${formatNumber(point.y)})`).join("; ")
+      },
+      { label: "Current pair", value: describePair(step, step.currentPair, step.currentSquared) },
+      { label: "Current distance calculation", value: currentCalculation },
+      { label: "Decision", value: decision },
+      {
+        label: "Closest pair so far",
+        value: describePair(step, step.bestPair, step.bestSquared)
+      },
+      { label: "Pairs evaluated", value: String(step.pairsChecked) },
+      { label: "Coordinate terms", value: String(step.coordinateTerms) }
+    ]
+  };
+}
+
 export const closestPairModule = {
   id: "closest-pair",
   shortTitle: "Closest pair",
@@ -178,11 +224,19 @@ export const closestPairModule = {
     { line: 1, text: "d ← ∞" },
     { line: 2, text: "for i ← 1 to n − 1 do" },
     { line: 3, text: "for j ← i + 1 to n do", indent: 1 },
-    { line: 4, latex: "d \\gets \\min\\!\\left(d,(x_i-x_j)^2+(y_i-y_j)^2\\right)", indent: 2, basic: true, basicLabel: "coordinate terms" },
+    {
+      line: 4,
+      latex: "d \\gets \\min\\!\\left(d,(x_i-x_j)^2+(y_i-y_j)^2\\right)",
+      spoken: "d gets the minimum of d and the squared x-coordinate difference plus the squared y-coordinate difference for points i and j",
+      indent: 2,
+      basic: true,
+      basicLabel: "coordinate terms"
+    },
     { line: 5, text: "return d" }
   ],
   buildTrace: buildClosestPairTrace,
   render: renderClosestPair,
+  describe: describeClosestPair,
   metrics(step) {
     return [{ label: "Coordinate terms", value: step.coordinateTerms, emphasis: true }];
   },

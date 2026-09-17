@@ -50,6 +50,23 @@ The default screen is for students, not site authors. Do not surface architectur
 - Avoid random inputs in prepared scenarios. Teaching examples should be reproducible.
 - Keep a stable visualization height and reveal scrollbars only when the drawing cannot fit.
 
+## Nonvisual access
+
+Every published module must provide a structured text description of each trace state. The text trace must identify the active pseudocode line, concrete state, current or retained candidate, named-operation counts, and relationships otherwise conveyed by position or color.
+
+- Use indexed sequences, ordered peg contents, edge lists, call stacks, and row/column labels instead of spatial phrases.
+- Keep all trace controls keyboard operable.
+- Do not bind trace shortcuts while focus is inside a scrollable text region or an interactive control.
+- Keep the ordered state and metric labels stable, using an explicit inactive value instead of renaming or removing a concept. This exposes tracked before-and-after changes separately from the complete current snapshot.
+- Keep each optional detail position semantically stable; give an important changing relationship a named state row rather than relying on `Relationship 1`.
+- Keep the current event and at most four meaningful changed state values visible. Place excess changes under **More changes**, and place the exact state, metrics, and relationships under one collapsed **Full state and relationships** disclosure.
+- Announce manual steps with only the position and event, active pseudocode, and primary count. **Repeat step** repeats this concise announcement; students browse the text view for exact changes. Do not announce every autoplay frame; announce its start, pause, and completion instead.
+- Do not add visited-step history or separate controls for reading changes and full state.
+- Keep the Text trace container and its labeled regions mounted while values update so assistive-technology reading positions are less likely to be lost.
+- Render mathematics with the repository-local KaTeX HTML and MathML output.
+- Treat the text trace as an equivalent representation, not a shorter summary of the picture.
+- Treat automated checks as structural safeguards, not screen-reader testing or a WCAG-conformance claim.
+
 ## Content writing
 
 Use the lecture's notation and vocabulary. Each module should answer:

@@ -222,6 +222,54 @@ function renderTravelingSalesman(step) {
     </div>`;
 }
 
+function describeTravelingSalesman(step) {
+  const progress = `${step.evaluatedCount} of ${step.candidateTotal} candidate tours evaluated`;
+  const edgeWeights = EDGE_KEYS
+    .map((key) => `${key[0]} to ${key[1]}: ${formatNumber(step.weights[key])}`)
+    .join("; ");
+  const candidateLedger = step.candidates.map((entry, index) => (
+    `${tourLabel(entry.tour)}: ${index < step.evaluatedCount ? `cost ${formatNumber(entry.cost)}` : "not evaluated"}`
+  )).join("; ");
+  const candidate = step.currentCandidate;
+  const currentTour = candidate ? tourLabel(candidate.tour) : "None";
+  const currentEdges = candidate
+    ? candidate.tour.slice(0, -1).map((city, index) => (
+        `${city} to ${candidate.tour[index + 1]} costs ${formatNumber(candidate.edgeWeights[index])}`
+      )).join("; ")
+    : "None";
+  const currentCalculation = candidate
+    ? `${candidate.edgeWeights.map(formatNumber).join(" + ")} = ${formatNumber(candidate.cost)}`
+    : "Not evaluated";
+  const bestTour = step.best ? tourLabel(step.best.tour) : "None";
+  const bestCost = step.best ? formatNumber(step.best.cost) : "Not evaluated";
+  const decision = step.phase === "initial"
+    ? "Search not started"
+    : step.phase === "complete"
+      ? "Search complete; return the best tour"
+      : step.improved
+        ? "Retain as the new best tour"
+        : "Keep the previous best tour";
+
+  return {
+    summary: step.message,
+    state: [
+      { label: "Progress", value: progress },
+      { label: "Fixed start", value: "City a" },
+      { label: "Total candidate tours", value: String(step.candidateTotal) },
+      { label: "Undirected edge weights", value: edgeWeights },
+      { label: "Tour rule", value: "Visit b, c, and d exactly once, return to a, and count a tour and its reverse once" },
+      { label: "Candidate ledger", value: candidateLedger },
+      { label: "Current tour", value: currentTour },
+      { label: "Current edge costs", value: currentEdges },
+      { label: "Current calculation", value: currentCalculation },
+      { label: "Current cost", value: candidate ? formatNumber(candidate.cost) : "Not evaluated" },
+      { label: "Best tour so far", value: bestTour },
+      { label: "Best cost so far", value: bestCost },
+      { label: "Decision", value: decision }
+    ]
+  };
+}
+
 export const travelingSalesmanModule = {
   id: "traveling-salesman",
   shortTitle: "Traveling salesman",
@@ -249,6 +297,7 @@ export const travelingSalesmanModule = {
   ],
   buildTrace: buildTravelingSalesmanTrace,
   render: renderTravelingSalesman,
+  describe: describeTravelingSalesman,
   metrics(step) {
     return [
       { label: "Candidate tours", value: step.evaluatedCount, emphasis: true }

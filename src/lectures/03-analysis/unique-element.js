@@ -101,7 +101,7 @@ function renderUnique(step) {
         if (currentPair[0] === row && currentPair[1] === column) classes.push("is-current");
         if (pair?.equal) classes.push("is-duplicate");
       }
-      matrixHtml += `<div class="${classes.join(" ")}" aria-label="pair ${row}, ${column}">${label}</div>`;
+      matrixHtml += `<div class="${classes.join(" ")}" role="img" aria-label="pair ${row}, ${column}">${label}</div>`;
     }
   }
 
@@ -158,6 +158,31 @@ export const uniqueElementModule = {
   ],
   buildTrace: buildUniqueElementTrace,
   render: renderUnique,
+  describe(step) {
+    const pair = step.currentPair
+      ? `A[${step.currentPair[0]}] = ${formatNumber(step.values[step.currentPair[0]])} and A[${step.currentPair[1]}] = ${formatNumber(step.values[step.currentPair[1]])}`
+      : "none";
+    const result = step.result === null
+      ? "not yet determined"
+      : step.result
+        ? "True; every element is distinct"
+        : "False; equal elements were found";
+    return {
+      summary: step.message,
+      state: [
+        {
+          label: "Array A",
+          value: step.values.map((value, index) => `A[${index}] = ${formatNumber(value)}`).join("; ")
+        },
+        { label: "Current pair", value: pair },
+        { label: "Pairs compared", value: String(step.comparisons) },
+        { label: "Result", value: result }
+      ],
+      details: step.visitedPairs.map(({ i, j, equal }) => (
+        `A[${i}] and A[${j}] were ${equal ? "equal" : "different"}.`
+      ))
+    };
+  },
   metrics(step) {
     return [
       { label: "Comparisons", value: step.comparisons, emphasis: true }

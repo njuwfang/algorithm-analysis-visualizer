@@ -17,6 +17,10 @@ import {
   parseAssignmentMatrix
 } from "../src/lectures/05-exhaustive-search/assignment.js";
 
+function describedValue(description, label) {
+  return description.state.find((item) => item.label === label)?.value;
+}
+
 test("exhaustive-search helpers are deterministic and do not mutate input", () => {
   const values = [1, 2, 3];
   assert.deepEqual(permutations(values), [
@@ -49,6 +53,20 @@ test("Traveling Salesman rejects missing or invalid edge weights", () => {
   assert.throws(() => parseTravelingSalesmanInput("1, 2, 3, 4, 5, 0"), /positive finite/);
 });
 
+test("Traveling Salesman describes routes and costs without the graph", () => {
+  const trace = buildTravelingSalesmanTrace(parseTravelingSalesmanInput("2, 5, 7, 8, 3, 1"));
+  const candidate = travelingSalesmanModule.describe(trace[2]);
+  const complete = travelingSalesmanModule.describe(trace.at(-1));
+
+  assert.equal(describedValue(candidate, "Progress"), "2 of 3 candidate tours evaluated");
+  assert.equal(describedValue(candidate, "Current tour"), "a → b → d → c → a");
+  assert.equal(describedValue(candidate, "Current cost"), "11");
+  assert.equal(describedValue(candidate, "Best cost so far"), "11");
+  assert.match(describedValue(candidate, "Current edge costs"), /a to b costs 2/);
+  assert.equal(describedValue(complete, "Best tour so far"), "a → b → d → c → a");
+  assert.match(describedValue(complete, "Decision"), /Search complete/);
+});
+
 test("Knapsack includes the empty subset and follows the lecture table grouping", () => {
   const input = parseKnapsackInput("16 | 2:20, 5:30, 10:50, 5:10");
   const trace = buildKnapsackTrace(input);
@@ -70,6 +88,21 @@ test("Knapsack gives explicit format and capacity errors", () => {
   assert.throws(() => parseKnapsackInput("16 2:20"), /separated by \|/);
   assert.throws(() => parseKnapsackInput("0 | 2:20"), /Capacity/);
   assert.throws(() => parseKnapsackInput("16 | 2-20"), /weight:value/);
+});
+
+test("Knapsack describes feasibility, totals, and the retained subset", () => {
+  const trace = buildKnapsackTrace(parseKnapsackInput("16 | 2:20, 5:30, 10:50, 5:10"));
+  const overweightStep = trace.find((step) => step.phase === "candidate" && !step.feasible);
+  const candidate = knapsackModule.describe(overweightStep);
+  const complete = knapsackModule.describe(trace.at(-1));
+
+  assert.equal(describedValue(candidate, "Feasibility"), "Over capacity");
+  assert.match(describedValue(candidate, "Current weight"), /of capacity 16$/);
+  assert.match(describedValue(candidate, "Decision"), /Disqualify/);
+  assert.match(describedValue(candidate, "Available items"), /Item 1: weight 2, value 20/);
+  assert.equal(describedValue(complete, "Best subset so far"), "{2, 3}");
+  assert.equal(describedValue(complete, "Current value"), "80");
+  assert.equal(describedValue(complete, "Progress"), "16 of 16 candidate subsets evaluated");
 });
 
 test("Assignment exhausts all 24 permutations and finds the true lecture-matrix optimum", () => {
@@ -94,4 +127,18 @@ test("Assignment validates square matrices", () => {
   assert.throws(() => parseAssignmentMatrix("1,2,3"), /2–4 rows/);
   assert.throws(() => parseAssignmentMatrix("1,2; 3,4,5"), /exactly 2 costs/);
   assert.throws(() => parseAssignmentMatrix("1,x; 3,4"), /whole numbers/);
+});
+
+test("Assignment describes each mapping, matrix cost, and search progress", () => {
+  const trace = buildAssignmentTrace(parseAssignmentMatrix("9,7,2,8; 6,4,3,7; 5,8,1,8; 7,6,9,4"));
+  const candidate = assignmentModule.describe(trace[1]);
+  const complete = assignmentModule.describe(trace.at(-1));
+
+  assert.equal(describedValue(candidate, "Progress"), "1 of 24 candidate assignments evaluated");
+  assert.match(describedValue(candidate, "Current mapping"), /Person 1 to job 1, cost 9/);
+  assert.equal(describedValue(candidate, "Assignment rule"), "Each candidate gives every person one distinct job");
+  assert.match(describedValue(candidate, "Current cost calculation"), /9 \+ 4 \+ 1 \+ 4 = 18/);
+  assert.equal(describedValue(complete, "Best assignment so far"), "⟨3, 2, 1, 4⟩");
+  assert.equal(describedValue(complete, "Best cost so far"), "15");
+  assert.match(describedValue(complete, "Cost matrix"), /Person 4:/);
 });

@@ -139,6 +139,46 @@ function renderAssignment(step) {
     </div>`;
 }
 
+function describeAssignment(step) {
+  const progress = `${step.candidatesEvaluated} of ${step.totalCandidates} candidate assignments evaluated`;
+  const matrix = step.matrix.map((row, person) => (
+    `Person ${person + 1}: ${row.map((cost, job) => `job ${job + 1} costs ${formatNumber(cost)}`).join(", ")}`
+  )).join("; ");
+  const describeMapping = (assignment) => assignment.map((job, person) => (
+    `Person ${person + 1} to job ${job + 1}, cost ${formatNumber(step.matrix[person][job])}`
+  )).join("; ");
+  const currentAssignment = step.currentAssignment;
+  const bestAssignment = step.bestAssignment;
+  const currentCosts = currentAssignment
+    ? currentAssignment.map((job, person) => step.matrix[person][job])
+    : [];
+  const decision = step.phase === "initial"
+    ? "Search not started"
+    : step.phase === "complete"
+      ? "Search complete; return the least-cost assignment"
+      : step.improves
+        ? "Retain as the new least-cost assignment"
+        : "Keep the previous best assignment";
+
+  return {
+    summary: step.message,
+    state: [
+      { label: "Progress", value: progress },
+      { label: "People and jobs", value: String(step.matrix.length) },
+      { label: "Cost matrix", value: matrix },
+      { label: "Assignment rule", value: "Each candidate gives every person one distinct job" },
+      { label: "Current assignment", value: currentAssignment ? assignmentLabel(currentAssignment) : "None" },
+      { label: "Current mapping", value: currentAssignment ? describeMapping(currentAssignment) : "None" },
+      { label: "Current cost calculation", value: currentAssignment ? `${currentCosts.map(formatNumber).join(" + ")} = ${formatNumber(step.currentCost)}` : "Not evaluated" },
+      { label: "Current cost", value: currentAssignment ? formatNumber(step.currentCost) : "Not evaluated" },
+      { label: "Best assignment so far", value: bestAssignment ? assignmentLabel(bestAssignment) : "None" },
+      { label: "Best mapping so far", value: bestAssignment ? describeMapping(bestAssignment) : "None" },
+      { label: "Best cost so far", value: bestAssignment ? formatNumber(step.bestCost) : "Not evaluated" },
+      { label: "Decision", value: decision }
+    ]
+  };
+}
+
 export const assignmentModule = {
   id: "assignment",
   shortTitle: "Assignment",
@@ -160,11 +200,19 @@ export const assignmentModule = {
   pseudocode: [
     { line: 1, text: "bestCost ← ∞" },
     { line: 2, text: "for each permutation p of the n jobs do" },
-    { line: 3, latex: "\\mathit{cost} \\gets \\sum_{i=1}^{n} C[i,p[i]];\\; \\text{retain }p\\text{ if smaller}", indent: 1, basic: true, basicLabel: "candidate assignment" },
+    {
+      line: 3,
+      latex: "\\mathit{cost} \\gets \\sum_{i=1}^{n} C[i,p[i]];\\; \\text{retain }p\\text{ if smaller}",
+      spoken: "cost gets the sum from i equals 1 through n of C at row i and column p of i; retain p if the cost is smaller",
+      indent: 1,
+      basic: true,
+      basicLabel: "candidate assignment"
+    },
     { line: 4, text: "return the retained assignment" }
   ],
   buildTrace: buildAssignmentTrace,
   render: renderAssignment,
+  describe: describeAssignment,
   metrics(step) {
     return [{ label: "Candidate assignments", value: step.candidatesEvaluated, emphasis: true }];
   },

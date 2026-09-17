@@ -9,9 +9,9 @@
   <title>Analysis of Algorithms</title>
   <link rel="stylesheet" href="./assets/vendor/katex/katex.min.css?v=0.18.7">
   <link rel="stylesheet" href="./assets/styles/tokens.css?v=20260916-1">
-  <link rel="stylesheet" href="./assets/styles/base.css?v=20260916-1">
-  <link rel="stylesheet" href="./assets/styles/layout.css?v=20260916-1">
-  <link rel="stylesheet" href="./assets/styles/components.css?v=20260916-5">
+  <link rel="stylesheet" href="./assets/styles/base.css?v=20260916-8">
+  <link rel="stylesheet" href="./assets/styles/layout.css?v=20260916-8">
+  <link rel="stylesheet" href="./assets/styles/components.css?v=20260917-2">
   <link rel="stylesheet" href="./assets/styles/visualizations.css?v=20260916-2">
   <link rel="stylesheet" href="./src/lectures/03-analysis/styles.css?v=20260916-2">
   <link rel="stylesheet" href="./src/lectures/04-brute-force/styles.css?v=20260916-6">
@@ -26,7 +26,7 @@
       <span>Lectures</span>
     </button>
 
-    <div class="route-summary" aria-live="polite">
+    <div class="route-summary">
       <div class="route-context">
         <span id="topLectureLabel">Lecture 03</span>
         <span class="route-context-separator" aria-hidden="true">·</span>
@@ -41,12 +41,12 @@
     </nav>
   </header>
 
-  <button id="navBackdrop" class="nav-backdrop" type="button" aria-label="Close lecture navigation" tabindex="-1"></button>
-  <aside id="courseNav" class="course-nav" aria-label="Lecture navigation" aria-hidden="true" inert>
+  <button id="navBackdrop" class="nav-backdrop" type="button" aria-label="Close lecture navigation" aria-hidden="true" tabindex="-1"></button>
+  <aside id="courseNav" class="course-nav" role="dialog" aria-modal="true" aria-labelledby="courseNavTitle" aria-hidden="true" inert>
     <div class="course-nav-heading">
       <div>
         <p class="eyebrow">Course</p>
-        <h2>Lectures</h2>
+        <h2 id="courseNavTitle">Lectures</h2>
       </div>
       <button id="navClose" class="icon-button" type="button" aria-label="Close lecture navigation">×</button>
     </div>
@@ -83,9 +83,57 @@
         <article class="stage-panel visualization-panel" aria-labelledby="visualizationTitle">
           <header class="panel-heading">
             <h2 id="visualizationTitle">Visualization</h2>
-            <span id="stepCounter" class="step-counter">Step 0 / 0</span>
+            <div class="panel-heading-actions">
+              <button id="textTraceToggle" class="trace-view-toggle" type="button" aria-controls="visualization textTrace">Show text</button>
+              <span id="stepCounter" class="step-counter">Step 0 / 0</span>
+            </div>
           </header>
           <div id="visualization" class="visualization"></div>
+          <section id="textTrace" class="text-trace" aria-label="Text description of the current trace step" tabindex="-1" hidden>
+            <section class="text-trace-current" aria-labelledby="textTraceCurrentTitle">
+              <div class="text-trace-section-heading">
+                <h3 id="textTraceCurrentTitle">Current step</h3>
+                <button id="repeatStepButton" class="trace-read-button" type="button">Repeat step</button>
+              </div>
+              <p id="textTraceSummary" class="text-trace-summary"></p>
+              <p class="text-trace-meta">
+                <span id="textTracePosition"></span>
+                <span aria-hidden="true">·</span>
+                <span id="textTraceActiveCode"></span>
+              </p>
+            </section>
+
+            <section id="textTraceKeyChangesSection" class="text-trace-key-changes" aria-labelledby="textTraceChangesTitle">
+              <h3 id="textTraceChangesTitle">Changes this step</h3>
+              <p id="textTraceChangeSummary" class="text-trace-change-summary"></p>
+              <dl id="textTraceKeyChanges" class="text-trace-state text-trace-key-list"></dl>
+              <details id="textTraceMoreChanges" class="text-trace-more-changes" hidden>
+                <summary id="textTraceMoreChangesSummary">More changes</summary>
+                <dl id="textTraceChanges" class="text-trace-state text-trace-changes"></dl>
+              </details>
+            </section>
+
+            <details class="text-trace-disclosure">
+              <summary>
+                <span>Full state and relationships</span>
+                <small>All values and operation counts</small>
+              </summary>
+              <div class="text-trace-disclosure-body">
+                <section class="text-trace-detail-section" aria-labelledby="textTraceStateTitle">
+                  <h4 id="textTraceStateTitle">State values</h4>
+                  <dl id="textTraceStateRows" class="text-trace-state"></dl>
+
+                  <h4>Operation counts</h4>
+                  <dl id="textTraceMetricRows" class="text-trace-state"></dl>
+
+                  <section id="textTraceDetails" aria-labelledby="textTraceDetailsTitle" hidden>
+                    <h4 id="textTraceDetailsTitle">Additional relationships</h4>
+                    <ul id="textTraceDetailsList"></ul>
+                  </section>
+                </section>
+              </div>
+            </details>
+          </section>
         </article>
 
         <article class="stage-panel code-panel" aria-labelledby="pseudocodeTitle">
@@ -97,12 +145,13 @@
         </article>
       </div>
 
-      <div id="traceControls" class="transport-bar" aria-label="Trace controls">
+      <div id="traceControls" class="transport-bar" role="group" aria-label="Trace controls">
         <button id="previousButton" class="icon-button" type="button" aria-label="Previous step">←</button>
-        <button id="playButton" class="button button-primary play-button" type="button" aria-label="Play trace">
+        <button id="playButton" class="button button-primary play-button" type="button" aria-label="Play trace" aria-describedby="playbackHint">
           <span id="playIcon" aria-hidden="true">▶</span>
           <span id="playLabel">Play</span>
         </button>
+        <span id="playbackHint" class="sr-only">Autoplay is silent. Use the previous and next step buttons for narrated updates.</span>
         <button id="nextButton" class="icon-button" type="button" aria-label="Next step">→</button>
         <label class="timeline-control" for="stepRange">
           <span class="sr-only">Trace position</span>
@@ -142,10 +191,10 @@
 
   </main>
 
-  <p id="liveStatus" class="sr-only" aria-live="polite"></p>
+  <p id="liveStatus" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
   <noscript><div class="noscript-message">This site requires JavaScript.</div></noscript>
 
   <script src="./assets/vendor/katex/katex.min.js?v=0.18.7"></script>
-  <script type="module" src="./src/main.js?v=20260916-7"></script>
+  <script type="module" src="./src/main.js?v=20260917-2"></script>
 </body>
 </html>

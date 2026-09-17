@@ -146,21 +146,29 @@ function renderKnapsack(step) {
     : step.feasible
       ? "Feasible"
       : "Over capacity";
+  const currentLabel = step.phase === "initial"
+    ? "No candidate yet"
+    : `Current ${setLabel(step.currentSubset)}`;
+  const capacityLabel = step.phase === "initial"
+    ? `No candidate evaluated; capacity ${step.capacity}`
+    : `Current weight ${step.currentWeight} of capacity ${step.capacity}`;
+  const weightValue = step.phase === "initial" ? "—" : formatNumber(step.currentWeight);
+  const itemValue = step.phase === "initial" ? "—" : formatNumber(step.currentValue);
 
   return `
     <div class="knapsack-visual">
       <div class="knapsack-items">${itemCards}</div>
       <div class="knapsack-evaluation ${step.feasible ? "is-feasible" : "is-infeasible"}" data-active-visual="true">
         <div class="knapsack-evaluation-heading">
-          <span>Current ${setLabel(step.currentSubset)}</span>
+          <span>${currentLabel}</span>
           <strong>${status}</strong>
         </div>
-        <div class="knapsack-capacity" aria-label="Current weight ${step.currentWeight} of capacity ${step.capacity}">
+        <div class="knapsack-capacity" role="img" aria-label="${capacityLabel}">
           <span style="--capacity-fill:${fill}%"></span>
         </div>
         <div class="knapsack-totals">
-          <span>weight <strong>${formatNumber(step.currentWeight)} / ${formatNumber(step.capacity)}</strong></span>
-          <span>value <strong>${formatNumber(step.currentValue)}</strong></span>
+          <span>weight <strong>${weightValue} / ${formatNumber(step.capacity)}</strong></span>
+          <span>value <strong>${itemValue}</strong></span>
         </div>
       </div>
       <div class="knapsack-best">
@@ -169,6 +177,42 @@ function renderKnapsack(step) {
         <small>weight ${formatNumber(step.bestWeight)} · value ${formatNumber(step.bestValue)}</small>
       </div>
     </div>`;
+}
+
+function describeKnapsack(step) {
+  const progress = `${step.candidatesEvaluated} of ${step.totalCandidates} candidate subsets evaluated`;
+  const availableItems = step.items
+    .map((item) => `Item ${item.label}: weight ${formatNumber(item.weight)}, value ${formatNumber(item.value)}`)
+    .join("; ");
+  const selectedItems = step.currentSubset.length
+    ? step.currentSubset.map((index) => {
+      const item = step.items[index];
+      return `Item ${item.label}: weight ${formatNumber(item.weight)}, value ${formatNumber(item.value)}`;
+    }).join("; ")
+    : "No items";
+
+  let decision = "Search not started";
+  if (step.phase === "complete") decision = "Search complete; return the best feasible subset";
+  else if (!step.feasible) decision = "Disqualify because it exceeds capacity";
+  else if (step.phase === "candidate" && step.improves) decision = "Retain as the new best subset";
+  else if (step.phase === "candidate") decision = "Feasible, but keep the previous best subset";
+
+  return {
+    summary: step.message,
+    state: [
+      { label: "Progress", value: progress },
+      { label: "Capacity", value: formatNumber(step.capacity) },
+      { label: "Available items", value: availableItems },
+      { label: "Current subset", value: step.phase === "initial" ? "None" : setLabel(step.currentSubset) },
+      { label: "Selected items", value: step.phase === "initial" ? "None" : selectedItems },
+      { label: "Current weight", value: step.phase === "initial" ? "Not evaluated" : `${formatNumber(step.currentWeight)} of capacity ${formatNumber(step.capacity)}` },
+      { label: "Current value", value: step.phase === "initial" ? "Not evaluated" : formatNumber(step.currentValue) },
+      { label: "Feasibility", value: step.phase === "initial" ? "Not evaluated" : step.feasible ? "Feasible" : "Over capacity" },
+      { label: "Best subset so far", value: setLabel(step.bestSubset) },
+      { label: "Best totals so far", value: `weight ${formatNumber(step.bestWeight)}, value ${formatNumber(step.bestValue)}` },
+      { label: "Decision", value: decision }
+    ]
+  };
 }
 
 export const knapsackModule = {
@@ -197,6 +241,7 @@ export const knapsackModule = {
   ],
   buildTrace: buildKnapsackTrace,
   render: renderKnapsack,
+  describe: describeKnapsack,
   metrics(step) {
     return [{ label: "Candidate subsets", value: step.candidatesEvaluated, emphasis: true }];
   },

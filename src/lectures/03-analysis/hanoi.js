@@ -59,7 +59,7 @@ export function buildHanoiTrace(n) {
         activeLabel: "Call",
         phase: "call",
         callStack: stack,
-        message: `Call Hanoi(${k}, ${PEG_NAMES[from]} → ${PEG_NAMES[to]}, auxiliary ${PEG_NAMES[aux]}).`
+        message: `Call Hanoi(${k}, ${PEG_NAMES[from]} to ${PEG_NAMES[to]}, auxiliary ${PEG_NAMES[aux]}).`
       });
     }
 
@@ -68,8 +68,8 @@ export function buildHanoiTrace(n) {
       addStep({
         activeLabel: "Return",
         phase: "return",
-        callStack: stack,
-        message: `Return from Hanoi(1, ${PEG_NAMES[from]} → ${PEG_NAMES[to]}).`
+        callStack: ancestors,
+        message: `Returned from Hanoi(1, ${PEG_NAMES[from]} to ${PEG_NAMES[to]}).`
       });
       return;
     }
@@ -80,8 +80,8 @@ export function buildHanoiTrace(n) {
     addStep({
       activeLabel: "Return",
       phase: "return",
-      callStack: stack,
-      message: `Return from Hanoi(${k}, ${PEG_NAMES[from]} → ${PEG_NAMES[to]}).`
+      callStack: ancestors,
+      message: `Returned from Hanoi(${k}, ${PEG_NAMES[from]} to ${PEG_NAMES[to]}).`
     });
   }
 
@@ -90,7 +90,7 @@ export function buildHanoiTrace(n) {
   addStep({
     activeLabel: "Complete",
     phase: "complete",
-    message: `Solved in ${moves} moves, which equals 2^${n} − 1.`
+    message: `Solved in ${moves} ${moves === 1 ? "move" : "moves"}, which equals 2^${n} − 1.`
   });
 
   return trace;
@@ -101,7 +101,7 @@ function diskStackHtml(peg, n, { activeDisk = null, highlightTop = false } = {})
     const width = 38 + (disk / n) * 55;
     const topClass = index === peg.length - 1 ? " is-top" : "";
     const currentClass = disk === activeDisk || (highlightTop && index === peg.length - 1) ? " is-current" : "";
-    return `<div class="hanoi-disk${topClass}${currentClass}" style="--disk-width:${width}%" aria-label="disk ${disk}">${disk}</div>`;
+    return `<div class="hanoi-disk${topClass}${currentClass}" style="--disk-width:${width}%" role="img" aria-label="disk ${disk}">${disk}</div>`;
   }).join("");
 }
 
@@ -113,11 +113,16 @@ function hanoiBoardHtml(pegs, n, { practice = false, selectedPeg = null, activeD
         const pegState = peg.length
           ? `disks bottom to top: ${peg.join(", ")}; top disk ${peg.at(-1)}`
           : "empty";
+        const practiceAttributes = !practice
+          ? `role="group" aria-label="Peg ${PEG_NAMES[index]}, ${pegState}"`
+          : complete
+            ? `role="button" tabindex="-1" aria-disabled="true" aria-pressed="${selected}" aria-label="Peg ${PEG_NAMES[index]}, ${pegState}; puzzle solved"`
+            : `data-activity-action="select-peg" data-activity-value="${index}" role="button" tabindex="0" aria-pressed="${selected}" aria-label="Peg ${PEG_NAMES[index]}, ${pegState}${selected ? ", selected source" : ""}"`;
         return `
         <div class="peg-zone ${selected ? "is-selected" : ""}"
-             ${practice ? `data-activity-action="select-peg" data-activity-value="${index}" role="button" tabindex="0" aria-pressed="${selected}" aria-label="Peg ${PEG_NAMES[index]}, ${pegState}${selected ? ", selected source" : ""}"` : ""}>
+             ${practiceAttributes}>
           <div class="peg" aria-hidden="true"></div>
-          <div class="disk-stack">${diskStackHtml(peg, n, { activeDisk, highlightTop: practice && selected })}</div>
+          <div class="disk-stack" aria-hidden="true">${diskStackHtml(peg, n, { activeDisk, highlightTop: practice && selected })}</div>
           <span class="peg-label">${PEG_NAMES[index]}</span>
         </div>`;
       }).join("")}
@@ -313,6 +318,37 @@ export const hanoiModule = {
   ],
   buildTrace: buildHanoiTrace,
   render: renderHanoi,
+  describe(step) {
+    const pegState = (peg) => peg.length
+      ? `${peg.join(", ")} (bottom to top)`
+      : "empty";
+    const callStackText = step.callStack.length
+      ? step.callStack.map((frame) => (
+          `Hanoi(${frame.n}, ${PEG_NAMES[frame.from]} to ${PEG_NAMES[frame.to]}, auxiliary ${PEG_NAMES[frame.aux]})`
+        )).join(" → ")
+      : "empty";
+    const activeCall = step.callStack.at(-1);
+    const activeCallText = activeCall
+      ? `Hanoi(${activeCall.n}, ${PEG_NAMES[activeCall.from]} to ${PEG_NAMES[activeCall.to]}, auxiliary ${PEG_NAMES[activeCall.aux]})`
+      : "none";
+    const summary = step.phase === "complete"
+      ? `Solved in ${step.moves} ${step.moves === 1 ? "move" : "moves"}. This equals two to the power ${step.n} minus 1.`
+      : step.message;
+
+    return {
+      summary,
+      state: [
+        { label: "Peg A", value: pegState(step.pegs[0]) },
+        { label: "Peg B", value: pegState(step.pegs[1]) },
+        { label: "Peg C", value: pegState(step.pegs[2]) },
+        { label: "Disk moves", value: String(step.moves) },
+        { label: "Disk moved this step", value: step.activeDisk === null ? "none" : String(step.activeDisk) },
+        { label: "Recursive call depth", value: String(step.callStack.length) },
+        { label: "Active recursive call", value: activeCallText },
+        { label: "Call stack, outermost to active", value: callStackText }
+      ]
+    };
+  },
   metrics(step) {
     return [
       { label: "Disk moves", value: step.moves, emphasis: true }
@@ -338,6 +374,27 @@ export const hanoiModule = {
     label: "Practice puzzle",
     create: createPractice,
     render: renderPractice,
+    describe(state) {
+      const pegState = (peg) => peg.length
+        ? `${peg.join(", ")} (bottom to top)`
+        : "empty";
+      const lastMove = state.log.at(-1);
+      const lastMoveText = lastMove
+        ? `Move ${state.log.length}: disk ${lastMove.disk} from peg ${PEG_NAMES[lastMove.from]} to peg ${PEG_NAMES[lastMove.to]}`
+        : "none";
+      return {
+        summary: state.message,
+        state: [
+          { label: "Peg A", value: pegState(state.pegs[0]) },
+          { label: "Peg B", value: pegState(state.pegs[1]) },
+          { label: "Peg C", value: pegState(state.pegs[2]) },
+          { label: "Selected source", value: state.selectedPeg === null ? "none" : `Peg ${PEG_NAMES[state.selectedPeg]}` },
+          { label: "Last move", value: lastMoveText },
+          { label: "Disk moves", value: String(state.moves) },
+          { label: "Puzzle status", value: state.solved ? "solved" : "in progress" }
+        ]
+      };
+    },
     reduce: reducePractice,
     metrics(state) {
       return [

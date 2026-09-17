@@ -369,6 +369,207 @@
   letter-spacing: -0.01em;
 }
 
+.panel-heading-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.trace-view-toggle {
+  min-height: 28px;
+  padding: 4px 8px;
+  color: var(--brand-deep);
+  background: #fff;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.72rem;
+  font-weight: 780;
+}
+
+.trace-view-toggle:hover {
+  background: var(--brand-soft);
+  border-color: #9fb0d6;
+}
+
+.text-trace {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 15px 18px 20px;
+  overflow: auto;
+  background: #fff;
+}
+
+.text-trace:focus-visible {
+  outline-offset: -4px;
+}
+
+.text-trace-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.text-trace .text-trace-section-heading h3 {
+  margin: 0;
+}
+
+.trace-read-button {
+  flex: 0 0 auto;
+  min-height: 30px;
+  padding: 4px 9px;
+  color: var(--brand-deep);
+  background: #fff;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.72rem;
+  font-weight: 760;
+}
+
+.trace-read-button:hover {
+  background: var(--brand-soft);
+  border-color: #9fb0d6;
+}
+
+.text-trace-change-summary {
+  margin: 0 0 6px;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.text-trace-summary {
+  margin: 0 0 7px;
+  color: var(--ink);
+  font-size: 0.88rem;
+  font-weight: 720;
+  line-height: 1.45;
+}
+
+.text-trace-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 7px;
+  margin: 0;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+.text-trace-key-changes,
+.text-trace-disclosure {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.text-trace h3,
+.text-trace h4 {
+  margin: 0 0 7px;
+  color: var(--brand-deep);
+  font-size: 0.8rem;
+}
+
+.text-trace h4 {
+  margin-top: 12px;
+  font-size: 0.76rem;
+}
+
+.text-trace-detail-section > h4:first-child {
+  margin-top: 0;
+}
+
+.text-trace-state {
+  display: grid;
+  gap: 0;
+  margin: 0;
+}
+
+.text-trace-state > div {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.38fr) minmax(0, 1fr);
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.text-trace-state > div:last-child {
+  border-bottom: 0;
+}
+
+.text-trace-state dt {
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 760;
+}
+
+.text-trace-state dd {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 0.78rem;
+}
+
+.text-trace ul {
+  margin: 0 0 0 2px;
+  padding-left: 20px;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.text-trace-more-changes {
+  margin-top: 7px;
+}
+
+.text-trace-more-changes > summary,
+.text-trace-disclosure > summary {
+  color: var(--brand-deep);
+  cursor: pointer;
+  font-size: 0.76rem;
+  font-weight: 780;
+}
+
+.text-trace-more-changes[open] > summary {
+  margin-bottom: 5px;
+}
+
+.text-trace-disclosure > summary {
+  font-size: 0.8rem;
+}
+
+.text-trace-disclosure > summary small {
+  display: block;
+  margin: 2px 0 0 18px;
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 540;
+}
+
+.text-trace-disclosure-body {
+  margin-top: 10px;
+  padding: 10px 12px;
+  background: var(--surface-subtle);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+}
+
+@media (max-width: 580px) {
+  .text-trace-section-heading {
+    gap: 8px;
+  }
+
+  .text-trace-state > div {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+}
+
 .step-counter,
 .line-badge {
   color: var(--muted);

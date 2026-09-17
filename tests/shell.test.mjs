@@ -26,6 +26,7 @@ test("the student shell follows the concise teaching sequence", async () => {
   const positions = [
     "inputForm",
     "visualization",
+    "textTrace",
     "traceControls",
     "metrics",
     "generalizeTitle"
@@ -35,6 +36,62 @@ test("the student shell follows the concise teaching sequence", async () => {
   assert.deepEqual([...positions].sort((a, b) => a - b), positions);
   assert.doesNotMatch(html, /GitHub Pages ready|One shell, one module contract|Reusable workflow/);
   assert.doesNotMatch(html, /<(?:script|link)[^>]+(?:src|href)="https?:/);
+});
+
+test("the shell provides an equivalent keyboard-accessible text trace", async () => {
+  const [html, app, components] = await Promise.all([
+    readFile(new URL("index.html", root), "utf8"),
+    readFile(new URL("src/core/app.js", root), "utf8"),
+    readFile(new URL("assets/styles/components.css", root), "utf8")
+  ]);
+
+  assert.match(html, /id="textTraceToggle"[^>]+aria-controls="visualization textTrace"/);
+  assert.match(html, /id="textTrace"[^>]+tabindex="-1"[^>]+hidden/);
+  assert.match(app, /module\.describe\(step\)/);
+  assert.match(app, /setAttribute\("aria-current", "step"\)/);
+  assert.match(app, /params\.get\("view"\) === "text"/);
+  assert.match(app, /url\.searchParams\.set\("view", "text"\)/);
+  assert.match(app, /event\.target\.closest\("#textTrace,/);
+  assert.match(app, /description\.summary/);
+  assert.match(app, /activeCodeText\(module, step\)/);
+  assert.match(components, /\.text-trace\s*\{[^}]*overflow:\s*auto/s);
+  assert.match(html, /id="liveStatus"[^>]+role="status"[^>]+aria-atomic="true"/);
+  assert.match(html, /id="playButton"[^>]+aria-describedby="playbackHint"/);
+});
+
+test("modal navigation and trace shortcuts preserve keyboard and assistive-technology commands", async () => {
+  const [html, app] = await Promise.all([
+    readFile(new URL("index.html", root), "utf8"),
+    readFile(new URL("src/core/app.js", root), "utf8")
+  ]);
+
+  assert.match(html, /id="courseNav"[^>]+role="dialog"[^>]+aria-modal="true"[^>]+aria-labelledby="courseNavTitle"/);
+  assert.match(html, /id="navBackdrop"[^>]+aria-hidden="true"/);
+  assert.match(app, /dom\.topbar\.inert = open/);
+  assert.match(app, /dom\.lessonMain\.inert = open/);
+  assert.match(app, /function setNavigationOpen\(open[^)]*\) \{\s*if \(open\) stopPlayback\(\)/);
+  assert.doesNotMatch(app, /navBackdrop\.setAttribute\("aria-hidden"/);
+  assert.match(app, /!element\.closest\("\[hidden\]"\)/);
+  assert.match(app, /event\.defaultPrevented \|\| event\.altKey \|\| event\.ctrlKey \|\| event\.metaKey \|\| event\.shiftKey/);
+});
+
+test("route changes use the single shared status region", async () => {
+  const [html, app] = await Promise.all([
+    readFile(new URL("index.html", root), "utf8"),
+    readFile(new URL("src/core/app.js", root), "utf8")
+  ]);
+
+  assert.equal([...html.matchAll(/\baria-live=/g)].length, 1);
+  assert.doesNotMatch(html, /class="route-summary"[^>]*aria-live/);
+  assert.match(app, /announcementLead: `Loaded \$\{route\.module\.title\}, step`/);
+});
+
+test("manual timeline changes and activity rerenders retain accessible feedback and focus", async () => {
+  const app = await readFile(new URL("src/core/app.js", root), "utf8");
+
+  assert.match(app, /stepRange\.addEventListener\("change", \(\) => \{\s*renderCurrent\(\{ shouldAnnounce: true,[^}]+announcementLead:/s);
+  assert.match(app, /focusedControlAction/);
+  assert.match(app, /matchingControl \?\? \$\("button:not\(\[disabled\]\)"/);
 });
 
 

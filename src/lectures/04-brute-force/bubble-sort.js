@@ -108,7 +108,7 @@ function renderBubbleSort(step) {
     const suffix = roles.length ? `, ${roles.join(", ")}` : "";
 
     return `
-      <li class="${classes.join(" ")}"${active ? ' data-active-visual="true" aria-current="step"' : ""}
+      <li class="${classes.join(" ")}"${active ? ' data-active-visual="true"' : ""}
           aria-label="A index ${index}, value ${escapeHtml(formatNumber(value))}${escapeHtml(suffix)}">
         <span class="sort-item-value">${escapeHtml(formatNumber(value))}</span>
         <small class="sort-item-index">A[${index}]</small>
@@ -150,6 +150,56 @@ function renderBubbleSort(step) {
     </section>`;
 }
 
+function describeBubbleSort(step) {
+  const pass = step.phase === "initial"
+    ? `Not started; ${step.values.length - 1} passes will run`
+    : step.phase === "complete"
+      ? `Complete; ${step.values.length - 1} passes finished`
+      : `${step.passIndex + 1} of ${step.values.length - 1}`;
+  const fixedFrom = step.phase === "complete"
+    ? 0
+    : step.values.length - step.completedPasses;
+  const sortedSuffix = fixedFrom >= step.values.length
+    ? "None"
+    : `A[${fixedFrom}] through A[${step.values.length - 1}]`;
+  const activePair = step.pair.length === 2
+    ? `A[${step.pair[0]}] = ${formatNumber(step.values[step.pair[0]])} and A[${step.pair[1]}] = ${formatNumber(step.values[step.pair[1]])}`
+    : "none";
+  const comparisonResult = step.phase === "compare"
+    ? `A[${step.pair[0]}] > A[${step.pair[1]}] is ${step.outOfOrder ? "true" : "false"}`
+    : step.phase === "swap"
+      ? "out of order; swap performed"
+      : "not evaluated at this step";
+  const swapThisStep = step.phase === "swap"
+    ? `A[${step.pair[0]}] and A[${step.pair[1]}] exchanged positions`
+    : "none";
+  const newlyFixed = step.phase === "pass"
+    ? `A[${step.fixedIndex}] = ${formatNumber(step.values[step.fixedIndex])}`
+    : "none";
+
+  return {
+    summary: step.message,
+    state: [
+      {
+        label: "Array A",
+        value: step.values.map((value, index) => `A[${index}] = ${formatNumber(value)}`).join("; ")
+      },
+      { label: "Pass", value: pass },
+      { label: "Sorted suffix", value: sortedSuffix },
+      { label: "Active pair", value: activePair },
+      { label: "Comparison result", value: comparisonResult },
+      { label: "Swap this step", value: swapThisStep },
+      { label: "Newly fixed position", value: newlyFixed },
+      {
+        label: "Order status",
+        value: step.phase === "complete" ? "Every position is in nondecreasing order" : "Sorting in progress"
+      },
+      { label: "Key comparisons", value: String(step.comparisons) },
+      { label: "Swaps", value: String(step.swaps) }
+    ]
+  };
+}
+
 export const bubbleSortModule = {
   id: "bubble-sort",
   shortTitle: "Bubble Sort",
@@ -176,6 +226,7 @@ export const bubbleSortModule = {
   ],
   buildTrace: buildBubbleSortTrace,
   render: renderBubbleSort,
+  describe: describeBubbleSort,
   metrics(step) {
     return [
       { label: "Key comparisons", value: step.comparisons, emphasis: true },

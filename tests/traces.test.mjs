@@ -141,7 +141,7 @@ test("Master Theorem traces make the three level-work profiles explicit", () => 
       activeLine: 6,
       levelWork: [16, 16, 16, 16, 16],
       totalWork: 80,
-      result: "O(n log n)"
+      result: "Θ(n log n)"
     },
     {
       raw: "4, 2, 1, 16",
@@ -149,7 +149,7 @@ test("Master Theorem traces make the three level-work profiles explicit", () => 
       activeLine: 6,
       levelWork: [16, 32, 64, 128, 256],
       totalWork: 496,
-      result: "O(n^2)"
+      result: "Θ(n^2)"
     },
     {
       raw: "2, 2, 2, 16",
@@ -157,7 +157,7 @@ test("Master Theorem traces make the three level-work profiles explicit", () => 
       activeLine: 6,
       levelWork: [256, 128, 64, 32, 16],
       totalWork: 496,
-      result: "O(n^2)"
+      result: "Θ(n^2)"
     },
     {
       raw: "1, 2, 0, 16",
@@ -165,7 +165,7 @@ test("Master Theorem traces make the three level-work profiles explicit", () => 
       activeLine: 6,
       levelWork: [1, 1, 1, 1, 1],
       totalWork: 5,
-      result: "O(log n)"
+      result: "Θ(log n)"
     }
   ];
 
@@ -220,7 +220,7 @@ test("Master Theorem input errors are specific", () => {
   );
   const fractionalTrace = buildMasterTheoremTrace(parseMasterTheoremInput("2, 2, 0.5, 16"));
   assert.equal(fractionalTrace.at(-1).masterCase, "leaves");
-  assert.equal(fractionalTrace.at(-1).result.text, "O(n)");
+  assert.equal(fractionalTrace.at(-1).result.text, "Θ(n)");
   assert.ok(fractionalTrace.at(-1).levels.every((level) => Number.isFinite(level.levelWork)));
   assert.throws(() => parseMasterTheoremInput("2.5, 2, 1, 16"), /a, b, and n must be whole numbers/);
   assert.throws(() => parseMasterTheoremInput("2, 2, unknown, 16"), /d must be a valid number/);
