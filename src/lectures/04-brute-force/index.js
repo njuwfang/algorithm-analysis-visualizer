@@ -1,5 +1,5 @@
-import { selectionSortModule } from "./selection-sort.js?v=20260916-8";
-import { bubbleSortModule } from "./bubble-sort.js?v=20260916-8";
+import { selectionSortModule } from "./selection-sort.js?v=20260920-1";
+import { bubbleSortModule } from "./bubble-sort.js?v=20260920-1";
 import { stringMatchingModule } from "./string-matching.js?v=20260916-8";
 import { closestPairModule } from "./closest-pair.js?v=20260916-8";
 

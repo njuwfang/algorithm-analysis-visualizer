@@ -1,4 +1,5 @@
 import { escapeHtml, formatNumber, parseArray } from "../../core/utils.js?v=20260916-1";
+import { relativeBarHeights } from "./sort-bars.js?v=20260920-1";
 
 export function buildSelectionSortTrace(input) {
   const values = [...input];
@@ -117,6 +118,7 @@ export function buildSelectionSortTrace(input) {
 }
 
 function renderSelectionSort(step) {
+  const barHeights = relativeBarHeights(step.values);
   const activeIndices = new Set();
   if (step.phase === "compare") {
     activeIndices.add(step.scanIndex);
@@ -150,7 +152,7 @@ function renderSelectionSort(step) {
     const suffix = roles.length ? `, ${roles.join(", ")}` : "";
 
     return `
-      <li class="${classes.join(" ")}"${index === focusIndex ? ' data-active-visual="true" aria-current="step"' : ""}
+      <li class="${classes.join(" ")}" style="--sort-height: ${barHeights[index]}%"${index === focusIndex ? ' data-active-visual="true" aria-current="step"' : ""}
           aria-label="A index ${index}, value ${escapeHtml(formatNumber(value))}${escapeHtml(suffix)}">
         <span class="sort-item-value">${escapeHtml(formatNumber(value))}</span>
         <small class="sort-item-index">A[${index}]</small>

@@ -33,12 +33,14 @@
 
 .sort-array {
   display: flex;
-  align-items: stretch;
+  align-items: flex-end;
   justify-content: center;
   gap: clamp(4px, 0.8vw, 8px);
   width: 100%;
+  height: 152px;
+  box-sizing: border-box;
   margin: 0;
-  padding: 12px 0 20px;
+  padding: 8px 0 20px;
   list-style: none;
 }
 
@@ -49,13 +51,14 @@
   place-items: center;
   min-width: 36px;
   max-width: 72px;
-  min-height: 72px;
+  height: var(--sort-height, 77.5%);
+  min-height: 44px;
   color: var(--ink);
   background: #fff;
   border: 2px solid var(--border-strong);
   border-radius: 9px;
   font-family: var(--mono);
-  transition: background-color 140ms ease, border-color 140ms ease, transform 140ms ease;
+  transition: background-color 140ms ease, border-color 140ms ease;
 }
 
 .sort-item::before {
@@ -133,7 +136,6 @@
   border-color: var(--accent);
   border-style: solid;
   outline: 2px solid rgba(231, 143, 47, 0.2);
-  transform: translateY(-4px);
 }
 
 .sort-item.is-current::before {
@@ -151,7 +153,6 @@
   background: var(--success-soft);
   border-color: #8bc5a9;
   outline: 0;
-  transform: none;
 }
 
 .sort-item.is-complete::before {
@@ -465,8 +466,8 @@
     gap: 8px;
   }
 
-  .sort-item {
-    min-height: 62px;
+  .sort-array {
+    height: 136px;
   }
 
   .closest-plot {

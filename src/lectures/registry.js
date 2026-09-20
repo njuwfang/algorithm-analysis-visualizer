@@ -1,5 +1,5 @@
 import { lecture03 } from "./03-analysis/index.js?v=20260916-9";
-import { lecture04 } from "./04-brute-force/index.js?v=20260916-8";
+import { lecture04 } from "./04-brute-force/index.js?v=20260920-1";
 import { lecture05 } from "./05-exhaustive-search/index.js?v=20260916-8";
 import { validateRegistry } from "../core/schema.js?v=20260916-9";
 

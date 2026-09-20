@@ -50,6 +50,8 @@ The PDF metadata title says “Induction and recursion,” but the visible deck 
 
 The lecture overview and its brief mentions of power computation, the consecutive-integer GCD algorithm, and matrix multiplication do not contain worked traces, so they are not separate visualizations. The published modules are Selection Sort, Bubble Sort, Brute-Force String Matching, and Brute-Force Closest Pair.
 
+The two sorting modules add one authored visual encoding that is not specified by the deck: item height is normalized within the current input, so a taller item represents a larger key. The printed key remains authoritative; equal keys have equal height, and negative values remain supported.
+
 ## Selection Sort
 
 The trace preserves the lecture array `[89, 45, 68, 90, 29, 34, 17]`, zero-based indexing, the strict comparison `A[j] < A[min]`, and the swap statement after every pass. A self-swap still counts as an executed swap statement. The counted basic operation is the key comparison, giving exactly

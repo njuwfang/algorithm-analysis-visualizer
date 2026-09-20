@@ -1,4 +1,5 @@
 import { escapeHtml, formatNumber, parseArray } from "../../core/utils.js?v=20260916-1";
+import { relativeBarHeights } from "./sort-bars.js?v=20260920-1";
 
 export function buildBubbleSortTrace(input) {
   const values = [...input];
@@ -86,6 +87,7 @@ export function buildBubbleSortTrace(input) {
 }
 
 function renderBubbleSort(step) {
+  const barHeights = relativeBarHeights(step.values);
   const activeIndices = new Set(step.pair);
   const fixedFrom = step.phase === "complete"
     ? 0
@@ -108,7 +110,7 @@ function renderBubbleSort(step) {
     const suffix = roles.length ? `, ${roles.join(", ")}` : "";
 
     return `
-      <li class="${classes.join(" ")}"${active ? ' data-active-visual="true"' : ""}
+      <li class="${classes.join(" ")}" style="--sort-height: ${barHeights[index]}%"${active ? ' data-active-visual="true"' : ""}
           aria-label="A index ${index}, value ${escapeHtml(formatNumber(value))}${escapeHtml(suffix)}">
         <span class="sort-item-value">${escapeHtml(formatNumber(value))}</span>
         <small class="sort-item-index">A[${index}]</small>

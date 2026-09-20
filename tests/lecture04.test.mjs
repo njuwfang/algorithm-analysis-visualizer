@@ -9,6 +9,7 @@ import {
   stringMatchingModule
 } from "../src/lectures/04-brute-force/string-matching.js";
 import { buildClosestPairTrace, closestPairModule, parsePoints } from "../src/lectures/04-brute-force/closest-pair.js";
+import { relativeBarHeights } from "../src/lectures/04-brute-force/sort-bars.js";
 
 const lectureArray = [89, 45, 68, 90, 29, 34, 17];
 
@@ -41,6 +42,43 @@ test("Bubble Sort keeps the lecture's complete passes without an early exit", ()
   assert.equal(ascending.swaps, 0);
   assert.doesNotMatch(bubbleSortModule.model(trace[0]).latex, /Theta|\\Theta/);
   assert.match(bubbleSortModule.model(final).latex, /\\Theta\(n\^2\)/);
+});
+
+test("Lecture 04 sorting bars encode relative values without losing edge cases", () => {
+  assert.deepEqual(relativeBarHeights([-5, 0, 15]), [55, 66.25, 100]);
+  assert.deepEqual(relativeBarHeights([4, 4, 4]), [77.5, 77.5, 77.5]);
+  assert.deepEqual(
+    relativeBarHeights([-Number.MAX_VALUE, 0, Number.MAX_VALUE]),
+    [55, 77.5, 100]
+  );
+  const decimalHeights = relativeBarHeights([-1.5, 0, 2.5]);
+  assert.ok(decimalHeights.every(Number.isFinite));
+  assert.ok(decimalHeights[0] < decimalHeights[1] && decimalHeights[1] < decimalHeights[2]);
+
+  const beforeSwap = [3, 1, 2];
+  const afterSwap = [1, 3, 2];
+  const beforeHeights = relativeBarHeights(beforeSwap);
+  const afterHeights = relativeBarHeights(afterSwap);
+  const heightByValue = new Map(beforeSwap.map((value, index) => (
+    [value, beforeHeights[index]]
+  )));
+  afterSwap.forEach((value, index) => {
+    assert.equal(afterHeights[index], heightByValue.get(value));
+  });
+
+  for (const module of [selectionSortModule, bubbleSortModule]) {
+    const variedHtml = module.render(module.buildTrace([-5, 0, 15])[0]);
+    const equalHtml = module.render(module.buildTrace([4, 4, 4])[0]);
+    const renderedHeights = [...variedHtml.matchAll(/--sort-height: ([\d.]+)%/g)]
+      .map((match) => Number(match[1]));
+
+    assert.deepEqual(renderedHeights, [55, 66.25, 100]);
+    assert.match(variedHtml, /--sort-height: 55%/);
+    assert.match(variedHtml, /--sort-height: 66\.25%/);
+    assert.match(variedHtml, /--sort-height: 100%/);
+    assert.match(variedHtml, /aria-label="A index 0, value -5"/);
+    assert.doesNotMatch(equalHtml, /NaN|Infinity/);
+  }
 });
 
 test("Brute-force string matching finds NOT at the lecture's zero-based position", () => {
