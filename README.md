@@ -1,6 +1,6 @@
 # Analysis of Algorithms Visualizations
 
-A reusable, self-contained static website for teaching algorithm execution and analysis. Lectures 03–05 preserve one repeated workflow:
+A reusable, self-contained static website for teaching algorithm execution and analysis. Lectures 03–06 preserve one repeated workflow:
 
 > **Trace → Count → Generalize**
 
@@ -31,6 +31,21 @@ Lecture 05 — Exhaustive Search:
 - Traveling Salesman Problem
 - Knapsack — exhaustive subsets
 - Assignment — exhaustive permutations
+
+Lecture 06 — Decrease and Conquer:
+
+- Power — decrease by one
+- Exponentiation by squaring
+- Insertion Sort
+- Shellsort
+- Binary Search
+- Russian Peasant Multiplication
+- Interpolation Search
+- Euclid's Algorithm
+- Lomuto Partitioning
+- Quickselect
+
+These follow all 137 pages of `06_Decrease and conquer.pdf`. Reconstructed procedures and the deck's input/indexing ambiguities are recorded in [SOURCE_NOTES.md](docs/SOURCE_NOTES.md). Open `#/06-decrease-conquer/power-decrease-one` to start the lecture; every module also supports `?view=text` before the hash.
 
 Each lesson keeps the custom input, one example chooser, visualization, lecture pseudocode, selected-operation count, and mathematical model in a compact shared shell. Supporting analysis is available on demand instead of occupying the default screen.
 
@@ -114,6 +129,16 @@ Because routing uses the URL hash and the vendored KaTeX distribution renders fo
 #/05-exhaustive-search/traveling-salesman
 #/05-exhaustive-search/exhaustive-knapsack
 #/05-exhaustive-search/assignment
+#/06-decrease-conquer/power-decrease-one
+#/06-decrease-conquer/exponentiation-squaring
+#/06-decrease-conquer/insertion-sort
+#/06-decrease-conquer/shellsort
+#/06-decrease-conquer/binary-search
+#/06-decrease-conquer/russian-peasant
+#/06-decrease-conquer/interpolation-search
+#/06-decrease-conquer/euclid-gcd
+#/06-decrease-conquer/lomuto-partition
+#/06-decrease-conquer/quickselect
 ```
 
 Iframe-friendly link:
@@ -147,7 +172,8 @@ visualization/
 │   ├── registry.js
 │   ├── 03-analysis/          # modules and lecture-local styles.css
 │   ├── 04-brute-force/       # modules and lecture-local styles.css
-│   └── 05-exhaustive-search/ # modules and lecture-local styles.css
+│   ├── 05-exhaustive-search/ # modules and lecture-local styles.css
+│   └── 06-decrease-conquer/ # modules and lecture-specific drawings
 ├── docs/
 ├── templates/
 ├── tests/

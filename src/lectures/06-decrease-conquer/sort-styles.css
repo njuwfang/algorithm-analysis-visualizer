@@ -1,0 +1,546 @@
+/* Lecture 06 sorting mechanisms: held-key insertion and h-spaced chains. */
+.dc-sort-visual {
+  width: min(100%, 800px);
+  min-width: 0;
+  font-family: var(--mono);
+}
+
+.dc-insertion-key-row,
+.dc-shell-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 32px;
+}
+
+.dc-held-key {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--brand-deep);
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.dc-held-key strong {
+  display: grid;
+  place-items: center;
+  min-width: 35px;
+  min-height: 30px;
+  padding: 2px 5px;
+  background: var(--brand-soft);
+  border: 2px solid var(--brand);
+  border-radius: 4px;
+}
+
+.dc-held-key.is-compared strong {
+  color: #17655f;
+  background: var(--teal-soft);
+  border-color: var(--teal);
+}
+
+.dc-slot-key {
+  color: var(--muted);
+  font-family: var(--sans);
+  font-size: 0.75rem;
+  text-align: right;
+}
+
+.dc-insertion-stage {
+  position: relative;
+  padding-top: 20px;
+}
+
+.dc-insertion-array {
+  height: 137px;
+  gap: 4px;
+  padding: 7px 0 21px;
+}
+
+.dc-insertion-bar {
+  min-width: 22px;
+  max-width: none;
+  min-height: 40px;
+  border-radius: 4px;
+}
+
+.dc-insertion-bar .sort-item-value {
+  padding: 0 2px;
+  overflow-wrap: anywhere;
+}
+
+.dc-insertion-bar .sort-item-index {
+  bottom: -20px;
+  font-size: 0.75rem;
+}
+
+.dc-insertion-bar.is-swapping::before {
+  content: "COPY";
+}
+
+.dc-insertion-bar.is-hole {
+  color: var(--muted);
+  background: #fff;
+  border: 2px dashed var(--accent);
+  outline: 0;
+}
+
+.dc-insertion-bar.is-hole::before {
+  display: block;
+  color: #70400b;
+  content: "SLOT";
+}
+
+.dc-sort-pointer {
+  position: absolute;
+  top: -22px;
+  color: var(--brand-deep);
+  font-size: 0.75rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.dc-copy-arrow {
+  position: absolute;
+  top: -2px;
+  width: 100%;
+  height: 20px;
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1;
+  overflow: visible;
+}
+
+.dc-prefix-track {
+  display: grid;
+  grid-template-columns: repeat(var(--dc-items), minmax(0, 1fr));
+  gap: 4px;
+  height: 20px;
+  margin-top: 1px;
+}
+
+.dc-prefix-track span {
+  color: var(--success);
+  border-top: 3px solid var(--success);
+  font-size: 0.75rem;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.dc-prefix-track .is-empty {
+  color: var(--muted);
+  border-top: 1px dashed var(--border-strong);
+}
+
+.dc-sort-relation {
+  min-height: 21px;
+  margin: 5px 0 0;
+  color: var(--brand-deep);
+  font-size: 0.75rem;
+  line-height: 1.35;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.dc-sort-relation.is-counted {
+  color: #17655f;
+}
+
+.dc-shell-header {
+  min-height: 20px;
+  font-size: 0.75rem;
+}
+
+.dc-shell-header strong {
+  color: var(--brand-deep);
+  font-size: 0.83rem;
+}
+
+.dc-shell-header > span {
+  color: var(--muted);
+  font-size: 0.75rem;
+  text-align: right;
+}
+
+.dc-shell-overview {
+  display: grid;
+  grid-template-columns: repeat(var(--dc-items), minmax(0, 1fr));
+  gap: 2px;
+  margin: 2px 0 2px;
+}
+
+.dc-shell-overview .dc-shell-key {
+  grid-template-rows: 12px minmax(22px, auto);
+}
+
+.dc-shell-key {
+  display: inline-grid;
+  grid-template-rows: 13px minmax(25px, auto);
+  min-width: 0;
+  text-align: center;
+}
+
+.dc-shell-key small {
+  color: var(--muted);
+  font-size: 0.75rem;
+  line-height: 1;
+}
+
+.dc-shell-key strong {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  padding: 2px 1px;
+  color: var(--brand-deep);
+  background: #fff;
+  border: 1px solid var(--border-strong);
+  border-radius: 3px;
+  font-size: 0.79rem;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+
+.dc-shell-overview .dc-shell-key strong {
+  padding-block: 1px;
+}
+
+.dc-shell-key.is-compared strong {
+  color: #17655f;
+  background: var(--teal-soft);
+  border: 2px solid var(--teal);
+}
+
+.dc-shell-key.is-current strong {
+  color: #70400b;
+  background: var(--accent-soft);
+  border: 2px solid var(--accent);
+}
+
+.dc-shell-key.is-sorted strong {
+  color: var(--success);
+  background: var(--success-soft);
+  border-color: var(--success);
+}
+
+.dc-shell-key.is-subarray strong {
+  background: var(--brand-soft);
+  border-color: var(--brand);
+}
+
+.dc-shell-key.is-subarray.is-compared strong {
+  background: var(--teal-soft);
+  border-color: var(--teal);
+}
+
+.dc-shell-key.is-subarray.is-current strong {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.dc-shell-insertion {
+  margin-top: 4px;
+}
+
+.dc-shell-insert-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px;
+  min-height: 18px;
+  color: #70400b;
+  font-size: 0.8rem;
+  line-height: 18px;
+}
+
+.dc-shell-insert-heading strong {
+  white-space: nowrap;
+}
+
+.dc-shell-insert-heading > span {
+  max-width: 72%;
+  color: var(--brand-deep);
+  font-size: 0.75rem;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
+.dc-shell-insertion.is-complete .dc-shell-insert-heading,
+.dc-shell-insertion.is-complete .dc-shell-insert-pointer {
+  color: var(--success);
+}
+
+.dc-shell-insert-scroll {
+  width: 100%;
+  overflow: auto;
+}
+
+.dc-shell-insert-board {
+  position: relative;
+  min-width: calc(var(--shell-subarray-items) * var(--shell-cell-min) + (var(--shell-subarray-items) - 1) * 2px);
+}
+
+.dc-shell-insert-bars,
+.dc-shell-insert-prefix {
+  display: grid;
+  grid-template-columns: repeat(var(--shell-subarray-items), minmax(0, 1fr));
+  gap: 2px;
+}
+
+.dc-shell-insert-column {
+  display: grid;
+  grid-template-rows: 18px 70px 16px;
+  align-items: end;
+  min-width: 0;
+  text-align: center;
+}
+
+.dc-shell-insert-pointer {
+  align-self: center;
+  color: #70400b;
+  font-size: 0.75rem;
+  line-height: 1;
+}
+
+.dc-shell-insert-bar {
+  display: grid;
+  place-items: center;
+  height: var(--shell-key-height);
+  min-height: 30px;
+  color: var(--brand-deep);
+  background: #fff;
+  border: 1px solid var(--border-strong);
+  border-radius: 3px;
+  font-size: 1rem;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+
+.dc-shell-insert-bar.is-later {
+  color: var(--muted);
+  background: var(--surface-strong);
+  border-style: dashed;
+}
+
+.dc-shell-insert-bar.is-sorted,
+.dc-shell-insert-bar.is-finished {
+  color: var(--success);
+  background: var(--success-soft);
+  border-color: var(--success);
+}
+
+.dc-shell-insert-bar.is-key {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.dc-shell-insert-bar.is-exchanged {
+  color: #70400b;
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.dc-shell-insert-bar.is-counted {
+  color: #17655f;
+  background: var(--teal-soft);
+  border-color: var(--teal);
+  border-width: 2px;
+}
+
+.dc-shell-insert-bar.is-key.is-finished {
+  outline-color: var(--success);
+}
+
+.dc-shell-insert-index {
+  align-self: center;
+  color: var(--muted);
+  font-size: 0.75rem;
+  line-height: 1;
+}
+
+.dc-shell-insert-arrow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 18px;
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1;
+  overflow: visible;
+}
+
+.dc-shell-insert-prefix {
+  height: 15px;
+}
+
+.dc-shell-insert-prefix > span {
+  color: var(--success);
+  border-top: 2px solid var(--success);
+  font-size: 0.75rem;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.dc-shell-insert-prefix > .is-empty {
+  color: var(--muted);
+  border-top: 1px dashed var(--border-strong);
+}
+
+.dc-shell-insert-board:has(.dc-shell-insert-column:nth-child(n + 9)) .dc-shell-insert-bar {
+  font-size: 0.85rem;
+}
+
+.dc-shell-lanes {
+  display: grid;
+  gap: 2px;
+}
+
+.dc-shell-lane {
+  display: grid;
+  grid-template-columns: 68px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 0 4px;
+  border-left: 2px solid var(--border-strong);
+}
+
+.dc-shell-lane.is-active {
+  background: var(--accent-soft);
+  border-left: 3px solid var(--accent);
+}
+
+.dc-shell-lane-label {
+  color: var(--muted);
+  font-size: 0.75rem;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.dc-shell-lane-label > span,
+.dc-shell-lane-label > strong,
+.dc-shell-lane-label > small {
+  display: block;
+}
+
+.dc-shell-lane-label > strong {
+  margin-top: 2px;
+  color: #70400b;
+  font-size: 0.75rem;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.dc-shell-lane-label > small {
+  margin-top: 2px;
+  color: var(--success);
+  font-size: 0.75rem;
+}
+
+.dc-shell-row-scroll {
+  width: 100%;
+  overflow: auto;
+}
+
+.dc-shell-row-board {
+  width: min(100%, calc(var(--shell-row-items) * 60px));
+  min-width: calc(var(--shell-row-items) * var(--shell-row-cell));
+}
+
+.dc-shell-row-keys,
+.dc-shell-row-action,
+.dc-shell-row-prefix {
+  display: grid;
+  grid-template-columns: repeat(var(--shell-row-items), minmax(0, 1fr));
+}
+
+.dc-shell-row-item {
+  position: relative;
+  display: grid;
+  grid-template-rows: 12px 18px;
+  min-width: 0;
+  padding: 0 6px;
+  text-align: center;
+}
+
+.dc-shell-row-item > small {
+  color: var(--muted);
+  font-size: 0.75rem;
+  line-height: 1;
+}
+
+.dc-shell-row-value {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  color: var(--brand-deep);
+  background: #fff;
+  border: 1px solid var(--border-strong);
+  border-radius: 3px;
+  font-size: 0.85rem;
+  line-height: 1;
+  overflow-wrap: anywhere;
+}
+
+.dc-shell-row-value.is-later { border-style: dashed; color: var(--muted); }
+.dc-shell-row-value.is-sorted,
+.dc-shell-row-value.is-finished { color: var(--success); background: var(--success-soft); border-color: var(--success); }
+.dc-shell-row-value.is-key { outline: 2px solid var(--accent); outline-offset: -2px; }
+.dc-shell-row-value.is-counted { color: #17655f; background: var(--teal-soft); border: 2px solid var(--teal); }
+.dc-shell-row-value.is-exchanged { color: #70400b; background: var(--accent-soft); border-color: var(--accent); }
+.dc-shell-row-value.is-finished { outline-color: var(--success); }
+
+.dc-shell-row-link {
+  position: absolute;
+  top: 15px;
+  right: -6px;
+  width: 12px;
+  color: var(--brand);
+  font-size: 0.8rem;
+  line-height: 1;
+}
+
+.dc-shell-row-link.is-exchanged { color: #70400b; font-weight: 800; }
+
+.dc-shell-row-action {
+  position: relative;
+  height: 12px;
+  color: #70400b;
+  font-size: 0.75rem;
+  line-height: 1;
+  text-align: center;
+}
+
+.dc-shell-row-arrow {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 12px;
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1;
+  overflow: visible;
+}
+
+.dc-shell-row-prefix {
+  /* Prefix glyphs can extend below their line box in fallback fonts. */
+  height: calc(1em + 4px);
+  color: var(--success);
+  font-size: 0.75rem;
+  line-height: 1;
+  text-align: center;
+}
+
+.dc-shell-row-prefix > span { border-top: 2px solid var(--success); white-space: nowrap; }
+.dc-shell-row-prefix > .is-empty { color: var(--muted); border-top: 1px dashed var(--border-strong); }
+.dc-shell-row-prefix.is-retained { height: 2px; }
+.dc-shell .dc-sort-relation { margin-top: 1px; }
+.dc-shell-lane.is-complete { border-color: var(--success); background: var(--success-soft); }
+.dc-shell-lane.is-complete .dc-shell-lane-label > strong,
+.dc-shell-lane.is-complete .dc-shell-row-action { color: var(--success); }
+
+@media (max-width: 580px) {
+  .dc-shell-overview .dc-shell-key strong { font-size: 0.75rem; }
+  .dc-slot-key { max-width: 120px; }
+}

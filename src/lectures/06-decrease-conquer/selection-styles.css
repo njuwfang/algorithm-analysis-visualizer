@@ -1,0 +1,325 @@
+/* Lecture 06 selection: pointers, partition bands, and the retained interval. */
+.partition-visual {
+  width: min(100%, 780px);
+  min-width: 0;
+  font-family: var(--mono);
+}
+
+.partition-context {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 16px;
+  margin-bottom: 2px;
+  color: var(--brand-deep);
+  font-size: 0.82rem;
+  line-height: 1.2;
+}
+
+.partition-context strong {
+  font-weight: 750;
+}
+
+.partition-context small,
+.partition-target-context {
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.partition-target-context {
+  margin-left: auto;
+}
+
+.partition-board-scroll {
+  width: 100%;
+  overflow: auto;
+}
+
+.partition-board {
+  width: min(100%, calc(var(--partition-items) * 64px));
+  min-width: calc(var(--partition-items) * var(--partition-cell-min));
+  margin: 0 auto;
+}
+
+.partition-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--partition-items), minmax(0, 1fr));
+}
+
+.partition-swap-space,
+.partition-swap-path {
+  display: block;
+  width: 100%;
+  height: 22px;
+  overflow: visible;
+}
+
+.partition-swap-path {
+  color: var(--accent);
+}
+
+.partition-exchange-line {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.partition-pointer-rail {
+  min-height: 24px;
+  align-items: end;
+}
+
+.partition-pointer {
+  display: grid;
+  justify-items: center;
+  color: var(--brand-deep);
+  font-size: 0.75rem;
+  line-height: 1.05;
+}
+
+.partition-pointer b {
+  font-weight: 650;
+}
+
+.partition-pointer > span {
+  font-size: 0.85rem;
+}
+
+.partition-pointer.is-scan {
+  color: #915500;
+}
+
+.partition-cell {
+  position: relative;
+  display: grid;
+  grid-template-rows: 18px minmax(40px, auto);
+  text-align: center;
+  padding: 0 3px;
+  min-width: 0;
+}
+
+.partition-index {
+  color: var(--muted);
+  font-size: 0.75rem;
+  line-height: 18px;
+}
+
+.partition-cell strong {
+  display: grid;
+  place-items: center;
+  padding: 5px 3px;
+  color: var(--ink);
+  background: #fff;
+  border: 1px solid var(--border-strong);
+  border-radius: 3px;
+  font-size: 1rem;
+  font-weight: 750;
+  overflow-wrap: anywhere;
+}
+
+.partition-cell.is-pivot strong {
+  color: var(--brand-deep);
+  border: 2px solid var(--brand);
+}
+
+.partition-cell.is-current strong {
+  color: #70400b;
+  background: var(--accent-soft);
+  border: 2px solid var(--accent);
+}
+
+.partition-cell.is-counted strong {
+  color: #17655f;
+  background: var(--teal-soft);
+  border: 2px solid var(--teal);
+}
+
+.partition-cell.is-result strong {
+  color: var(--success);
+  background: var(--success-soft);
+  border: 2px solid var(--success);
+}
+
+.partition-cell.is-discarded strong {
+  color: var(--muted);
+  background: var(--surface-strong);
+  border-style: dashed;
+  border-color: var(--border-strong);
+}
+
+.partition-regions {
+  min-height: 23px;
+  margin-top: 4px;
+}
+
+.partition-band {
+  display: grid;
+  grid-row: 1;
+  place-items: center;
+  position: relative;
+  min-width: 0;
+  height: 23px;
+  margin: 0 3px;
+  color: var(--brand-deep);
+  border-top: 2px solid var(--brand);
+  background: var(--brand-soft);
+  font-size: 0.75rem;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.partition-band::before,
+.partition-band::after {
+  position: absolute;
+  top: -2px;
+  content: "";
+  width: 0;
+  height: 6px;
+  border-left: 2px solid currentColor;
+}
+
+.partition-band::before { left: 0; }
+.partition-band::after { right: 0; }
+
+.partition-band.is-greater {
+  color: var(--brand-deep);
+  background: #e9eff9;
+  border-top-style: double;
+  border-top-width: 3px;
+}
+
+.partition-band.is-unprocessed {
+  color: var(--muted);
+  background: #fff;
+  border-top-color: var(--border-strong);
+  border-top-style: dashed;
+}
+
+.partition-band.is-pivot {
+  color: var(--brand-deep);
+  background: #fff;
+  font-weight: 800;
+}
+
+.partition-band.is-pivot::before {
+  left: calc(50% - 4px);
+  top: -5px;
+  width: 6px;
+  height: 6px;
+  background: var(--brand);
+  border: 0;
+  transform: rotate(45deg);
+}
+
+.partition-band.is-pivot::after { display: none; }
+
+.partition-retention {
+  min-height: 21px;
+  margin-top: 3px;
+}
+
+.partition-retention .partition-band { height: 21px; }
+
+.partition-band.is-retained {
+  color: #70400b;
+  background: var(--accent-soft);
+  border-top-color: var(--accent);
+}
+
+.partition-band.is-discarded {
+  color: var(--muted);
+  background: transparent;
+  border-top-color: var(--border-strong);
+  border-top-style: dashed;
+}
+
+.partition-band.is-selected {
+  color: var(--success);
+  background: var(--success-soft);
+  border-top-color: var(--success);
+}
+
+.partition-target-rail {
+  min-height: 18px;
+}
+
+.partition-target {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2px;
+  color: var(--brand-deep);
+  font-size: 0.75rem;
+  line-height: 1;
+}
+
+.partition-target b { font-weight: 700; }
+
+.partition-key {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 3px 12px;
+  margin-top: 4px;
+  min-height: 14.4px;
+  color: var(--muted);
+  font-family: var(--sans);
+  font-size: 0.75rem;
+  line-height: 1.2;
+}
+
+.selection-progress {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.selection-size-path {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.selection-size {
+  display: grid;
+  justify-items: center;
+  position: relative;
+  width: 48px;
+  height: 22px;
+  color: var(--brand-deep);
+  font-weight: 500;
+}
+
+.selection-size::after {
+  position: absolute;
+  content: "";
+  bottom: 0;
+  left: 0;
+  width: calc(100% * var(--candidate-fraction));
+  height: 5px;
+  background: var(--brand);
+}
+
+.selection-size.is-current {
+  font-weight: 800;
+}
+
+.selection-size-path.is-long .selection-size { width: 26px; }
+
+.selection-size-arrow {
+  color: var(--brand);
+}
+
+@media (max-width: 620px) {
+  .partition-context { font-size: 0.77rem; gap: 4px 10px; }
+  .partition-cell { padding-inline: 2px; }
+  .partition-band { margin-inline: 2px; }
+  .partition-cell strong { font-size: 0.9rem; }
+}

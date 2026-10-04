@@ -22,7 +22,17 @@ test("registry exposes unique lecture/module routes", () => {
     "04-brute-force/closest-pair",
     "05-exhaustive-search/traveling-salesman",
     "05-exhaustive-search/exhaustive-knapsack",
-    "05-exhaustive-search/assignment"
+    "05-exhaustive-search/assignment",
+    "06-decrease-conquer/power-decrease-one",
+    "06-decrease-conquer/exponentiation-squaring",
+    "06-decrease-conquer/insertion-sort",
+    "06-decrease-conquer/shellsort",
+    "06-decrease-conquer/binary-search",
+    "06-decrease-conquer/russian-peasant",
+    "06-decrease-conquer/interpolation-search",
+    "06-decrease-conquer/euclid-gcd",
+    "06-decrease-conquer/lomuto-partition",
+    "06-decrease-conquer/quickselect"
   ];
   assert.deepEqual(keys, expectedRoutes);
   assert.ok(!keys.includes("03-analysis/max-element"));

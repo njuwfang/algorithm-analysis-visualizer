@@ -1,4 +1,4 @@
-import { lectures, neighboringRoutes, routes, resolveRoute, routeHash } from "../lectures/registry.js?v=20260920-1";
+import { lectures, neighboringRoutes, routes, resolveRoute, routeHash } from "../lectures/registry.js?v=20261004-4";
 import { deriveTraceChanges } from "./trace-delta.js?v=20260916-1";
 import { bounded, escapeHtml } from "./utils.js?v=20260916-1";
 
@@ -507,6 +507,7 @@ function renderActiveLine(activeLine, activeLabel = null) {
 
   if (activeElement) {
     window.requestAnimationFrame(() => {
+      if (!activeElement.isConnected || !activeElement.classList.contains("is-active")) return;
       const container = dom.pseudocode.getBoundingClientRect();
       const target = activeElement.getBoundingClientRect();
       const gap = 12;
@@ -516,6 +517,10 @@ function renderActiveLine(activeLine, activeLabel = null) {
         dom.pseudocode.scrollTop += target.bottom - container.bottom + gap;
       }
     });
+  } else if (state.mode === "trace") {
+    // Ready and completed snapshots show the procedure from its beginning,
+    // rather than retaining an unrelated branch from an earlier visited step.
+    dom.pseudocode.scrollTop = 0;
   }
 }
 
@@ -534,7 +539,7 @@ function revealActiveVisualization() {
   if (!active) return;
 
   window.requestAnimationFrame(() => {
-    const nestedScroller = active.closest(".hanoi-call-list");
+    const nestedScroller = active.closest("[data-visual-scroll], .hanoi-call-list");
     if (nestedScroller) {
       const nestedBounds = nestedScroller.getBoundingClientRect();
       const activeBounds = active.getBoundingClientRect();
