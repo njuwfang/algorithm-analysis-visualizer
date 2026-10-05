@@ -132,10 +132,112 @@ test("Quickselect best and worst cases match the lecture counts", () => {
   }
 });
 
+test("decreasing-order Quickselect alternates extreme pivots and retains one fewer middle-rank candidate", () => {
+  for (let n = 1; n <= 10; n += 1) {
+    const values = Array.from({ length: n }, (_, index) => n - index);
+    const k = Math.ceil(n / 2);
+    const trace = buildQuickselectTrace({ values, k });
+    const final = trace.at(-1);
+    const sizes = Array.from({ length: n }, (_, index) => n - index);
+    assert.equal(final.result, k, `n=${n}, middle rank=${k}`);
+    assert.equal(final.resultIndex, k - 1);
+    assert.equal(final.comparisons, n * (n - 1) / 2);
+    assert.deepEqual(final.completedPartitionSizes, sizes.slice(0, -1));
+    assert.deepEqual(trace.filter((step) => step.phase === "call").map((step) => step.r - step.l + 1), sizes);
+    assert.deepEqual(candidateSizes(final), sizes);
+    assert.equal(descriptionValue(quickselectModule, final, "Candidate-size progression"), sizes.join(" → "));
+    assert.equal(descriptionValue(quickselectModule, final, "Returned value"), `A[${k - 1}] = ${k}, rank ${k}`);
+    const starts = trace.filter((step) => step.phase === "partition-start");
+    const returns = trace.filter((step) => step.phase === "partition-return");
+    assert.equal(starts.length, n - 1);
+    for (let partition = 0; partition < starts.length; partition += 1) {
+      const start = starts[partition];
+      const returned = returns[partition];
+      const candidates = start.values.slice(start.l, start.r + 1);
+      const maximumPivot = partition % 2 === 0;
+      assert.equal(start.p, start.values[start.l], "the pivot is the active interval's first value");
+      assert.equal(start.p, maximumPivot ? Math.max(...candidates) : Math.min(...candidates), "first-element pivots alternate between the active maximum and minimum");
+      assert.equal(returned.m, maximumPivot ? start.r : start.l, "each extreme pivot lands at an active interval endpoint");
+      assert.equal(returned.m, maximumPivot ? n - 1 - partition / 2 : (partition - 1) / 2, "absolute pivot ranks alternate highest and lowest remaining ranks");
+      assert.equal(returned.partitionComparisons, candidates.length - 1);
+    }
+    assert.ok(trace.filter((step) => step.phase === "compare").every((step) => step.activeLine === 12));
+    assertComparisonEvents(trace);
+    const counts = sizes.slice(0, -1).map((size) => size - 1);
+    assert.ok(quickselectModule.model(final).latex.replaceAll("\\\\&\\quad", "").includes(counts.length ? `${counts.join("+")}=${final.comparisons}` : "C_{\\text{trace}}&=0"), "the model sums exactly the executed partition comparisons, regardless of wrapping");
+  }
+});
+
+test("decreasing-order Quickselect returns the largest first pivot after one partition", () => {
+  for (let n = 1; n <= 10; n += 1) {
+    const values = Array.from({ length: n }, (_, index) => n - index);
+    const trace = buildQuickselectTrace({ values, k: n });
+    const final = trace.at(-1);
+    assert.equal(final.result, n);
+    assert.equal(final.resultIndex, n - 1);
+    assert.equal(final.comparisons, n - 1);
+    assert.deepEqual(final.completedPartitionSizes, n === 1 ? [] : [n]);
+    assert.deepEqual(candidateSizes(final), n === 1 ? [1] : [n, 1]);
+    assert.equal(trace.filter((step) => step.phase === "partition-return").length, n === 1 ? 0 : 1);
+    assert.equal(trace.filter((step) => step.phase === "call").length, 1, "the selected maximum needs no recursive subarray");
+    if (n > 1) {
+      const returned = trace.find((step) => step.phase === "partition-return");
+      assert.equal(returned.p, n);
+      assert.equal(returned.m, n - 1);
+      assert.ok(quickselectModule.model(final).latex.replaceAll("\\\\&\\quad", "").includes(`${n - 1}=${n - 1}`));
+    }
+    assertComparisonEvents(trace);
+  }
+});
+
+test("Quickselect's decreasing-order presets distinguish middle and largest ranks", () => {
+  const values = [15, 12, 10, 9, 8, 7, 4, 2, 1];
+  const cases = [
+    { label: "Decreasing: middle", k: 5, result: 8, count: 36, partitions: [9, 8, 7, 6, 5, 4, 3, 2], retained: [9, 8, 7, 6, 5, 4, 3, 2, 1], sum: "8+7+6+5+4+3+2+1=36" },
+    { label: "Decreasing: largest", k: 9, result: 15, count: 8, partitions: [9], retained: [9, 1], sum: "8=8" }
+  ];
+  for (const expected of cases) {
+    const preset = quickselectModule.input.presets.find(({ label }) => label === expected.label);
+    assert.ok(preset, `the chooser includes ${expected.label}`);
+    const input = quickselectModule.input.parse(preset.value);
+    assert.deepEqual(input, { values, k: expected.k });
+    const trace = quickselectModule.buildTrace(input);
+    const final = trace.at(-1);
+    assert.equal(final.result, expected.result);
+    assert.equal(final.resultIndex, expected.k - 1);
+    assert.equal(final.comparisons, expected.count);
+    assert.deepEqual(final.completedPartitionSizes, expected.partitions);
+    assert.deepEqual(candidateSizes(final), expected.retained);
+    assert.equal(descriptionValue(quickselectModule, final, "Candidate-size progression"), expected.retained.join(" → "));
+    assert.equal(descriptionValue(quickselectModule, final, "Returned value"), `A[${expected.k - 1}] = ${expected.result}, rank ${expected.k}`);
+    assert.ok(quickselectModule.model(final).latex.replaceAll("\\\\&\\quad", "").includes(expected.sum));
+    if (expected.k === 5) assert.deepEqual(final.values, [...values].sort((a, b) => a - b), "the middle-rank trace has reordered the input by completion");
+    for (const step of trace) {
+      assert.equal(step.k, expected.k, "the global rank is retained across subarray reductions");
+      assert.equal(step.inputOrder, "strictly decreasing", "initial-order metadata survives every partition swap");
+      assert.equal(descriptionValue(quickselectModule, step, "Initial order"), "strictly decreasing", "the text reports original order even when the current array has become increasing");
+      assert.equal(descriptionValue(quickselectModule, step, "Key comparisons"), String(step.comparisons));
+      assert.equal(quickselectModule.metrics(step)[0].value, step.comparisons);
+    }
+    assertComparisonEvents(trace);
+  }
+  const increasing = quickselectModule.input.presets.find(({ label }) => label === "Increasing: largest");
+  assert.ok(increasing, "the existing increasing-order case has an explicit order label");
+  assert.deepEqual(quickselectModule.input.parse(increasing.value), { values: [...values].reverse(), k: 9 });
+  for (const step of quickselectModule.buildTrace(quickselectModule.input.parse(increasing.value))) {
+    assert.equal(step.inputOrder, "strictly increasing");
+    assert.equal(descriptionValue(quickselectModule, step, "Initial order"), "strictly increasing");
+  }
+});
+
 test("singleton and equal-key traces reveal the strict comparison and base case", () => {
   const singleton = buildQuickselectTrace({ values: [4], k: 1 });
   assert.deepEqual(singleton.map((step) => step.phase), ["call", "singleton", "complete"]);
   assert.equal(singleton.at(-1).comparisons, 0);
+  for (const step of singleton) {
+    assert.equal(step.inputOrder, "singleton");
+    assert.equal(descriptionValue(quickselectModule, step, "Initial order"), "singleton");
+  }
   const equal = buildLomutoPartitionTrace([4, 4, 4]);
   assert.equal(equal.at(-1).m, 0);
   assert.ok(equal.filter((step) => step.phase === "compare").every((step) => step.comparisonResult === false));

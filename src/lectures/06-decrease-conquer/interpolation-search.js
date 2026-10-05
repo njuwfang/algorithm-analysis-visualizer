@@ -3,6 +3,28 @@ import { parseBinarySearchInput } from "./binary-search.js";
 
 const LECTURE_ARRAY = "3,14,27,31,39,42,55,70,74,81,85,93,98";
 
+function valuePattern(lst) {
+  if (lst.length < 2 || lst.every((value) => value === lst[0])) return "equal endpoints";
+  const gap = lst[1] - lst[0];
+  if (lst.every((value, index) => index === 0 || value - lst[index - 1] === gap)) return "even spacing";
+  if (lst[0] > 0 && lst.every((value, index) => index === 0 || value === 2 * lst[index - 1])) return "doubling values";
+  if (lst.length >= 3 && lst.slice(0, -1).every((value, index) => value === lst[0] + index)
+    && lst.at(-1) - lst.at(-2) > (lst.length - 1) ** 2) return "large final outlier";
+  if (lst.join(",") === LECTURE_ARRAY) return "near-linear lecture list";
+  return "sorted values";
+}
+
+function patternExplanation(step) {
+  switch (valuePattern(step.lst)) {
+    case "even spacing": return "Equal spacing makes a key's value fraction match its index fraction, so the line gives an accurate estimate.";
+    case "doubling values": return "Values grow exponentially while the estimate uses a straight line; probes can repeatedly guess too far left.";
+    case "large final outlier": return "The huge endpoint stretches the denominator; estimates for keys in the consecutive prefix stay near l.";
+    case "near-linear lecture list": return "This list comes from the lecture's binary-search example. Its nearly linear spacing gives close interpolation estimates.";
+    case "equal endpoints": return "Equal endpoint values use x = l directly, avoiding division by zero.";
+    default: return "Compare the plotted values with the endpoint line to see how well the linear estimate fits this input.";
+  }
+}
+
 export function parseInterpolationSearchInput(raw) {
   const { array, key } = parseBinarySearchInput(raw);
   return { lst: array, key };
@@ -45,7 +67,7 @@ export function buildInterpolationSearchTrace({ lst: inputList, key }) {
     }
     probes += 1;
     comparison = key === lst[x] ? "=" : key < lst[x] ? "<" : ">";
-    history.push({ index: x, value: lst[x], relation: comparison });
+    history.push({ index: x, value: lst[x], relation: comparison, candidateSize: r - l + 1 });
     emit("probe", 5, `Probe lst[${x}] = ${lst[x]}: key = ${key} ${comparison} lst[${x}].`);
     if (comparison === "=") {
       result = x;
@@ -85,6 +107,10 @@ function renderEstimate(step) {
   const points = step.lst.map((value, index) => `<circle cx="${plotX(index)}" cy="${plotY(value)}" r="3" class="decrease-search-point ${index < step.l || index > step.r ? "is-excluded" : ""}"/>`).join("");
   const atLeftEndpoint = showEstimate && bounds && Math.abs(step.estimate - bounds[0]) < 1e-9;
   const atRightEndpoint = showEstimate && bounds && Math.abs(step.estimate - bounds[1]) < 1e-9;
+  const estimateNearEndpoint = showEstimate && bounds && Math.min(
+    Math.abs(plotX(step.estimate) - plotX(bounds[0])),
+    Math.abs(plotX(step.estimate) - plotX(bounds[1]))
+  ) < 32;
   const leftIndexLabel = bounds && bounds[0] === bounds[1] ? `${showEstimate ? "l=r=x" : "l=r"}=${bounds[0]}` : `${atLeftEndpoint ? "l,x" : "l"}=${bounds?.[0]}`;
   const rightIndexLabel = `${atRightEndpoint ? "r,x" : "r"}=${bounds?.[1]}`;
   const endpointLine = bounds ? `<path class="decrease-search-line" d="M ${plotX(bounds[0])} ${plotY(step.lst[bounds[0]])} L ${plotX(bounds[1])} ${plotY(step.lst[bounds[1]])}"/>
@@ -96,7 +122,7 @@ function renderEstimate(step) {
     ? `<rect class="decrease-search-estimate" x="${plotX(step.x) - 4}" y="${plotY(step.key) - 4}" width="8" height="8"/>`
     : `<path class="decrease-search-guide" d="M ${left - 5} ${plotY(step.key)} H ${plotX(step.estimate)} V ${bottom + 3}"/>
     <circle class="decrease-search-estimate" cx="${plotX(step.estimate)}" cy="${plotY(step.key)}" r="5"/>
-    ${atLeftEndpoint || atRightEndpoint ? "" : `<text x="${plotX(step.estimate)}" y="112" text-anchor="middle">x</text>`}
+    ${estimateNearEndpoint ? "" : `<text x="${plotX(step.estimate)}" y="112" text-anchor="middle">x</text>`}
     <text x="${left - 8}" y="${plotY(step.key) + 4}" text-anchor="end">key</text>` : "";
   const probe = step.phase === "probe" ? `<circle class="decrease-search-probe" cx="${plotX(step.x)}" cy="${plotY(step.lst[step.x])}" r="7"/>` : "";
   return `<svg class="decrease-search-plot" viewBox="0 0 400 118" aria-hidden="true">
@@ -129,8 +155,9 @@ function renderInterpolationStrip(step) {
   const n = step.lst.length;
   const hasCandidates = step.l <= step.r;
   const current = currentEstimate(step);
-  const cellWidth = Math.max(36, ...step.lst.map((value) => String(value).length * 9 + 12));
-  const phoneCellWidth = Math.max(22, ...step.lst.map((value) => String(value).length * 7.8 + 6));
+  const cellWidths = step.lst.map((value) => Math.max(36, String(value).length * 9.6 + 8));
+  const phoneCellWidths = step.lst.map((value) => Math.max(22, String(value).length * 8.4 + 6));
+  const columns = (widths) => widths.map((width) => `minmax(${width}px, 1fr)`).join(" ");
   const cells = step.lst.map((value, index) => {
     const isX = index === step.x;
     const roles = [index === step.l && hasCandidates ? "l" : "", isX ? current ? "x" : "x*" : "",
@@ -145,7 +172,7 @@ function renderInterpolationStrip(step) {
   }).join("");
   const discarded = (start, length) => length > 0 ? `<span class="binary-search-band is-discarded" style="grid-column:${start + 1}/span ${length}">${length >= 3 ? "× discarded" : "×"}</span>` : "";
   const bands = hasCandidates ? `${discarded(0, step.l)}<span class="binary-search-band is-retained" style="grid-column:${step.l + 1}/span ${step.r - step.l + 1}"></span>${discarded(step.r + 1, n - step.r - 1)}` : discarded(0, n);
-  return `<div class="binary-search-scroll" data-visual-scroll><div class="binary-search-strip ${hasCandidates && step.l === step.r && step.x === step.l ? "has-shared-bounds" : ""}" style="--binary-items:${n};--binary-cell-width:${cellWidth}px;--binary-phone-cell-width:${phoneCellWidth}px">
+  return `<div class="binary-search-scroll" data-visual-scroll><div class="binary-search-strip ${hasCandidates && step.l === step.r && step.x === step.l ? "has-shared-bounds" : ""}" style="--binary-items:${n};--interpolation-columns:${columns(cellWidths)};--interpolation-phone-columns:${columns(phoneCellWidths)};--interpolation-min-width:${cellWidths.reduce((sum, width) => sum + width, 0)}px;--interpolation-phone-min-width:${phoneCellWidths.reduce((sum, width) => sum + width, 0)}px">
     <div class="binary-search-array">${cells}</div><div class="binary-search-bands">${bands}</div>
   </div></div>`;
 }
@@ -171,7 +198,10 @@ export const interpolationSearchModule = {
     hint: "Enter 1–13 sorted integers and a key, separated by |. Values range from −1,000,000 to 1,000,000; x is rounded down.",
     default: `${LECTURE_ARRAY} | 70`,
     presets: [
-      { label: "Lecture array, key 70", value: `${LECTURE_ARRAY} | 70` },
+      { label: "Lecture list: near-linear", value: `${LECTURE_ARRAY} | 70` },
+      { label: "Evenly spaced values", value: "0,10,20,30,40,50,60,70,80,90 | 70" },
+      { label: "Doubling values", value: "1,2,4,8,16,32,64,128,256,512 | 32" },
+      { label: "Huge final value", value: "1,2,3,4,5,6,7,8,9,1000000 | 9" },
       { label: "Missing key", value: `${LECTURE_ARRAY} | 71` },
       { label: "Equal endpoints", value: "70,70,70 | 70" },
       { label: "Outside value range", value: `${LECTURE_ARRAY} | 99` }
@@ -199,6 +229,8 @@ export const interpolationSearchModule = {
       summary: step.message,
       state: [
         { label: "List lst", value: step.lst.map((value, index) => `lst[${index}] = ${value}`).join("; ") },
+        { label: "List size n", value: String(step.lst.length) },
+        { label: "Value pattern", value: valuePattern(step.lst) },
         { label: "Search key", value: String(step.key) },
         { label: "Bounds", value: `l = ${step.l}; r = ${step.r}` },
         { label: "Candidate indices", value: step.l <= step.r ? Array.from({ length: step.r - step.l + 1 }, (_, index) => index + step.l).join(", ") : "none" },
@@ -212,6 +244,7 @@ export const interpolationSearchModule = {
         { label: "Comparison result", value: step.comparison === null ? "not evaluated" : `key ${step.comparison} lst[${step.x}]` },
         { label: "Excluded indices", value: step.lst.map((_, index) => index).filter((index) => index < step.l || index > step.r).join(", ") || "none" },
         { label: "Probe results", value: step.history.length ? step.history.map((probe) => `lst[${probe.index}] = ${probe.value}: key ${probe.relation} lst[${probe.index}]`).join("; ") : "none" },
+        { label: "Candidate sizes at probes", value: step.history.length ? step.history.map((probe) => probe.candidateSize).join(" → ") : "none" },
         { label: "Probes", value: String(step.probes) },
         { label: "Result", value: step.result === null ? "not returned" : step.result === -1 ? "−1: key not found" : `index ${step.result}, lst[${step.result}] = ${step.key}` }
       ]
@@ -219,12 +252,18 @@ export const interpolationSearchModule = {
   },
   metrics: (step) => [{ label: "Probes", value: step.probes, emphasis: true }],
   model(step) {
+    const complete = step.phase === "complete";
+    const linearOutlier = valuePattern(step.lst) === "large final outlier" && step.key === step.lst.at(-2);
     return {
-      latex: step.phase === "complete"
-        ? "\\begin{gathered}x=l+\\frac{(key-lst[l])(r-l)}{lst[r]-lst[l]}\\\\T_{\\mathrm{avg}}(n)<\\log\\log n+1,\\qquad T_{\\mathrm{worst}}(n)=n\\end{gathered}"
+      latex: complete
+        ? `\\begin{gathered}P_{\\mathrm{trace}}=${step.probes},\\quad n=${step.lst.length}\\\\${linearOutlier ? "P_{\\mathrm{family}}(n)=n-1\\in\\Theta(n)\\\\" : ""}T_{\\mathrm{avg}}(n)<\\log\\log n+1,\\qquad T_{\\mathrm{worst}}(n)=n\\end{gathered}`
         : "x=l+\\frac{(key-lst[l])(r-l)}{lst[r]-lst[l]}",
-      notes: ["The lecture's real-valued x is rounded down for the array index; equal endpoint values use l directly.",
-        ...(step.phase === "complete" ? ["The average-case expression is reported as written in the lecture, with its linear-growth premise; this trace does not establish an average-case guarantee."] : [])]
+      notes: [patternExplanation(step),
+        ...(complete ? [
+          `Probe indices: ${step.history.length ? step.history.map((probe) => probe.index).join(" → ") : "none"}. Candidate sizes at probes: ${step.history.length ? step.history.map((probe) => probe.candidateSize).join(" → ") : "none"}.`,
+          ...(linearOutlier ? ["For the family [a, a+1, …, a+n−2, a+n²], search for a+n−2: flooring gives x=l, so each miss removes one candidate; the successful search uses n−1 probes."] : []),
+          "P_trace counts this input's probes. Slide 92 reports the T expressions as its efficiency summary. The log log n average describes an expectation under uniform-key assumptions."
+        ] : ["Round the real estimate down for the array index; equal endpoint values use l directly."])]
     };
   },
   analysis: [
@@ -233,6 +272,10 @@ export const interpolationSearchModule = {
     { term: "Estimate", value: "The x-coordinate at height key on the line through (l,lst[l]) and (r,lst[r])" },
     { term: "Conventions", value: "Reconstructed procedure; floor x, stop on an empty or out-of-range interval, and use x=l when endpoint values are equal" },
     { term: "Lecture analysis", value: "Slide 92 reports Tavg(n) < log log n + 1 and Tworst(n) = n; it does not supply a distribution or define its cost unit" },
+    { term: "Fast examples", value: "The near-linear lecture list takes two probes. Exactly equal spacing takes one probe for a present key; this is a special case of an accurate estimate." },
+    { term: "Average-case assumption", value: "The expected log log n analysis assumes uniformly distributed keys. These small deterministic examples illustrate the mechanism; asymptotic average growth concerns a family of random inputs." },
+    { term: "Slow examples", value: "Doubling values can make the line underestimate the index. Consecutive small values followed by a huge endpoint can make floor(x)=l, removing one candidate per failed probe." },
+    { term: "Linear worst-case family", value: "For [a, a+1, …, a+n−2, a+n²] and key a+n−2, the rounded probes visit indices 0 through n−2: exactly n−1 probes, Θ(n)." },
     { term: "Scope", value: "The small deterministic traces illustrate estimates; they do not measure the lecture's large-list recommendation" }
   ]
 };

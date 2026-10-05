@@ -125,6 +125,74 @@ test("interpolation drawings distinguish a remembered probe's origin from reduce
   assert.equal(stateValue(interpolationSearchModule, nextEstimate, "Probe role"), "current estimate");
 });
 
+test("interpolation presets expose accurate estimates and slow nonlinear cases", () => {
+  const cases = [
+    { lst: [3, 14, 27, 31, 39, 42, 55, 70, 74, 81, 85, 93, 98], key: 70, indices: [8, 7], sizes: [13, 8] },
+    { lst: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90], key: 70, indices: [7], sizes: [10] },
+    { lst: [1, 2, 4, 8, 16, 32, 64, 128, 256, 512], key: 32, indices: [0, 1, 2, 3, 4, 5], sizes: [10, 9, 8, 7, 6, 5] },
+    { lst: [1, 2, 3, 4, 5, 6, 7, 8, 9, 1_000_000], key: 9, indices: [0, 1, 2, 3, 4, 5, 6, 7, 8], sizes: [10, 9, 8, 7, 6, 5, 4, 3, 2] }
+  ];
+  for (const expected of cases) {
+    const preset = interpolationSearchModule.input.presets.find(({ value }) => {
+      const parsed = interpolationSearchModule.input.parse(value);
+      return parsed.key === expected.key && JSON.stringify(parsed.lst) === JSON.stringify(expected.lst);
+    });
+    assert.ok(preset, `the chooser includes ${expected.lst} | ${expected.key}`);
+    const input = interpolationSearchModule.input.parse(preset.value);
+    const trace = buildInterpolationSearchTrace(input);
+    const probes = trace.filter((step) => step.phase === "probe");
+    assert.deepEqual(probes.map((step) => step.x), expected.indices, preset.label);
+    assert.deepEqual(probes.map((step) => step.r - step.l + 1), expected.sizes, "recorded sizes are candidate intervals before each probe");
+    assert.equal(trace.at(-1).result, expected.indices.at(-1));
+    assert.equal(trace.at(-1).probes, expected.indices.length);
+    assert.deepEqual(probes.map((step) => step.comparison), expected.indices.map((_, index) => index === expected.indices.length - 1 ? "=" : expected.lst[expected.indices[index]] < expected.key ? ">" : "<"));
+    assertCountedEvents(trace, "probe", "probes", 5);
+    for (let index = 1; index < probes.length; index += 1) {
+      assert.ok(expected.sizes[index] < expected.sizes[index - 1], "each unsuccessful probe strictly reduces the next candidate interval");
+    }
+    for (const step of trace) {
+      assert.equal(interpolationSearchModule.metrics(step)[0].label, "Probes");
+      assert.equal(stateValue(interpolationSearchModule, step, "Probes"), String(step.probes));
+      assert.equal(stateValue(interpolationSearchModule, step, "List size n"), String(expected.lst.length));
+      const recordedSizes = expected.sizes.slice(0, step.probes);
+      assert.deepEqual(step.history.map((probe) => probe.candidateSize), recordedSizes, "history preserves each counted probe's original candidate size after later reductions");
+      assert.equal(stateValue(interpolationSearchModule, step, "Candidate sizes at probes"), recordedSizes.join(" → ") || "none", "the text sizes are exactly the counted-probe history");
+      assert.equal(stateValue(interpolationSearchModule, step, "Value pattern"), stateValue(interpolationSearchModule, trace[0], "Value pattern"), "the input pattern keeps the same meaning throughout the trace");
+    }
+    assert.ok(stateValue(interpolationSearchModule, trace[0], "Value pattern")?.length, "the nonvisual state identifies the list's value pattern");
+  }
+});
+
+test("interpolation's final-outlier family takes exactly n−1 probes under floor and the endpoint guard", () => {
+  // The pure trace is tested beyond the UI's 13-key limit to check growth of
+  // the family, not to introduce a larger classroom drawing.
+  for (let n = 3; n <= 40; n += 1) {
+    const lst = [...Array.from({ length: n - 1 }, (_, index) => index), n * n];
+    const key = n - 2;
+    const trace = buildInterpolationSearchTrace({ lst, key });
+    const probes = trace.filter((step) => step.phase === "probe");
+    assert.equal(trace.at(-1).result, n - 2);
+    assert.equal(trace.at(-1).probes, n - 1, `n=${n}`);
+    assert.deepEqual(probes.map((step) => step.x), Array.from({ length: n - 1 }, (_, index) => index));
+    assert.deepEqual(probes.map((step) => step.r - step.l + 1), Array.from({ length: n - 1 }, (_, index) => n - index));
+    for (const step of probes) {
+      assert.equal(step.r, n - 1, "the large final outlier stays in the candidate interval");
+      assert.equal(step.x, step.l, "floor makes the probe advance by only one position");
+      assert.equal(step.x, Math.floor(step.estimate));
+      assert.ok(step.estimate >= step.l && step.estimate < step.l + 1);
+      assert.ok(key >= lst[step.l] && key <= lst[step.r], "every counted probe satisfies the endpoint guard");
+      assert.equal(step.comparison, step.l === n - 2 ? "=" : ">");
+    }
+    for (const step of trace) {
+      const recordedSizes = Array.from({ length: step.probes }, (_, index) => n - index);
+      assert.deepEqual(step.history.map((probe) => probe.candidateSize), recordedSizes);
+      assert.equal(stateValue(interpolationSearchModule, step, "Candidate sizes at probes"), recordedSizes.join(" → ") || "none");
+      assert.equal(stateValue(interpolationSearchModule, step, "List size n"), String(n));
+    }
+    assertCountedEvents(trace, "probe", "probes", 5);
+  }
+});
+
 test("interpolation handles equal endpoints, duplicates, out-of-range keys, and missing keys", () => {
   const cases = [
     { lst: [70], key: 70, result: 0, probes: 1 },

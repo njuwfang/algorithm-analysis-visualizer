@@ -543,6 +543,15 @@
   padding-bottom: 2px;
 }
 
+.interpolation-search-board .binary-search-strip {
+  min-width: calc(var(--interpolation-min-width) + (var(--binary-items) - 1) * var(--binary-gap));
+}
+
+.interpolation-search-board .binary-search-array,
+.interpolation-search-board .binary-search-bands {
+  grid-template-columns: var(--interpolation-columns);
+}
+
 .interpolation-search-board .binary-search-cell {
   grid-template-rows: 29px 18px 30px;
 }
@@ -567,6 +576,17 @@
 .interpolation-search-board .binary-search-band {
   font-size: 0.75rem;
   line-height: 1.2;
+}
+
+@media (max-width: 580px) {
+  .interpolation-search-board .binary-search-strip {
+    min-width: calc(var(--interpolation-phone-min-width) + (var(--binary-items) - 1) * var(--binary-gap));
+  }
+
+  .interpolation-search-board .binary-search-array,
+  .interpolation-search-board .binary-search-bands {
+    grid-template-columns: var(--interpolation-phone-columns);
+  }
 }
 
 .binary-search-cell.is-previous-probe .binary-search-value {

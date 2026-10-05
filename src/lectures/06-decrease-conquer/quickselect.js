@@ -13,8 +13,17 @@ export function parseQuickselectInput(raw) {
   return { values, k };
 }
 
+function initialOrder(values) {
+  if (values.length === 1) return "singleton";
+  if (values.every((value) => value === values[0])) return "all equal";
+  if (values.every((value, index) => index === 0 || value > values[index - 1])) return "strictly increasing";
+  if (values.every((value, index) => index === 0 || value < values[index - 1])) return "strictly decreasing";
+  return "mixed order or repeated keys";
+}
+
 export function buildQuickselectTrace(input) {
   let values = [...input.values];
+  const inputOrder = initialOrder(values);
   const k = input.k;
   const targetIndex = k - 1;
   let l = 0;
@@ -30,7 +39,7 @@ export function buildQuickselectTrace(input) {
       processedThrough: l - 1, partitioned: false,
       comparisons, partitionComparisons: 0, partitionNumber,
       comparisonResult: null, swapIndices: [],
-      k, targetIndex, retainedL: l, retainedR: r,
+      k, targetIndex, inputOrder, retainedL: l, retainedR: r,
       completedPartitionSizes: [...completedPartitionSizes],
       result: null, resultIndex: null, rankDecision: "not evaluated"
     };
@@ -133,6 +142,7 @@ function describeQuickselect(step) {
     summary: step.message,
     state: [
       { label: "Target rank", value: `global k = ${step.k}; absolute target index k − 1 = ${step.targetIndex}` },
+      { label: "Initial order", value: step.inputOrder },
       ...describePartitionState(step),
       { label: "Retained candidates", value: indexedRegion(step, step.retainedL, step.retainedR) },
       { label: "Discarded positions", value: discarded },
@@ -160,7 +170,9 @@ export const quickselectModule = {
     presets: [
       { label: "Lecture: k = 5", value: "4, 1, 10, 8, 7, 12, 9, 2, 15 | 5" },
       { label: "First pivot is target", value: "4, 1, 10, 8, 7, 12, 9, 2, 15 | 3" },
-      { label: "Sorted: largest", value: "1, 2, 4, 7, 8, 9, 10, 12, 15 | 9" },
+      { label: "Increasing: largest", value: "1, 2, 4, 7, 8, 9, 10, 12, 15 | 9" },
+      { label: "Decreasing: middle", value: "15, 12, 10, 9, 8, 7, 4, 2, 1 | 5" },
+      { label: "Decreasing: largest", value: "15, 12, 10, 9, 8, 7, 4, 2, 1 | 9" },
       { label: "Equal keys", value: "4, 4, 4, 4 | 3" },
       { label: "Singleton", value: "4 | 1" }
     ],
@@ -195,12 +207,20 @@ export const quickselectModule = {
       notes: ["Count only comparisons A[i] < p inside LomutoPartition; index tests and swaps are excluded."]
     };
     const counts = step.completedPartitionSizes.map((size) => size - 1);
-    const total = counts.join("+") || "0";
+    const split = Math.ceil(counts.length / 2);
+    const total = counts.length > 5
+      ? `${counts.slice(0, split).join("+")}\\\\&\\quad+${counts.slice(split).join("+")}`
+      : counts.join("+") || "0";
+    const decreasing = step.inputOrder === "strictly decreasing";
     return {
       latex: `\\begin{aligned}C_{\\text{trace}}&=${total}${counts.length ? `=${step.comparisons}` : ""}\\\\C_b(n)&=n-1\\in\\Theta(n)\\\\C_w(n)&=\\sum_{j=1}^{n-1}j=\\frac{n(n-1)}{2}\\in\\Theta(n^2)\\end{aligned}`,
       notes: [
-        "Best case: the first partition places the pivot at the target index, using n − 1 key comparisons.",
-        "Worst case: the retained part has one fewer element each time; the sorted input selecting the largest value realizes this case.",
+        decreasing && step.k === step.values.length
+          ? "Decreasing order, largest rank: the largest value is the first pivot, so this input finishes in one partition with n − 1 comparisons."
+          : "Best case: the first partition places the pivot at the target index, using n − 1 key comparisons.",
+        decreasing && step.k === Math.ceil(step.values.length / 2)
+          ? "Decreasing order, middle rank: pivots alternate between the largest and smallest remaining key. Each retained part loses one element, so this input realizes the full worst-case sum."
+          : "Worst case: the retained part has one fewer element each time; the increasing input selecting the largest value realizes this case.",
         "The singleton base case uses zero comparisons; the array is partitioned only as far as selection requires."
       ]
     };
@@ -212,6 +232,7 @@ export const quickselectModule = {
     { term: "Rank convention", value: "Slide 105 mixes an absolute m with an adjusted local k. This trace follows the worked diagrams: keep global one-based k, compare absolute m to k − 1, and retain k on the right" },
     { term: "Base case", value: "A singleton returns its only value without partitioning; this explicit guard completes the slide pseudocode" },
     { term: "Best case", value: "The first pivot is the desired order statistic: n − 1 comparisons, Θ(n)" },
-    { term: "Worst case", value: "Successive retained sizes n−1, n−2, …, 1 give n(n−1)/2 comparisons, Θ(n²)" }
+    { term: "Worst case", value: "Successive retained sizes n−1, n−2, …, 1 give n(n−1)/2 comparisons, Θ(n²)" },
+    { term: "Decreasing order", value: "The largest value is the first pivot, so rank n finishes after one partition. For middle rank ⌈n/2⌉, the largest and smallest remaining pivots alternate; each retained part loses one element, realizing the quadratic worst case." }
   ]
 };
