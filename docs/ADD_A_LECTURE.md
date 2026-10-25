@@ -62,6 +62,11 @@ For a worked process that is not an algorithm, such as a theorem decision rule, 
 codeTitle: "Theorem cases"
 ```
 
+When students need the whole algorithm in view, set `codeLayout: "expanded"`.
+The full pseudocode then flows beside the drawing and controls on desktop, and
+below the controls on phones. The drawing keeps its stable height; the algorithm
+reference grows with its contents and has no inner scrolling window.
+
 When a line is mathematical rather than pseudocode, provide `latex` instead of `text` and a concise `spoken` equivalent for live step announcements:
 
 ```js

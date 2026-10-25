@@ -70,6 +70,9 @@ export function validateModule(module, lectureId) {
   if (module.codeTitle !== undefined) {
     assert(typeof module.codeTitle === "string" && module.codeTitle.trim(), `${prefix}.codeTitle must be a non-empty string.`);
   }
+  if (module.codeLayout !== undefined) {
+    assert(module.codeLayout === "expanded", `${prefix}.codeLayout must be "expanded" when provided.`);
+  }
 
   assert(module.source && typeof module.source.slides === "string" && module.source.slides.trim(), `${prefix}.source.slides is required.`);
   assert(module.input && typeof module.input === "object", `${prefix}.input is required.`);

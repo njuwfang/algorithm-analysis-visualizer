@@ -32,7 +32,12 @@ test("registry exposes unique lecture/module routes", () => {
     "06-decrease-conquer/interpolation-search",
     "06-decrease-conquer/euclid-gcd",
     "06-decrease-conquer/lomuto-partition",
-    "06-decrease-conquer/quickselect"
+    "06-decrease-conquer/quickselect",
+    "07-divide-conquer/merge",
+    "07-divide-conquer/mergesort",
+    "07-divide-conquer/integer-multiplication",
+    "07-divide-conquer/fft-multiplication",
+    "07-divide-conquer/strassen"
   ];
   assert.deepEqual(keys, expectedRoutes);
   assert.ok(!keys.includes("03-analysis/max-element"));

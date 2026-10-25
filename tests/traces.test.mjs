@@ -267,6 +267,17 @@ test("Master Theorem intuition remains correct for fractional exponents", () => 
 });
 
 
+test("Master Theorem final bounds preserve fractional exponents exactly", () => {
+  for (const raw of ["3,2,1.584962500721156,16", "1,2,0.123456789,16"]) {
+    const input = parseMasterTheoremInput(raw);
+    const final = masterTheoremModule.buildTrace(input).at(-1);
+    const exponent = String(input.d);
+    assert.ok(final.result.text.includes(`n^${exponent}`), `${raw}: final text exponent`);
+    assert.ok(masterTheoremModule.model(final).latex.includes(`n^{${exponent}}`), `${raw}: final LaTeX exponent`);
+  }
+});
+
+
 test("every module rejects an empty input with a readable error", () => {
   for (const { module } of routes) {
     assert.throws(

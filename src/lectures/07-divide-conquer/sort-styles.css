@@ -1,0 +1,56 @@
+/* Lecture 07: current merge heads, output flow, and retained recursive results. */
+.dc-merge-mechanism,
+.dc-mergesort-visual { width: min(100%, 800px); min-width: 0; font-family: var(--mono); }
+.dc-merge-scroll,
+.dc-mergesort-tree-scroll,
+.dc-mergesort-focus-scroll { width: 100%; min-width: 0; overflow: auto; }
+.dc-merge-board { width: 100%; min-width: var(--dc-min-width); }
+.dc-merge-inputs { display: grid; }
+.dc-merge-run { min-width: 0; }
+.dc-merge-run + .dc-merge-run { border-left: 1px solid var(--border-strong); }
+.dc-merge-run-label { display: flex; justify-content: space-between; align-items: baseline; gap: 4px; min-height: 17px; padding-inline: 3px; color: var(--brand-deep); font-size: 12px; line-height: 15px; }
+.dc-merge-run-label span { color: var(--muted); }
+.dc-merge-values { display: grid; grid-template-columns: repeat(var(--dc-cells), minmax(0, 1fr)); list-style: none; margin: 0; padding: 0; }
+.dc-merge-cell { position: relative; height: 68px; min-width: 0; padding-inline: 2px; }
+.dc-merge-pointer { position: absolute; top: 0; left: 0; width: 100%; color: var(--brand-deep); font-size: 12px; line-height: 14px; text-align: center; }
+.dc-merge-bar { position: absolute; bottom: 15px; left: 2px; right: 2px; display: grid; align-content: center; justify-content: center; height: calc(40px * var(--dc-height)); min-height: 22px; color: var(--ink); background: var(--brand-soft); border: 1px solid var(--brand); font-size: 14px; line-height: 16px; font-weight: 750; }
+.dc-merge-index { position: absolute; bottom: 0; left: 0; width: 100%; text-align: center; color: var(--muted); font-size: 12px; line-height: 14px; }
+.dc-merge-cell.is-consumed .dc-merge-bar { color: var(--muted); background: var(--surface-strong); border-color: var(--border-strong); border-style: dashed; }
+.dc-merge-cell.is-counted .dc-merge-bar { color: #17655f; background: var(--teal-soft); border: 2px solid var(--teal); }
+.dc-merge-cell.is-written .dc-merge-bar { color: var(--success); background: var(--success-soft); border-color: var(--success); }
+.dc-merge-cell.is-empty .dc-merge-bar { color: var(--muted); background: transparent; border: 1px dashed var(--border-strong); }
+.dc-merge-cell.is-copy .dc-merge-bar { color: #70400b; background: var(--accent-soft); border: 2px solid var(--accent); }
+.dc-merge-flow { display: block; width: 100%; height: 24px; fill: none; stroke: var(--accent); stroke-width: 1.8; }
+.dc-merge-flow path { vector-effect: non-scaling-stroke; }
+.dc-merge-output { position: relative; }
+.dc-merge-output-label { position: absolute; left: 1px; top: 0; color: var(--brand-deep); font-size: 12px; line-height: 14px; font-weight: 750; }
+.dc-merge-empty { display: grid; place-items: center; height: 68px; color: var(--muted); font-size: 12px; }
+.dc-merge-relation { margin: 5px 0 0; min-height: 17px; color: var(--brand-deep); font-size: 12px; line-height: 17px; text-align: center; }
+.dc-merge-relation.is-counted { color: #17655f; font-weight: 750; }
+.dc-merge-mechanism.is-compact .dc-merge-run-label { min-height: 14px; line-height: 14px; }
+.dc-merge-mechanism.is-compact .dc-merge-cell { height: 40px; }
+.dc-merge-mechanism.is-compact .dc-merge-bar { bottom: 0; height: calc(26px * var(--dc-height)); min-height: 16px; font-size: 12px; line-height: 14px; }
+.dc-merge-mechanism.is-compact .dc-merge-cell.is-counted .dc-merge-bar,
+.dc-merge-mechanism.is-compact .dc-merge-cell.is-copy .dc-merge-bar { min-height: 18px; }
+.dc-merge-mechanism.is-compact .dc-merge-flow { height: 12px; }
+.dc-merge-mechanism.is-compact .dc-merge-empty { height: 36px; }
+.dc-merge-mechanism.is-compact .dc-merge-relation { min-height: 14px; margin-top: 2px; line-height: 14px; }
+.dc-mergesort-caption { display: flex; flex-wrap: wrap; gap: 2px 9px; align-items: baseline; min-height: 16px; margin-bottom: 2px; color: var(--brand-deep); font-size: 12px; line-height: 14px; }
+.dc-mergesort-caption > span:last-child { margin-left: auto; color: var(--muted); }
+.dc-mergesort-tree { position: relative; min-width: var(--dc-tree-min); height: calc(var(--dc-tree-rows) * 20px + (var(--dc-tree-rows) - 1) * 5px); }
+.dc-mergesort-edges { position: absolute; inset: 0; width: 100%; height: 100%; fill: none; stroke: var(--brand); stroke-width: 1; }
+.dc-mergesort-edges path { vector-effect: non-scaling-stroke; }
+.dc-mergesort-edges .is-returned { stroke: var(--success); }
+.dc-mergesort-nodes { position: relative; display: grid; grid-template-columns: repeat(var(--dc-tree-items), minmax(0, 1fr)); grid-template-rows: repeat(var(--dc-tree-rows), 20px); row-gap: 5px; list-style: none; margin: 0; padding: 0; }
+.dc-mergesort-node { display: flex; align-items: center; justify-content: center; gap: 3px; min-width: 0; height: 20px; margin-inline: 2px; padding-inline: 2px; color: var(--brand-deep); background: #fff; border: 1px solid var(--border-strong); font-size: 12px; line-height: 16px; white-space: nowrap; }
+.dc-mergesort-node.is-returned { border-bottom: 2px solid var(--success); }
+.dc-mergesort-return { color: var(--success); font-weight: 750; }
+.dc-mergesort-node.is-active,
+.dc-mergesort-node.is-next { border-color: var(--accent); outline: 1px solid var(--accent); outline-offset: -2px; }
+.dc-mergesort-node.is-counted { border-color: var(--teal); outline-color: var(--teal); }
+.dc-mergesort-visual > .dc-merge-mechanism { margin-top: 4px; }
+.dc-mergesort-focus { display: grid; align-content: center; gap: 5px; min-height: 116px; }
+.dc-mergesort-focus-bars { display: grid; grid-template-columns: repeat(var(--dc-cells), minmax(0, 1fr)); align-items: end; height: 66px; margin: 0; padding: 0; list-style: none; }
+.dc-mergesort-focus-bars li { display: grid; place-items: center; align-self: end; height: calc(54px * var(--dc-height)); min-height: 25px; margin-inline: 2px; color: var(--brand-deep); background: var(--brand-soft); border: 1px solid var(--brand); font-size: 14px; }
+.dc-mergesort-focus-bars li.is-returned { color: var(--success); background: var(--success-soft); border-color: var(--success); }
+.dc-mergesort-focus p { margin: 0; color: var(--brand-deep); font-size: 12px; line-height: 16px; text-align: center; }

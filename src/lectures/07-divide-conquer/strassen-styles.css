@@ -1,0 +1,110 @@
+.dc-strassen-board { width:min(100%,680px); min-width:0; display:grid; gap:2px; color:var(--brand-deep); font-family:var(--mono); font-size:12px; line-height:14px; }
+.dc-strassen-stagebar { display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:0 5px; min-height:16px; font-size:12px; line-height:15px; }
+.dc-strassen-stagebar > span { padding:0 3px; }
+.dc-strassen-stagebar > small { color:var(--muted); font-size:12px; }
+.dc-strassen-stagebar .is-current { color:#70400b; background:var(--accent-soft); outline:1px solid var(--accent); }
+.dc-strassen-stagebar .is-complete { color:var(--success); }
+.dc-strassen-operands-scroll { min-width:0; max-width:100%; overflow:auto; }
+.dc-strassen-operands { display:flex; align-items:center; justify-content:safe center; gap:9px; min-width:max-content; }
+.dc-strassen-matrix-box { display:grid; justify-items:center; flex-shrink:0; gap:1px; }
+.dc-strassen-matrix-box > small { font-size:12px; line-height:12px; }
+.dc-strassen-matrix { display:grid; grid-template-columns:repeat(var(--dc-cols),var(--dc-cell)); border-left:2px solid currentColor; border-right:2px solid currentColor; padding:1px 3px; background:var(--surface); }
+.dc-strassen-matrix > span { min-width:0; padding:0 2px; font-size:13px; line-height:14px; text-align:center; white-space:nowrap; }
+.dc-strassen-matrix.is-scalar { border:0; }
+.dc-strassen-matrix .has-top-split { border-top:1px solid var(--brand); }
+.dc-strassen-matrix .has-left-split { border-left:1px solid var(--brand); }
+.dc-strassen-matrix .is-current { color:#70400b; background:var(--accent-soft); outline:1px solid var(--accent); outline-offset:-1px; }
+.dc-strassen-matrix-box.is-counted .dc-strassen-matrix { color:#17655f; background:var(--teal-soft); outline:2px solid var(--teal); }
+.dc-strassen-products-scroll { min-width:0; max-width:100%; overflow:auto; border:1px solid var(--border-strong); background:var(--surface); }
+.dc-strassen-product-list { min-width:max-content; }
+.dc-strassen-product-row { display:grid; grid-template-columns:36px max-content minmax(58px,1fr); align-items:center; gap:6px; min-height:18px; padding:0 5px; border-bottom:1px solid var(--border); font-size:12px; line-height:16px; }
+.dc-strassen-product-row:last-child { border-bottom:0; }
+.dc-strassen-product-row > strong { font-size:12px; font-weight:700; }
+.dc-strassen-formula { white-space:nowrap; }
+.dc-strassen-product-value { padding-inline:2px; text-align:right; white-space:nowrap; }
+.dc-strassen-product-value.is-known { color:var(--success); }
+.dc-strassen-product-row.is-current { color:#70400b; background:var(--accent-soft); outline:1px solid var(--accent); outline-offset:-1px; }
+.dc-strassen-product-value.is-counted { color:#17655f; background:var(--teal-soft); box-shadow:inset 0 -2px var(--teal); }
+.dc-strassen-combine-line { min-height:17px; padding:1px 4px; background:var(--brand-soft); text-align:center; font-size:12px; line-height:14px; overflow-wrap:anywhere; }
+.dc-strassen-combine-line.is-current { color:#70400b; background:var(--accent-soft); outline:1px solid var(--accent); }
+.dc-strassen-combine-line.is-complete { color:var(--success); background:var(--success-soft); }
+@media(max-width:680px) {
+ .dc-strassen-board { gap:2px; }
+ .dc-strassen-stagebar { gap:0 3px; }
+ .dc-strassen-operands { gap:7px; }
+ .dc-strassen-product-row { gap:4px; padding-inline:3px; }
+}
+
+/* The requested 64-cell tensor needs its own readable, stable canvas. */
+[data-module="07-divide-conquer/strassen"] .visualization-panel { height:auto; }
+[data-module="07-divide-conquer/strassen"] .visualization-panel .visualization,
+[data-module="07-divide-conquer/strassen"] .visualization-panel .text-trace { height:380px; min-height:380px; flex:none; }
+.dc-tensor-board { gap:3px; width:min(100%,680px); font-family:var(--mono); }
+.dc-tensor-top { display:flex; align-items:center; justify-content:space-between; gap:5px; min-width:0; }
+.dc-tensor-heading { display:grid; flex-shrink:0; gap:0 8px; font-size:13px; line-height:14px; }
+.dc-tensor-heading > span { color:var(--muted); font-size:12px; }
+.dc-tensor-rail { display:flex; justify-content:center; flex:1; gap:2px; font-size:12px; line-height:15px; }
+.dc-tensor-rail > span { flex:1; padding:0 3px; border:1px solid var(--border-strong); text-align:center; background:var(--surface); }
+.dc-tensor-rail .is-current { color:#70400b; outline:1px solid var(--accent); background:var(--accent-soft); }
+.dc-tensor-rail .is-retained { color:var(--success); border-color:var(--success); }
+.dc-tensor-current-label { font-size:12px; line-height:14px; text-align:center; color:var(--brand-deep); }
+.dc-tensor-definition { text-align:center; font-family:var(--sans); font-size:12px; line-height:14px; }
+.dc-tensor-vectors { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:5px; }
+.dc-tensor-vector { display:grid; gap:1px; min-width:0; padding:2px 3px; border:1px solid var(--brand); background:var(--brand-soft); text-align:center; }
+.dc-tensor-vector > strong { font-size:12px; line-height:13px; font-weight:600; overflow-wrap:anywhere; }
+.dc-tensor-vector > div { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); }
+.dc-tensor-vector > div > span { display:grid; justify-items:center; }
+.dc-tensor-vector small { color:var(--muted); font-size:12px; line-height:12px; }
+.dc-tensor-vector b { font-size:13px; line-height:14px; font-weight:600; }
+.dc-tensor-vector .is-included { outline:1px solid var(--brand); outline-offset:-1px; background:var(--surface); }
+.dc-tensor-numeric-scroll { min-width:0; max-width:100%; overflow:auto; }
+.dc-tensor-numeric { display:flex; justify-content:center; gap:0 8px; font-size:12px; line-height:15px; white-space:nowrap; min-width:max-content; }
+.dc-tensor-numeric strong { font-weight:650; }
+.dc-tensor-numeric > span { color:var(--muted); }
+.dc-tensor-numeric-empty { text-align:center; font-size:12px; line-height:15px; }
+.dc-tensor-band-key { display:flex; justify-content:center; gap:14px; font-size:12px; line-height:14px; }
+.dc-tensor-band-key > span:first-child { color:var(--brand-deep); }
+.dc-tensor-band-key > span:last-child { color:var(--muted); }
+.dc-tensor-axis-caption { color:var(--muted); font-family:var(--sans); font-size:12px; line-height:14px; text-align:center; }
+.dc-tensor-slices { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:7px; min-width:0; }
+.dc-tensor-slice { min-width:0; margin:0; }
+.dc-tensor-slice h3 { display:flex; justify-content:space-between; gap:2px; margin:0; padding:0 2px 1px; font-size:13px; line-height:15px; }
+.dc-tensor-slice h3 small { color:var(--muted); font-size:12px; font-weight:400; }
+.dc-tensor-plane { display:grid; grid-template-columns:24px repeat(4,minmax(20px,1fr)); grid-template-rows:14px repeat(4,26px); }
+.dc-tensor-axis-corner,.dc-tensor-b-index,.dc-tensor-a-index { display:grid; place-items:center; color:var(--muted); font-size:12px; line-height:12px; }
+.dc-tensor-cell { display:grid; grid-template-rows:12px 12px; min-width:0; border:1px solid var(--border); background:var(--surface); text-align:center; font-size:12px; line-height:12px; }
+.dc-tensor-term { display:block; min-width:0; color:var(--muted); font-size:12px; line-height:12px; }
+.dc-tensor-sum-band { display:flex; justify-content:center; align-items:center; min-width:0; color:var(--muted); border-top:1px solid var(--border); font-size:12px; line-height:12px; }
+.dc-tensor-sum { font-size:12px; line-height:12px; }
+.dc-tensor-cell.is-target { outline:2px solid var(--success); outline-offset:-2px; }
+.dc-tensor-cell.has-current .dc-tensor-term { color:var(--brand-deep); background:var(--brand-soft); font-weight:700; }
+.dc-tensor-cell.has-extra .dc-tensor-sum-band { border-bottom:1px dashed var(--brand); color:var(--brand-deep); }
+.dc-tensor-cell.has-survivor .dc-tensor-sum-band { color:var(--success); background:var(--success-soft); font-weight:700; }
+.dc-tensor-cell.has-cancelled { border-style:dashed; }
+.dc-tensor-cell.has-cancelled .dc-tensor-sum-band { justify-content:space-around; color:var(--brand-deep); }
+.dc-tensor-cell.is-example { box-shadow:0 0 0 1px var(--brand); z-index:1; }
+.dc-tensor-cancel-mark { font-size:12px; line-height:12px; }
+.dc-tensor-goal-key { display:flex; justify-content:center; flex-wrap:wrap; gap:0 10px; color:var(--muted); font-family:var(--sans); font-size:12px; line-height:14px; }
+.dc-tensor-target-key { padding-inline:3px; outline:1px solid var(--success); }
+.dc-tensor-equation { padding:2px 4px; color:var(--brand-deep); background:var(--brand-soft); font-size:12px; line-height:14px; text-align:center; overflow-wrap:anywhere; }
+.dc-tensor-progress { display:flex; justify-content:space-between; flex-wrap:wrap; gap:0 8px; font-size:12px; line-height:14px; }
+.dc-tensor-progress > span { color:var(--muted); }
+.dc-tensor-actual-c { min-width:0; overflow-wrap:anywhere; }
+.dc-tensor-base { justify-items:center; gap:14px; }
+.dc-tensor-base h3 { font-size:15px; margin:0; }
+.dc-tensor-base p { font-family:var(--sans); font-size:13px; margin:0; text-align:center; }
+@media(max-width:680px) {
+ [data-module="07-divide-conquer/strassen"] .visualization-panel .visualization,
+ [data-module="07-divide-conquer/strassen"] .visualization-panel .text-trace { height:568px; min-height:568px; }
+ .dc-tensor-board { gap:3px; }
+ .dc-tensor-top { flex-wrap:wrap; justify-content:center; gap:3px; }
+ .dc-tensor-heading { display:flex; justify-content:center; gap:0 5px; }
+ .dc-tensor-rail { flex-basis:100%; }
+ .dc-tensor-vectors { gap:3px; }
+ .dc-tensor-vector { padding-inline:1px; }
+ .dc-tensor-slices { grid-template-columns:repeat(2,minmax(0,1fr)); gap:5px 8px; }
+ .dc-tensor-plane { grid-template-columns:25px repeat(4,minmax(20px,1fr)); }
+ .dc-tensor-band-key { gap:7px; }
+ .dc-tensor-numeric { justify-content:safe center; }
+ .dc-tensor-progress { justify-content:center; }
+}

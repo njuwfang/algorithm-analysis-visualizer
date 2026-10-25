@@ -12,6 +12,14 @@ function withActivity(overrides) {
   };
 }
 
+test("full algorithm references use the supported expanded code layout", () => {
+  assert.equal(validateModule({ ...hanoiModule, codeLayout: "expanded" }, "03-analysis"), true);
+  assert.throws(
+    () => validateModule({ ...hanoiModule, codeLayout: "hidden" }, "03-analysis"),
+    /codeLayout must be "expanded"/
+  );
+});
+
 test("validates the optional activity contract", async (t) => {
   assert.equal(validateModule(hanoiModule, "03-analysis"), true);
 

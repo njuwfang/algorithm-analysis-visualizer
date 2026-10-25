@@ -1,6 +1,6 @@
 # Analysis of Algorithms Visualizations
 
-A reusable, self-contained static website for teaching algorithm execution and analysis. Lectures 03–06 preserve one repeated workflow:
+A reusable, self-contained static website for teaching algorithm execution and analysis. Lectures 03–07 preserve one repeated workflow:
 
 > **Trace → Count → Generalize**
 
@@ -46,6 +46,20 @@ Lecture 06 — Decrease and Conquer:
 - Quickselect
 
 These follow all 137 pages of `06_Decrease and conquer.pdf`. Reconstructed procedures and the deck's input/indexing ambiguities are recorded in [SOURCE_NOTES.md](docs/SOURCE_NOTES.md). Open `#/06-decrease-conquer/power-decrease-one` to start the lecture; every module also supports `?view=text` before the hash.
+
+Lecture 07 — Divide and Conquer:
+
+- Merge — two sorted arrays
+- Mergesort — divide, recursively sort, and merge
+- Three-product integer multiplication
+- FFT integer multiplication — instructor-requested extension
+- Strassen's Matrix Multiplication
+
+The four lecture modules follow `07_Divide and conquer.pdf`, whose complete 73 pages were reviewed. The recurrence material is already covered by the existing Lecture 03 Master Theorem extension and is omitted from Lecture 07 at the instructor's request. The integer module traces one decomposition level and distinguishes those products from the deck's idealized recursive digit-multiplication model. Strassen traces recursive blocks down to scalar products. Source inconsistencies and explicit conventions are recorded in [SOURCE_NOTES.md](docs/SOURCE_NOTES.md). Start at `#/07-divide-conquer/merge`.
+
+The separate FFT extension at `#/07-divide-conquer/fft-multiplication` explains why representation changes help multiplication: digit polynomials → values at shared points → matching-value products → recovered coefficients → integer product. The default `23×14` example has nine steps and a five-line outline. FFT and inverse FFT appear as conversion steps; recursive internals are omitted. The counter includes only pointwise products. Its optional cost discussion uses a unit-cost arithmetic model. FFT is additional material requested by the instructor, not part of the supplied deck.
+
+The integer view uses a four-region product rectangle and an aligned decimal addition ledger. At the instructor's request, Strassen adds a three-way tensor view: four output slices show how seven rank-one terms combine into the coefficients of matrix multiplication. Its full algorithm reference stays open beside the visualization on desktop and flows below the controls on phones.
 
 Each lesson keeps the custom input, one example chooser, visualization, lecture pseudocode, selected-operation count, and mathematical model in a compact shared shell. Supporting analysis is available on demand instead of occupying the default screen.
 
@@ -139,6 +153,10 @@ Because routing uses the URL hash and the vendored KaTeX distribution renders fo
 #/06-decrease-conquer/euclid-gcd
 #/06-decrease-conquer/lomuto-partition
 #/06-decrease-conquer/quickselect
+#/07-divide-conquer/merge
+#/07-divide-conquer/mergesort
+#/07-divide-conquer/integer-multiplication
+#/07-divide-conquer/strassen
 ```
 
 Iframe-friendly link:
@@ -173,7 +191,8 @@ visualization/
 │   ├── 03-analysis/          # modules and lecture-local styles.css
 │   ├── 04-brute-force/       # modules and lecture-local styles.css
 │   ├── 05-exhaustive-search/ # modules and lecture-local styles.css
-│   └── 06-decrease-conquer/ # modules and lecture-specific drawings
+│   ├── 06-decrease-conquer/ # modules and lecture-specific drawings
+│   └── 07-divide-conquer/   # recursive splits, merging, and product identities
 ├── docs/
 ├── templates/
 ├── tests/

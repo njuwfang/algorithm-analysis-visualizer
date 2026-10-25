@@ -1,4 +1,4 @@
-import { lectures, neighboringRoutes, routes, resolveRoute, routeHash } from "../lectures/registry.js?v=20261005-2";
+import { lectures, neighboringRoutes, routes, resolveRoute, routeHash } from "../lectures/registry.js?v=20261025-5";
 import { deriveTraceChanges } from "./trace-delta.js?v=20260916-1";
 import { bounded, escapeHtml } from "./utils.js?v=20260916-1";
 
@@ -132,6 +132,8 @@ function renderLessonMetadata() {
   dom.topLectureLabel.textContent = `Lecture ${lecture.number}`;
   dom.topModuleLabel.textContent = lecture.title;
   dom.lessonTitle.textContent = module.title;
+  dom.lessonMain.dataset.module = state.route.key;
+  dom.lessonMain.classList.toggle("has-expanded-code", module.codeLayout === "expanded");
   const codeTitle = module.codeTitle ?? "Pseudocode";
   dom.pseudocodeTitle.textContent = codeTitle;
   dom.pseudocode.setAttribute("aria-label", codeTitle);
@@ -505,7 +507,9 @@ function renderActiveLine(activeLine, activeLabel = null) {
     dom.activeLineBadge.textContent = "Complete";
   }
 
-  if (activeElement) {
+  if (currentModule().codeLayout === "expanded") {
+    dom.pseudocode.scrollTop = 0;
+  } else if (activeElement) {
     window.requestAnimationFrame(() => {
       if (!activeElement.isConnected || !activeElement.classList.contains("is-active")) return;
       const container = dom.pseudocode.getBoundingClientRect();

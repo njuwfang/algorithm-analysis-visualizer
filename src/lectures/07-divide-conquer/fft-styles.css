@@ -1,0 +1,27 @@
+[data-module="07-divide-conquer/fft-multiplication"] .visualization-panel { height:auto; }
+[data-module="07-divide-conquer/fft-multiplication"] .visualization,
+[data-module="07-divide-conquer/fft-multiplication"] .text-trace { height:440px; min-height:440px; flex:none; }
+.fft-board { display:grid; gap:6px; width:min(100%,680px); min-width:0; color:var(--brand-deep); font-family:var(--mono); font-size:13px; line-height:18px; }
+.fft-board sup { font-size:12px; line-height:0; }
+.fft-inputs { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+.fft-inputs > div { display:grid; gap:3px; padding:5px; border:1px solid var(--brand); background:var(--brand-soft); text-align:center; overflow-wrap:anywhere; }
+.fft-inputs strong { font-size:13px; }
+.fft-inputs span { font-size:13px; }
+.fft-convert { padding:3px; text-align:center; font-family:var(--sans); font-size:13px; line-height:18px; }
+.fft-convert.is-current { color:#70400b; outline:1px solid var(--accent); background:var(--accent-soft); }
+.fft-table-scroll { max-width:100%; min-width:0; overflow:auto; }
+.fft-table { width:100%; border-collapse:collapse; white-space:nowrap; font-size:12px; }
+.fft-table th,.fft-table td { padding:1px 5px; border:1px solid var(--border-strong); line-height:16px; text-align:center; }
+.fft-table th { font-weight:600; }
+.fft-table .is-counted { color:#17655f; outline:2px solid var(--teal); outline-offset:-2px; background:var(--teal-soft); }
+.fft-key-idea { min-height:36px; display:grid; place-items:center; padding:3px 5px; color:var(--brand-deep); background:var(--brand-soft); text-align:center; overflow-wrap:anywhere; }
+.fft-product { text-align:center; overflow-wrap:anywhere; }
+.fft-answer { min-height:24px; padding:3px; text-align:center; font-family:var(--sans); font-size:13px; overflow-wrap:anywhere; }
+.fft-answer.is-complete { color:var(--success); font-family:var(--mono); font-size:14px; font-weight:700; }
+.fft-footnote { color:var(--muted); font-family:var(--sans); font-size:12px; line-height:16px; text-align:center; }
+@media(max-width:680px) {
+ [data-module="07-divide-conquer/fft-multiplication"] .visualization,
+ [data-module="07-divide-conquer/fft-multiplication"] .text-trace { height:500px; min-height:500px; }
+ .fft-board { gap:5px; }
+ .fft-table th,.fft-table td { padding-inline:3px; }
+}
