@@ -1,6 +1,6 @@
 # Analysis of Algorithms Visualizations
 
-A reusable, self-contained static website for teaching algorithm execution and analysis. Lectures 03–07 preserve one repeated workflow:
+A reusable, self-contained static website for teaching algorithm execution and analysis. Lectures 03–08 preserve one repeated workflow:
 
 > **Trace → Count → Generalize**
 
@@ -60,6 +60,15 @@ The four lecture modules follow `07_Divide and conquer.pdf`, whose complete 73 p
 The separate FFT extension at `#/07-divide-conquer/fft-multiplication` explains why representation changes help multiplication: digit polynomials → values at shared points → matching-value products → recovered coefficients → integer product. The default `23×14` example has nine steps and a five-line outline. FFT and inverse FFT appear as conversion steps; recursive internals are omitted. The counter includes only pointwise products. Its optional cost discussion uses a unit-cost arithmetic model. FFT is additional material requested by the instructor, not part of the supplied deck.
 
 The integer view uses a four-region product rectangle and an aligned decimal addition ledger. At the instructor's request, Strassen adds a three-way tensor view: four output slices show how seven rank-one terms combine into the coefficients of matrix multiplication. Its full algorithm reference stays open beside the visualization on desktop and flows below the controls on phones.
+
+Lecture 08 — Transform and Conquer:
+
+- Presorting for Element Uniqueness
+- Horner's Rule
+- Binary Search Tree Insertion
+- AVL Insertion and Rotations
+
+These follow all 67 pages of `08_Transform and conquer.pdf`. Presorting shows why only neighbors need checking; Horner retains the lecture's running values through `p(3)=160`. The tree modules compare insertion order and trace all four AVL rotation types, including the transferred middle subtrees. Source diagram inconsistencies and reconstructed tree procedures are documented in [SOURCE_NOTES.md](docs/SOURCE_NOTES.md). Start at `#/08-transform-conquer/presort-uniqueness`.
 
 Each lesson keeps the custom input, one example chooser, visualization, lecture pseudocode, selected-operation count, and mathematical model in a compact shared shell. Supporting analysis is available on demand instead of occupying the default screen.
 
@@ -157,6 +166,10 @@ Because routing uses the URL hash and the vendored KaTeX distribution renders fo
 #/07-divide-conquer/mergesort
 #/07-divide-conquer/integer-multiplication
 #/07-divide-conquer/strassen
+#/08-transform-conquer/presort-uniqueness
+#/08-transform-conquer/horner
+#/08-transform-conquer/bst-insertion
+#/08-transform-conquer/avl-insertion
 ```
 
 Iframe-friendly link:
@@ -192,7 +205,8 @@ visualization/
 │   ├── 04-brute-force/       # modules and lecture-local styles.css
 │   ├── 05-exhaustive-search/ # modules and lecture-local styles.css
 │   ├── 06-decrease-conquer/ # modules and lecture-specific drawings
-│   └── 07-divide-conquer/   # recursive splits, merging, and product identities
+│   ├── 07-divide-conquer/   # recursive splits, merging, and product identities
+│   └── 08-transform-conquer/ # presorting, Horner, BSTs, and AVL rotations
 ├── docs/
 ├── templates/
 ├── tests/
