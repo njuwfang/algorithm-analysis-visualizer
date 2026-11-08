@@ -41,7 +41,9 @@ test("registry exposes unique lecture/module routes", () => {
     "08-transform-conquer/presort-uniqueness",
     "08-transform-conquer/horner",
     "08-transform-conquer/bst-insertion",
-    "08-transform-conquer/avl-insertion"
+    "08-transform-conquer/avl-insertion",
+    "09-non-comparison-sorting/counting-sort",
+    "09-non-comparison-sorting/radix-sort"
   ];
   assert.deepEqual(keys, expectedRoutes);
   assert.ok(!keys.includes("03-analysis/max-element"));

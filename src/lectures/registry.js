@@ -4,9 +4,10 @@ import { lecture05 } from "./05-exhaustive-search/index.js?v=20260916-8";
 import { lecture06 } from "./06-decrease-conquer/index.js?v=20261005-2";
 import { lecture07 } from "./07-divide-conquer/index.js?v=20261025-5";
 import { lecture08 } from "./08-transform-conquer/index.js?v=20261101-2";
+import { lecture09 } from "./09-non-comparison-sorting/index.js?v=20261108-1";
 import { validateRegistry } from "../core/schema.js?v=20261024-4";
 
-export const lectures = [lecture03, lecture04, lecture05, lecture06, lecture07, lecture08];
+export const lectures = [lecture03, lecture04, lecture05, lecture06, lecture07, lecture08, lecture09];
 validateRegistry(lectures);
 
 export const routes = lectures.flatMap((lecture) =>

@@ -1,6 +1,6 @@
 # Analysis of Algorithms Visualizations
 
-A reusable, self-contained static website for teaching algorithm execution and analysis. Lectures 03–08 preserve one repeated workflow:
+A reusable, self-contained static website for teaching algorithm execution and analysis. Lectures 03–09 preserve one repeated workflow:
 
 > **Trace → Count → Generalize**
 
@@ -69,6 +69,13 @@ Lecture 08 — Transform and Conquer:
 - AVL Insertion and Rotations
 
 These follow all 67 pages of `08_Transform and conquer.pdf`. Presorting shows why only neighbors need checking; Horner retains the lecture's running values through `p(3)=160`. The tree modules compare insertion order and trace all four AVL rotation types, including the transferred middle subtrees. Source diagram inconsistencies and reconstructed tree procedures are documented in [SOURCE_NOTES.md](docs/SOURCE_NOTES.md). Start at `#/08-transform-conquer/presort-uniqueness`.
+
+Lecture 09 — Non-Comparison Based Sorting:
+
+- Counting Sort — frequencies, block starts, and stable placement
+- Radix Sort — stable FIFO bins from least to most significant digit
+
+These follow all 39 pages of `09_Non-comparision based sorting.pdf`. Both include the lecture's worked input and exercise, retain the standard shared layout, and provide equivalent text states. Counting sort traces the exact 1-based Count/Pos procedure and counts array writes; radix sort counts distribution/gathering key moves and retains every completed pass order in the text state. The source's omitted key and cost-model qualifications are documented in [SOURCE_NOTES.md](docs/SOURCE_NOTES.md). Start at `#/09-non-comparison-sorting/counting-sort`.
 
 Each lesson keeps the custom input, one example chooser, visualization, lecture pseudocode, selected-operation count, and mathematical model in a compact shared shell. Supporting analysis is available on demand instead of occupying the default screen.
 
@@ -170,6 +177,8 @@ Because routing uses the URL hash and the vendored KaTeX distribution renders fo
 #/08-transform-conquer/horner
 #/08-transform-conquer/bst-insertion
 #/08-transform-conquer/avl-insertion
+#/09-non-comparison-sorting/counting-sort
+#/09-non-comparison-sorting/radix-sort
 ```
 
 Iframe-friendly link:
@@ -206,7 +215,8 @@ visualization/
 │   ├── 05-exhaustive-search/ # modules and lecture-local styles.css
 │   ├── 06-decrease-conquer/ # modules and lecture-specific drawings
 │   ├── 07-divide-conquer/   # recursive splits, merging, and product identities
-│   └── 08-transform-conquer/ # presorting, Horner, BSTs, and AVL rotations
+│   ├── 08-transform-conquer/ # presorting, Horner, BSTs, and AVL rotations
+│   └── 09-non-comparison-sorting/ # counting sort and LSD radix sort
 ├── docs/
 ├── templates/
 ├── tests/
