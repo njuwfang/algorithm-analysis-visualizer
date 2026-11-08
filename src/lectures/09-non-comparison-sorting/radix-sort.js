@@ -1,5 +1,5 @@
-import { buildRadixTrace, parseRadixInput, describeRadix } from "./radix-trace.js?v=20261108-1";
-import { renderRadix } from "./sort-view.js?v=20261108-1";
+import { buildRadixTrace, parseRadixInput, describeRadix } from "./radix-trace.js?v=20261108-3";
+import { renderRadix } from "./sort-view.js?v=20261108-3";
 
 export const radixSortModule = {
   id: "radix-sort", shortTitle: "Radix sort", title: "Radix Sort",
@@ -31,14 +31,14 @@ export const radixSortModule = {
   model(step) {
     return {
       latex: step.phase === "complete" ? `\\begin{gathered}K(n,d)=\\sum_{p=0}^{d-1}(n+n)\\\\=2dn=${step.moves}\\\\T_{10}(n,d)\\in\\Theta(dn)\\end{gathered}` : "\\begin{gathered}\\text{After }p\\text{ stable passes:}\\\\\\text{ordered by the last }p\\text{ digits}\\end{gathered}",
-      notes: step.phase === "complete" ? ["Decimal bins are fixed (m=10). If digit count d is also fixed, time is Θ(n).", "The lecture gives O(m + dn). Visiting every bin each pass gives Θ(m + d(n+m)) for variable m; with decimal m=10, both yield Θ(dn). Key moves omit bin visits and digit extraction."] : ["A FIFO bin keeps equal-digit keys in the order produced by the previous pass. Leading zeros align shorter keys."]
+      notes: step.phase === "complete" ? ["After d passes, the sorted suffix covers the entire padded key; the numeric keys are therefore sorted. Decimal bins are fixed (m=10); fixed d gives Θ(n).", "The lecture gives O(m + dn). Visiting every bin each pass gives Θ(m + d(n+m)) for variable m; with decimal m=10, both yield Θ(dn). Key moves omit bin visits and digit extraction."] : [step.pass <= 1 ? "Base case: gathering bins 0 through 9 sorts the units digit. Larger digits are handled in later passes." : `Inductive step: the incoming last ${step.pass-1} digits are sorted. Bins order the new digit; FIFO preserves the earlier order inside each bin, extending the sorted suffix to ${step.pass} digits.`]
     };
   },
   analysis: [
     { term: "Input size", value: "n positive integers with d decimal digits after leading-zero padding; d is the maximum input width. Bins are 0..9. A single-digit key still takes one full pass." },
     { term: "Reconstructed procedure", value: "The deck supplies distribution/gathering diagrams rather than pseudocode. This outline uses its FIFO queues, least-to-most significant digits, and unchanged arrival order." },
     { term: "Counted operation", value: "One enqueue or one dequeue into the output is a key move: n of each per pass, exactly 2dn. Adopting the gathered buffer is a reference change. Queue creation, arithmetic, and bin/loop checks are excluded." },
-    { term: "Why stability matters", value: "A later digit separates groups while FIFO retains their ordering by earlier digits. After p completed passes, the keys are ordered by their last p digits. The full text state retains every completed pass order and original input identity." },
+    { term: "Why stability matters", value: "Induction: the units pass establishes one sorted digit. Assume the last p−1 digits are sorted. Bins 0..9 order the new digit, while FIFO preserves the lower-digit order among keys in the same bin, establishing p sorted digits. After d passes this suffix is each whole padded key. The checkpoint retains the actual incoming array, an observed bin's FIFO order, and the numerical output suffixes." },
     { term: "Source notation", value: "Slide 37 says digits 0..m, whereas slide 38 speaks of m bins. Here m is the number of bins, 10, with labels 0..m−1. The drawing remains decimal." },
     { term: "Cost qualification", value: "Slide 38's O(m+dn) omits repeated traversal of empty bins. This implementation visits all 10 bins each pass; with fixed m this is Θ(dn). For variable m its outline costs Θ(m+d(n+m)); linear in n also requires fixed d." },
     { term: "Source discrepancy", value: "Slide 34's tens-digit diagram omits 54 from bin 5. It is retained after 51, matching slides 35–36 and the original input." },

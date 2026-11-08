@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { buildCountingTrace, parseCountingInput, describeCounting } from "../src/lectures/09-non-comparison-sorting/counting-trace.js";
 import { buildRadixTrace, parseRadixInput, describeRadix } from "../src/lectures/09-non-comparison-sorting/radix-trace.js";
+import { projectRadixProof } from "../src/lectures/09-non-comparison-sorting/radix-proof.js";
 
 const countingExample = "2,3,2,1,3,2,2,3,2,2,2,1 | 3";
 const countingExercise = "4,1,3,4,3,4,1,1,2,3,4,3,2,1 | 4";
@@ -121,6 +122,50 @@ test("both descriptions are complete, pure, and stable, and snapshots remain ind
     if(trace[0].counts){trace.at(-1).counts[0]=999;assert.equal(trace[0].counts[0],null);}
     else{trace.at(-1).order[0].value=999;assert.notEqual(trace[0].order[0].value,999);}
   }
+});
+
+test("radix correctness exposes the retained input, induction premise and concrete FIFO witness", () => {
+  const trace=buildRadixTrace(parseRadixInput(radixExample));
+  const passes=trace.filter(step=>step.phase==="pass-complete");
+  assert.deepEqual(passes[0].passInput,trace[0].original,"the checkpoint must keep the actual incoming order");
+  assert.deepEqual(passes[1].passInput,passes[0].order);
+  const proof=projectRadixProof(passes[1]);
+  assert.equal(proof.witness.digit,1);
+  assert.deepEqual(proof.witness.items.map(item=>item.value),[10,13,18]);
+  assert.deepEqual(proof.lower,[0,3,8]);
+  assert.deepEqual(proof.suffixes,[5,8,10,13,18,23,29,31,37,48,51,54,62]);
+  assert.equal(proof.verified,true);
+  const first=projectRadixProof(passes[0]);
+  assert.equal(first.priorDigits,0);
+  assert.deepEqual(first.suffixes,[0,1,1,2,3,3,4,5,7,8,8,8,9]);
+  for(const raw of [radixExample,radixExercise,"1","9,1,9,3,1","99999,1,99999,10"]){
+    const states=buildRadixTrace(parseRadixInput(raw));
+    for(const step of states){
+      const snapshot=structuredClone(step),p=projectRadixProof(step);
+      assert.deepEqual(step,snapshot);
+      assert.deepEqual(projectRadixProof(step),p);
+      assert.equal(p.verified,p.checkpoint,"only completed, valid passes claim correctness");
+      if(p.active)assert.equal(p.premise,true);
+      assert.deepEqual(p.groups.flatMap(group=>group.items).map(item=>item.origin).sort((a,b)=>a-b),step.passInput.slice(0,step.pass?step.inspected:0).map(item=>item.origin).sort((a,b)=>a-b));
+      if(p.witness&&p.priorDigits>0)assert.ok(p.lower.every((value,i)=>i===0||p.lower[i-1]<=value));
+    }
+  }
+});
+
+test("radix correctness does not certify incomplete, reordered, duplicated or unsorted results", () => {
+  const last=buildRadixTrace(parseRadixInput(radixExample)).at(-1);
+  const corrupt=structuredClone(last);
+  [corrupt.gathered[2],corrupt.gathered[3]]=[corrupt.gathered[3],corrupt.gathered[2]];
+  assert.equal(projectRadixProof(corrupt).verified,false,"reversing a bin loses the lower-digit order");
+  const duplicate=structuredClone(last);duplicate.gathered[1]=duplicate.gathered[0];
+  assert.equal(projectRadixProof(duplicate).verified,false);
+  const missing=structuredClone(last);missing.gathered.pop();
+  assert.equal(projectRadixProof(missing).verified,false);
+  const premature=structuredClone(last);premature.phase="gather";
+  assert.equal(projectRadixProof(premature).verified,false);
+  const unstable=buildRadixTrace([11,11,21]).at(-1);
+  [unstable.gathered[0],unstable.gathered[1]]=[unstable.gathered[1],unstable.gathered[0]];
+  assert.equal(projectRadixProof(unstable).verified,false,"equal numeric keys must retain their identity order too");
 });
 
 test("input errors identify unsupported keys and ranges", () => {

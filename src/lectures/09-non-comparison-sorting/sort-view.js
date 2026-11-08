@@ -1,16 +1,23 @@
 import { escapeHtml } from "../../core/utils.js";
+import { projectRadixProof } from "./radix-proof.js?v=20261108-2";
 
-function arrayRow(label, values, { active = null, counted = false, origins = null, done = 0, digit = null, digits = 1 } = {}) {
-  const width = Math.max(digit === null ? 25 : 27, Math.max(digits, ...values.map(value => value === null ? 1 : String(value).length)) * 8 + 8);
+function arrayRow(label, values, { active = null, counted = false, origins = null, done = 0, digit = null, digits = 1, verified = 0, groupPlace = null, spaced = false } = {}) {
+  const length = Math.max(digits, ...values.map(value => value === null ? 1 : String(value).length));
+  const width = spaced ? Math.max(32, length * 11 + 12) : Math.max(digit === null ? 25 : 27, length * 8 + 8);
   return `<div class="nc-array-row"><strong>${label}</strong><div class="nc-array-scroll" data-visual-scroll><div class="nc-array" style="--nc-items:${values.length};--nc-cell:${width}px">${values.map((value, index) => {
     const current = index === active;
-    const number = value === null ? "·" : digit === null ? escapeHtml(value) : digitKey(value, digits, digit);
-    return `<div class="nc-cell ${current ? counted ? "is-counted" : "is-action" : ""} ${index < done ? "is-retained" : ""}"${current ? " data-active-visual" : ""} data-index="${index + 1}"><small>${index + 1}</small><b>${number}</b>${origins ? `<small class="nc-origin">${origins[index] === null ? "—" : `#${origins[index]}`}</small>` : ""}</div>`;
+    const number = value === null ? "·" : digit === null ? escapeHtml(value) : digitKey(value, digits, digit, verified);
+    const group = groupPlace !== null && value !== null ? Math.floor(value / groupPlace) % 10 : null;
+    const groupStart = group !== null && (index === 0 || group !== Math.floor(values[index - 1] / groupPlace) % 10);
+    return `<div class="nc-cell ${current ? counted ? "is-counted" : "is-action" : ""} ${index < done ? "is-retained" : ""} ${groupStart ? "is-group-start" : ""}"${current ? " data-active-visual" : ""} data-index="${index + 1}"${group === null ? "" : ` data-group="${group}"`}><small>${index + 1}</small><b>${number}</b>${origins ? `<small class="nc-origin">${origins[index] === null ? "—" : `#${origins[index]}`}</small>` : ""}</div>`;
   }).join("")}</div></div></div>`;
 }
 
-function digitKey(value, digits, active) {
-  return [...String(value).padStart(digits, "0")].map((digit, index) => `<span class="${digits - index - 1 === active ? "nc-digit" : ""}">${digit}</span>`).join("");
+function digitKey(value, digits, active, verified = 0) {
+  const padded = String(value).padStart(digits, "0");
+  if (verified) return `${padded.slice(0, digits - verified)}<span class="nc-verified-digits">${padded.slice(-verified)}</span>`;
+  const position = digits - active - 1;
+  return `${padded.slice(0, position)}<span class="nc-digit">${padded[position]}</span>${active > 0 ? `<span class="nc-earlier-digits">${padded.slice(position + 1)}</span>` : ""}`;
 }
 
 export function renderCounting(step) {
@@ -36,21 +43,32 @@ export function renderCounting(step) {
 }
 
 export function renderRadix(step) {
-  const digit = step.pass === 0 || step.phase === "complete" ? null : step.pass - 1;
+  const proof = projectRadixProof(step);
+  const digit = proof.active ? step.pass - 1 : null;
   const gathering = ["gather-start","gather"].includes(step.phase);
   const output = Array.from({length:step.order.length},(_,index)=>step.gathered[index]?.value ?? null);
   const equation = step.phase === "distribute" ? `${String(step.current.value).padStart(step.d,"0")} → bin ${step.bin} rear (append)`
     : step.phase === "gather" ? `bin ${step.bin} front → ${step.current.value} at output[${step.gathered.length}]`
-    : step.phase === "pass-complete" ? `✓ Ordered by the last ${step.pass} digit${step.pass === 1 ? "" : "s"}; retain this order`
-    : step.phase === "complete" ? "✓ Sorted · FIFO preserves equal-digit order in every pass"
-    : "Append at rear → gather bins 0 to 9 from the front";
-  const stage = step.phase === "distribute" ? "distribute" : gathering ? "gather" : step.phase === "pass-complete" ? "pass complete" : step.phase === "complete" ? "complete" : "ready";
-  return `<div class="nc-visual nc-radix"><div class="nc-heading">${step.pass ? `Pass ${step.pass}/${step.d} · ${step.place}s digit · ${stage}` : `n = ${step.original.length} · ${step.d} decimal digits · FIFO bins`}</div>
-    ${arrayRow("A",step.order.map(item=>item.value),{active:step.phase === "distribute" ? step.i - 1 : null,done:step.inspected,digit,digits:step.d})}
-    <div class="nc-bins">${[0,5,1,6,2,7,3,8,4,9].map(bin => `<div class="nc-bin ${step.bin === bin ? "is-active" : ""}" data-bin="${bin}"><strong>bin ${bin}</strong><div class="nc-queue-scroll" data-visual-scroll><div class="nc-queue">${step.bins[bin].length ? step.bins[bin].map(item => {
+    : gathering ? "Gather bins 0 → 9; keep FIFO order inside each bin"
+    : "Group by the new digit; keep earlier digits in order";
+  const heading = proof.checkpoint
+    ? `${proof.verified ? "✓" : "×"} Pass ${step.pass}/${step.d}: last ${step.pass} digit${step.pass === 1 ? "" : "s"} ${proof.verified ? "sorted" : "not verified"}`
+    : step.pass ? `Pass ${step.pass}/${step.d} · <span class="nc-mark-new">new ${step.place}s</span> · <span class="nc-mark-keep">keep ${proof.priorDigits} digit${proof.priorDigits === 1 ? "" : "s"}</span>`
+    : `n = ${step.original.length} · ${step.d} decimal digits · FIFO bins`;
+  return `<div class="nc-visual nc-radix"><div class="nc-heading">${heading}</div>
+    ${arrayRow("In",step.passInput.map(item=>item.value),{active:step.phase === "distribute" ? step.i - 1 : null,done:step.inspected,digit,digits:step.d,spaced:true})}
+    ${proof.checkpoint ? renderPassProof(step,proof) : `<div class="nc-bins">${[0,5,1,6,2,7,3,8,4,9].map(bin => `<div class="nc-bin ${step.bin === bin ? "is-active" : ""}" data-bin="${bin}"><strong>bin ${bin}</strong><div class="nc-queue-scroll" data-visual-scroll><div class="nc-queue">${step.bins[bin].length ? step.bins[bin].map(item => {
       const current = step.phase === "distribute" && step.current?.origin === item.origin;
       return `<span class="nc-queue-item ${current ? "is-counted" : ""}" data-origin="${item.origin}" title="${item.value}, original A[${item.origin}]">${digit === null ? item.value : digitKey(item.value,step.d,digit)}</span>`;
-    }).join("") : `<span class="nc-empty">∅</span>`}</div></div></div>`).join("")}</div>
-    ${arrayRow("Out",output,{active:step.phase === "gather"?step.gathered.length-1:null,counted:true,digit,digits:step.d})}
-    <div class="nc-equation ${["distribute","gather"].includes(step.phase)?"is-counted":""}">${escapeHtml(equation)}</div></div>`;
+    }).join("") : `<span class="nc-empty">∅</span>`}</div></div></div>`).join("")}</div>`}
+    ${arrayRow("Out",output,{active:step.phase === "gather"?step.gathered.length-1:null,counted:true,digit,digits:step.d,verified:proof.verified?step.pass:0,groupPlace:proof.active?step.place:null,spaced:true})}
+    ${proof.checkpoint ? `<div class="nc-suffix-proof ${proof.verified?"is-verified":""}"><strong>${proof.verified?"✓":"×"} Last ${step.pass}:</strong><div data-visual-scroll>${proof.suffixes.join(" ≤ ")}</div></div>` : `<div class="nc-equation ${["distribute","gather"].includes(step.phase)?"is-counted":""}">${escapeHtml(equation)}</div>`}</div>`;
+}
+
+function renderPassProof(step,proof) {
+  const witness = proof.witness;
+  const values = witness.items.map(item=>`<span class="nc-proof-key" data-origin="${item.origin}">${digitKey(item.value,step.d,step.pass-1)}</span>`).join('<span class="nc-proof-arrow">→</span>');
+  return `<div class="nc-pass-proof"><div>1. Bins: 0→1→2→3→4→5→6→7→8→9</div>
+    <div class="nc-proof-witness"><strong>2. FIFO · bin ${witness.digit}:</strong><div class="nc-proof-items-scroll" data-visual-scroll><div class="nc-proof-items">${values}</div></div></div>
+    <div class="nc-proof-lower">${proof.priorDigits ? `Keep ${proof.priorDigits} earlier digit${proof.priorDigits === 1?"":"s"}: ${proof.lower.join(" ≤ ")}` : `Same units digit: ${witness.items.map(()=>witness.digit).join(" = ")}`}</div></div>`;
 }

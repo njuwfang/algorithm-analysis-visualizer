@@ -75,7 +75,7 @@ Lecture 09 — Non-Comparison Based Sorting:
 - Counting Sort — frequencies, block starts, and stable placement
 - Radix Sort — stable FIFO bins from least to most significant digit
 
-These follow all 39 pages of `09_Non-comparision based sorting.pdf`. Both include the lecture's worked input and exercise, retain the standard shared layout, and provide equivalent text states. Counting sort traces the exact 1-based Count/Pos procedure and counts array writes; radix sort counts distribution/gathering key moves and retains every completed pass order in the text state. The source's omitted key and cost-model qualifications are documented in [SOURCE_NOTES.md](docs/SOURCE_NOTES.md). Start at `#/09-non-comparison-sorting/counting-sort`.
+These follow all 39 pages of `09_Non-comparision based sorting.pdf`. Both include the lecture's worked input and exercise, retain the standard shared layout, and provide equivalent text states. Counting sort traces the exact 1-based Count/Pos procedure and counts array writes. Radix sort counts distribution/gathering key moves; each pass checkpoint retains the incoming order and shows how FIFO preserves earlier digits while bin order extends the sorted suffix. Every completed pass order remains available in the text state. The source's omitted key and cost-model qualifications are documented in [SOURCE_NOTES.md](docs/SOURCE_NOTES.md). Start at `#/09-non-comparison-sorting/counting-sort`.
 
 Each lesson keeps the custom input, one example chooser, visualization, lecture pseudocode, selected-operation count, and mathematical model in a compact shared shell. Supporting analysis is available on demand instead of occupying the default screen.
 

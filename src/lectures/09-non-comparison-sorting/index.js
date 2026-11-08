@@ -1,5 +1,5 @@
-import { countingSortModule } from "./counting-sort.js?v=20261108-1";
-import { radixSortModule } from "./radix-sort.js?v=20261108-1";
+import { countingSortModule } from "./counting-sort.js?v=20261108-3";
+import { radixSortModule } from "./radix-sort.js?v=20261108-3";
 
 export const lecture09 = {
   id: "09-non-comparison-sorting", number: "09",
