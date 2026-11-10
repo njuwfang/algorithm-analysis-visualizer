@@ -1,4 +1,4 @@
-import { lectures, neighboringRoutes, routes, resolveRoute, routeHash } from "../lectures/registry.js?v=20261108-3";
+import { lectures, neighboringRoutes, routes, resolveRoute, routeHash } from "../lectures/registry.js?v=20261109-3";
 import { deriveTraceChanges } from "./trace-delta.js?v=20260916-1";
 import { bounded, escapeHtml } from "./utils.js?v=20260916-1";
 

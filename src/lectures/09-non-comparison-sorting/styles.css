@@ -55,3 +55,47 @@
   .nc-queue { gap:6px; }
   .nc-queue-item { padding-inline:1px; }
 }
+
+/* Instructor-requested MSD extension. */
+.nc-msd .nc-array { min-width:calc(var(--nc-items) * var(--nc-cell) + (var(--nc-items) - 1) * 3px); }
+.nc-msd .nc-cell b { gap:2px; padding:0 2px; font-size:16px; line-height:22px; }
+.nc-msd-tree-scroll { min-width:0; max-width:100%; overflow:auto; }
+.nc-msd-tree { position:relative; display:grid; grid-template-columns:repeat(var(--nc-items),minmax(0,1fr)); grid-template-rows:repeat(var(--nc-levels),22px); column-gap:3px; min-width:calc(var(--nc-tree-width) + (var(--nc-items) - 1) * 3px); }
+.nc-msd-tree > svg { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+.nc-msd-tree path { fill:none; stroke:var(--border-strong); stroke-width:1; }
+.nc-msd-node { position:relative; align-self:start; min-width:0; height:18px; padding:1px 2px; border:1px solid var(--border-strong); background:var(--surface); font-size:12px; line-height:14px; text-align:center; white-space:nowrap; }
+.nc-msd-node.is-active,.nc-msd-node.is-next { border-color:var(--accent); background:var(--accent-soft); }
+.nc-msd-node.is-counted { border-color:var(--teal); background:var(--teal-soft); }
+.nc-msd-node.is-complete { border-color:var(--success); color:var(--success); background:#e3f3e9; }
+.nc-msd .nc-in-range b { border-bottom:2px solid var(--brand); }
+.nc-msd-prefix { padding-inline:1px; background:var(--brand-soft); letter-spacing:1px; font-weight:500; }
+.nc-msd-buckets { display:flex; flex-wrap:wrap; gap:4px 6px; min-width:0; min-height:36px; }
+.nc-msd-bucket { max-width:100%; min-width:0; border:1px solid var(--border-strong); background:var(--surface); }
+.nc-msd-bucket > strong { display:block; padding-inline:3px; color:var(--muted); font-size:12px; line-height:14px; font-weight:500; }
+.nc-msd-bucket.is-active { outline:2px solid var(--accent); outline-offset:-2px; }
+.nc-msd-bucket-items { display:flex; gap:6px; min-width:0; padding:1px 3px; overflow:auto; }
+.nc-msd-key { display:inline-flex; flex:none; gap:2px; font-size:14px; line-height:18px; }
+.nc-msd-empty { align-self:center; padding:4px; color:var(--muted); font-size:12px; }
+
+/* American flag: one live array, reserved ranges, and cycle permutations. */
+.nc-flag-row { display:grid; grid-template-columns:26px minmax(0,1fr); gap:4px; min-width:0; }
+.nc-flag-row-labels { display:grid; grid-template-rows:14px 24px 14px 18px; align-items:center; text-align:left; }
+.nc-flag-row-labels strong,.nc-flag-row-labels small { font-size:12px; line-height:14px; font-weight:500; }
+.nc-flag-board { min-width:calc(var(--nc-items) * var(--nc-cell) + (var(--nc-items) - 1) * 3px); }
+.nc-flag .nc-cell b { gap:2px; padding:0 2px; font-size:16px; line-height:22px; }
+.nc-flag .nc-flag-target b { border-color:var(--brand); outline:1px dashed var(--brand); outline-offset:-2px; }
+.nc-flag-ranges { display:grid; grid-template-columns:repeat(var(--nc-items),minmax(0,1fr)); gap:3px; min-height:16px; margin-top:2px; font-size:12px; line-height:14px; text-align:center; }
+.nc-flag-ranges > span { min-width:0; border-top:2px solid var(--brand); white-space:nowrap; }
+.nc-flag-ranges .is-filled { color:var(--success); background:#e3f3e9; border-color:var(--success); }
+.nc-flag-table-scroll { min-width:0; max-width:100%; overflow:auto; }
+.nc-flag-table { width:100%; border-collapse:collapse; table-layout:fixed; font-size:12px; line-height:16px; text-align:center; }
+.nc-flag-table th,.nc-flag-table td { min-width:24px; padding:0 3px; border:1px solid var(--border-strong); white-space:nowrap; }
+.nc-flag-table th:first-child { width:46px; }
+.nc-flag-table th { color:var(--muted); font-weight:500; }
+.nc-flag-table .is-action { background:var(--accent-soft); color:#70400b; }
+.nc-flag-table .is-counted { background:var(--teal-soft); color:#17655f; outline:2px solid var(--teal); outline-offset:-2px; }
+.nc-flag-placeholder { display:grid; place-items:center; min-height:86px; padding:8px; border:1px solid var(--border-strong); background:var(--brand-soft); font-size:12px; line-height:18px; text-align:center; }
+.nc-flag-cycle { display:flex; align-items:center; gap:6px; min-width:0; min-height:18px; font-size:12px; line-height:18px; }
+.nc-flag-cycle strong { flex:none; font-weight:500; }
+.nc-flag-cycle > div { min-width:0; overflow:auto; white-space:nowrap; }
+[data-module="09-non-comparison-sorting/american-flag-sort"] .code-indent-4 { padding-left:72px; }

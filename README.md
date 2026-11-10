@@ -73,9 +73,13 @@ These follow all 67 pages of `08_Transform and conquer.pdf`. Presorting shows wh
 Lecture 09 — Non-Comparison Based Sorting:
 
 - Counting Sort — frequencies, block starts, and stable placement
-- Radix Sort — stable FIFO bins from least to most significant digit
+- LSD Radix Sort — stable FIFO bins from least to most significant digit
+- MSD Radix Sort — recursive leading-prefix groups; instructor-requested extension
+- American Flag Sort — counts, bucket boundaries, and in-place cycles; instructor-requested extension
 
-These follow all 39 pages of `09_Non-comparision based sorting.pdf`. Both include the lecture's worked input and exercise, retain the standard shared layout, and provide equivalent text states. Counting sort traces the exact 1-based Count/Pos procedure and counts array writes. Radix sort counts distribution/gathering key moves; each pass checkpoint retains the incoming order and shows how FIFO preserves earlier digits while bin order extends the sorted suffix. Every completed pass order remains available in the text state. The source's omitted key and cost-model qualifications are documented in [SOURCE_NOTES.md](docs/SOURCE_NOTES.md). Start at `#/09-non-comparison-sorting/counting-sort`.
+Counting Sort and LSD Radix Sort follow all 39 pages of `09_Non-comparision based sorting.pdf`. Both include the lecture's worked input and exercise, retain the standard shared layout, and provide equivalent text states. Counting sort traces the exact 1-based Count/Pos procedure and counts array writes. LSD radix sort counts distribution/gathering key moves; each pass checkpoint retains the incoming order and shows how FIFO preserves earlier digits while bin order extends the sorted suffix. Every completed pass order remains available in the text state. The source's omitted key and cost-model qualifications are documented in [SOURCE_NOTES.md](docs/SOURCE_NOTES.md). Start at `#/09-non-comparison-sorting/counting-sort`.
+
+MSD Radix Sort follows LSD, reusing the digit inputs to show recursive prefix ranges, retained child results, and singleton stopping. American Flag Sort comes last, combining counting-based bucket boundaries with recursive radix partitioning and cycles of swaps within A, with no n-item output array. American Flag counts swaps; MSD counts digit inspections; LSD counts key moves. These extensions are not in the deck; their NIST sources and explicit reconstruction choices are recorded in [SOURCE_NOTES.md](docs/SOURCE_NOTES.md). All four modules retain the standard lesson layout. The existing `radix-sort` route remains stable, and former Pigeonhole links open American Flag Sort.
 
 Each lesson keeps the custom input, one example chooser, visualization, lecture pseudocode, selected-operation count, and mathematical model in a compact shared shell. Supporting analysis is available on demand instead of occupying the default screen.
 
@@ -179,6 +183,8 @@ Because routing uses the URL hash and the vendored KaTeX distribution renders fo
 #/08-transform-conquer/avl-insertion
 #/09-non-comparison-sorting/counting-sort
 #/09-non-comparison-sorting/radix-sort
+#/09-non-comparison-sorting/msd-radix-sort
+#/09-non-comparison-sorting/american-flag-sort
 ```
 
 Iframe-friendly link:
@@ -216,7 +222,7 @@ visualization/
 │   ├── 06-decrease-conquer/ # modules and lecture-specific drawings
 │   ├── 07-divide-conquer/   # recursive splits, merging, and product identities
 │   ├── 08-transform-conquer/ # presorting, Horner, BSTs, and AVL rotations
-│   └── 09-non-comparison-sorting/ # counting sort and LSD radix sort
+│   └── 09-non-comparison-sorting/ # counting, LSD/MSD radix, and American flag sorts
 ├── docs/
 ├── templates/
 ├── tests/

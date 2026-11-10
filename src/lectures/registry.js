@@ -4,7 +4,7 @@ import { lecture05 } from "./05-exhaustive-search/index.js?v=20260916-8";
 import { lecture06 } from "./06-decrease-conquer/index.js?v=20261005-2";
 import { lecture07 } from "./07-divide-conquer/index.js?v=20261025-5";
 import { lecture08 } from "./08-transform-conquer/index.js?v=20261101-2";
-import { lecture09 } from "./09-non-comparison-sorting/index.js?v=20261108-3";
+import { lecture09 } from "./09-non-comparison-sorting/index.js?v=20261109-3";
 import { validateRegistry } from "../core/schema.js?v=20261024-4";
 
 export const lectures = [lecture03, lecture04, lecture05, lecture06, lecture07, lecture08, lecture09];
@@ -20,6 +20,16 @@ export const routes = lectures.flatMap((lecture) =>
 
 export const routeMap = new Map(routes.map((route) => [route.key, route]));
 export const moduleIdMap = new Map(routes.map((route) => [route.module.id, route]));
+
+// The replaced example's shared links continue to open its successor.
+const routeAliases = {
+  "09-non-comparison-sorting/pigeonhole-sort": "09-non-comparison-sorting/american-flag-sort"
+};
+for (const [alias, canonical] of Object.entries(routeAliases)) {
+  const route = routeMap.get(canonical);
+  routeMap.set(alias, route);
+  moduleIdMap.set(alias.split("/").at(-1), route);
+}
 
 export function neighboringRoutes(route) {
   const currentLectureRoutes = routes.filter(

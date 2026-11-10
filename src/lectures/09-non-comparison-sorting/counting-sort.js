@@ -1,5 +1,5 @@
 import { buildCountingTrace, parseCountingInput, describeCounting } from "./counting-trace.js?v=20261108-1";
-import { renderCounting } from "./sort-view.js?v=20261108-3";
+import { renderCounting } from "./sort-view.js?v=20261109-1";
 
 export const countingSortModule = {
   id: "counting-sort", shortTitle: "Counting sort", title: "Counting Sort",

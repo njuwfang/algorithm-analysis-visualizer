@@ -43,7 +43,9 @@ test("registry exposes unique lecture/module routes", () => {
     "08-transform-conquer/bst-insertion",
     "08-transform-conquer/avl-insertion",
     "09-non-comparison-sorting/counting-sort",
-    "09-non-comparison-sorting/radix-sort"
+    "09-non-comparison-sorting/radix-sort",
+    "09-non-comparison-sorting/msd-radix-sort",
+    "09-non-comparison-sorting/american-flag-sort"
   ];
   assert.deepEqual(keys, expectedRoutes);
   assert.ok(!keys.includes("03-analysis/max-element"));
@@ -85,6 +87,17 @@ test("invalid routes fall back and canonical hashes take precedence", () => {
     resolveRoute({ hash: routeHash(routes[0]), search: `?module=${routes.at(-1).module.id}` }).key,
     routes[0].key
   );
+});
+
+test("replaced pigeonhole links resolve to American flag without a duplicate navigation entry", () => {
+  const key="09-non-comparison-sorting/american-flag-sort";
+  for(const request of [
+    {hash:"#/09-non-comparison-sorting/pigeonhole-sort"},
+    {hash:"#pigeonhole-sort"},
+    {search:"?module=pigeonhole-sort"},
+    {search:"?lecture=09-non-comparison-sorting&module=pigeonhole-sort"}
+  ])assert.equal(resolveRoute(request).key,key);
+  assert.ok(!routes.some(route=>route.module.id==="pigeonhole-sort"));
 });
 
 

@@ -1,8 +1,8 @@
 import { buildRadixTrace, parseRadixInput, describeRadix } from "./radix-trace.js?v=20261108-3";
-import { renderRadix } from "./sort-view.js?v=20261108-3";
+import { renderRadix } from "./sort-view.js?v=20261109-1";
 
 export const radixSortModule = {
-  id: "radix-sort", shortTitle: "Radix sort", title: "Radix Sort",
+  id: "radix-sort", shortTitle: "LSD radix sort", title: "LSD Radix Sort",
   summary: "Distribute by one digit, gather FIFO bins, and retain the earlier digit order.",
   complexity: "Θ(d(n + m)); Θ(n) for fixed decimal width", source: { slides: "18–39" },
   objective: "Explain why stable least-significant-digit passes sort whole keys, and relate distribution and gathering to 2dn key moves.",
