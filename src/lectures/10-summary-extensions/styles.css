@@ -1,0 +1,76 @@
+/* Summary and extensions: the shared lesson geometry remains unchanged. */
+.sx-board { display:grid; gap:8px; width:100%; min-width:0; color:var(--brand); font-size:13px; line-height:1.35; }
+.sx-heading { display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:4px 12px; }
+.sx-heading strong { font-size:16px; }
+.sx-heading > span,.sx-legend { font-size:12px; color:var(--muted); }
+.sx-scroll { min-width:0; max-width:100%; overflow:auto; }
+.sx-array-row { display:grid; grid-template-columns:38px minmax(0,1fr); gap:5px; min-width:0; align-items:center; }
+.sx-array-row > strong { font-size:12px; font-weight:600; }
+.sx-array { display:grid; grid-template-columns:repeat(var(--sx-n),minmax(var(--sx-cell),1fr)); gap:3px; min-width:calc(var(--sx-n) * var(--sx-cell) + (var(--sx-n) - 1) * 3px); }
+.sx-cell { min-width:0; text-align:center; font-family:var(--mono); }
+.sx-cell > small { display:block; height:14px; color:var(--muted); font-size:12px; line-height:14px; }
+.sx-cell > b { display:flex; align-items:baseline; justify-content:center; gap:3px; min-height:24px; padding:0 2px; background:var(--surface); border:1px solid var(--border-strong); font-size:16px; line-height:22px; white-space:nowrap; }
+.sx-cell b > small { color:var(--muted); font-size:12px; font-weight:400; }
+.sx-cell.is-current > b { border:2px dashed var(--accent); background:var(--accent-soft); line-height:20px; }
+.sx-cell.is-counted > b { border:2px solid var(--teal); background:var(--teal-soft); line-height:20px; }
+.sx-cell.is-used > b { color:var(--muted); text-decoration:line-through; }
+.sx-cell.is-valid > b { border-color:var(--success); background:#e3f3e9; }
+.sx-empty { color:var(--muted); min-height:38px; display:flex; align-items:center; font-size:12px; }
+.sx-note { padding:7px 9px; border:1px solid var(--border-strong); background:var(--brand-soft); overflow-wrap:anywhere; }
+.sx-note.is-current { border-left:3px solid var(--accent); background:var(--accent-soft); }
+.sx-note.is-counted { border-left:3px solid var(--teal); background:var(--teal-soft); }
+.sx-strategies { display:grid; grid-template-columns:1fr 1fr; gap:6px; padding:0; margin:0; list-style:none; }
+.sx-strategies li { padding:7px 8px; border:1px solid var(--border-strong); background:var(--surface); }
+.sx-strategies li.is-current { border-left:3px solid var(--accent); background:var(--accent-soft); }
+.sx-strategies strong { display:block; font-size:13px; }
+.sx-strategies small { display:block; font-size:12px; color:var(--muted); }
+.sx-flow { display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:5px; }
+.sx-flow span { padding:4px 7px; border:1px solid var(--border-strong); background:var(--surface); font-size:12px; }
+.sx-held { display:flex; align-items:baseline; flex-wrap:wrap; gap:4px 8px; font-size:12px; }
+.sx-held b { padding:1px 5px; border:1px dashed var(--accent); background:var(--accent-soft); font-size:14px; }
+.sx-held > span { color:var(--muted); }
+.sx-inversion-grid { margin:0 auto; border-collapse:collapse; font-family:var(--mono); font-size:12px; line-height:16px; text-align:center; }
+.sx-inversion-grid caption { padding-bottom:3px; white-space:nowrap; color:var(--muted); font-family:var(--sans); }
+.sx-inversion-grid td,.sx-inversion-grid th { width:20px; min-width:20px; height:18px; padding:0 2px; border:1px solid var(--border); font-weight:500; }
+.sx-inversion-grid .is-outside { background:#eef2f4; }
+.sx-inversion-grid .is-inversion { color:#9d3f3f; background:#fbeeee; font-weight:700; }
+.sx-inversion-grid .is-counted { color:var(--teal); background:var(--teal-soft); outline:2px solid var(--teal); outline-offset:-2px; font-weight:700; }
+.sx-queues { display:grid; grid-template-columns:1fr 1fr; gap:10px; min-width:0; }
+.sx-queues .sx-array-row { grid-template-columns:14px minmax(0,1fr); }
+.sx-range-tree { display:grid; grid-template-columns:repeat(var(--sx-n),minmax(var(--sx-tree-cell),1fr)); grid-template-rows:repeat(var(--sx-levels),18px); gap:2px; min-width:calc(var(--sx-n) * var(--sx-tree-cell) + (var(--sx-n) - 1) * 2px); }
+.sx-range { align-self:center; text-align:center; padding:1px 2px; border:1px solid var(--border-strong); background:var(--surface); font:12px/14px var(--mono); white-space:nowrap; }
+.sx-range.is-current { border:2px dashed var(--accent); background:var(--accent-soft); padding:0 1px; }
+.sx-range.is-leaf { border-style:double; }
+.sx-range.is-valid { color:var(--success); border-color:var(--success); background:#e3f3e9; }
+.sx-merge { gap:4px; }
+.sx-merge .sx-note { font-size:12px; padding:5px 7px; }
+.sx-decision-tree { position:relative; display:grid; grid-template-columns:repeat(6,minmax(43px,1fr)); grid-template-rows:repeat(4,31px); min-width:278px; }
+.sx-decision-tree > svg { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+.sx-decision-tree path { fill:none; stroke:var(--border-strong); stroke-width:1; }
+.sx-decision-node,.sx-decision-leaf { position:relative; justify-self:center; align-self:center; padding:2px 4px; border:1px solid var(--border-strong); background:var(--surface); font:12px/16px var(--mono); white-space:nowrap; }
+.sx-decision-node.is-visited { border-color:var(--brand); background:var(--brand-soft); }
+.sx-decision-node.is-counted { outline:2px solid var(--teal); background:var(--teal-soft); }
+.sx-decision-leaf.is-rejected { color:var(--muted); text-decoration:line-through; border-style:dashed; }
+.sx-decision-leaf.is-valid { border:2px solid var(--success); background:#e3f3e9; color:var(--success); }
+.sx-capacities { display:flex; justify-content:center; gap:10px; text-align:center; font-family:var(--mono); }
+.sx-capacities span { min-width:68px; padding:3px 7px; border:1px solid var(--border-strong); background:var(--surface); font-size:12px; }
+.sx-capacities .is-invalid { border-style:dashed; border-color:#b44c4c; }
+.sx-capacities .is-valid { border:2px solid var(--success); background:#e3f3e9; }
+.sx-criteria { display:grid; gap:5px; margin:0; padding:0; list-style:none; }
+.sx-criteria li { display:grid; grid-template-columns:92px minmax(0,1fr); gap:5px; padding:4px 7px; line-height:1.25; border-left:2px solid var(--border-strong); font-size:12px; background:var(--surface); }
+.sx-criteria li.is-valid { border-left-color:var(--success); }
+.sx-criteria strong { font-size:12px; }
+@media(max-width:580px) {
+  .sx-board { gap:6px; }
+  .sx-strategies li { padding:5px 6px; }
+  .sx-heading strong { font-size:14px; }
+  .sx-criteria li { grid-template-columns:78px minmax(0,1fr); }
+}
+
+.sx-connections .sx-note { padding:5px 7px; font-size:12px; }
+
+.sx-decision { gap:5px; }
+
+/* The review badge names its earlier lectures without using the next lecture number. */
+.lecture-group-heading[data-lecture-toggle="10-summary-extensions"] { grid-template-columns:66px minmax(0,1fr) 18px; }
+.lecture-group-heading[data-lecture-toggle="10-summary-extensions"] .lecture-number { width:66px; font-size:12px; line-height:14px; text-align:center; }

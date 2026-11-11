@@ -45,7 +45,13 @@ test("registry exposes unique lecture/module routes", () => {
     "09-non-comparison-sorting/counting-sort",
     "09-non-comparison-sorting/radix-sort",
     "09-non-comparison-sorting/msd-radix-sort",
-    "09-non-comparison-sorting/american-flag-sort"
+    "09-non-comparison-sorting/american-flag-sort",
+    "10-summary-extensions/strategy-connections",
+    "10-summary-extensions/insertion-inversions",
+    "10-summary-extensions/merge-inversions",
+    "10-summary-extensions/sorting-lower-bound",
+    "10-summary-extensions/hybrid-mergesort",
+    "10-summary-extensions/choosing-algorithms"
   ];
   assert.deepEqual(keys, expectedRoutes);
   assert.ok(!keys.includes("03-analysis/max-element"));

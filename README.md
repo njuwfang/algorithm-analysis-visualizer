@@ -1,6 +1,6 @@
 # Analysis of Algorithms Visualizations
 
-A reusable, self-contained static website for teaching algorithm execution and analysis. Lectures 03–09 preserve one repeated workflow:
+A reusable, self-contained static website for teaching algorithm execution and analysis. Lectures 03–09 and their summary/extension companion preserve one repeated workflow:
 
 > **Trace → Count → Generalize**
 
@@ -81,7 +81,18 @@ Counting Sort and LSD Radix Sort follow all 39 pages of `09_Non-comparision base
 
 MSD Radix Sort follows LSD, reusing the digit inputs to show recursive prefix ranges, retained child results, and singleton stopping. American Flag Sort comes last, combining counting-based bucket boundaries with recursive radix partitioning and cycles of swaps within A, with no n-item output array. American Flag counts swaps; MSD counts digit inspections; LSD counts key moves. These extensions are not in the deck; their NIST sources and explicit reconstruction choices are recorded in [SOURCE_NOTES.md](docs/SOURCE_NOTES.md). All four modules retain the standard lesson layout. The existing `radix-sort` route remains stable, and former Pigeonhole links open American Flag Sort.
 
-Each lesson keeps the custom input, one example chooser, visualization, lecture pseudocode, selected-operation count, and mathematical model in a compact shared shell. Supporting analysis is available on demand instead of occupying the default screen.
+Lectures 06–09 Review — Summary and Extensions:
+
+- Strategy connections across the four lectures
+- Inversions and adaptive insertion sort
+- Counting inversions with merge
+- Comparison-sorting lower bound through a three-key decision tree
+- Hybrid mergesort with insertion-sort leaves
+- Guided algorithm selection and justification
+
+This instructor-requested synthesis uses the same layout, controls, deterministic examples, and equivalent text traces as earlier lectures. It is labeled **06–09 Review**, leaving Lecture 10 available for the next course section; the existing `10-summary-extensions` URLs remain stable. The new material connects insertion shifts to disorder, counts inversion batches during merge, distinguishes one decision path from worst-case tree height, and compares hybrid and standard mergesort using the same key-comparison definition. Selection cases ask for a written justification before revealing a worked candidate; they are learning practice with no required AI tool or answer submission. Quicksort is assumed already introduced. There is no new supplied deck: sources and authored conventions are recorded in [SOURCE_NOTES.md](docs/SOURCE_NOTES.md). Start at `#/10-summary-extensions/strategy-connections`.
+
+Each lesson keeps the custom input, one example chooser, visualization, lecture pseudocode or reasoning steps, selected-operation count, and mathematical model in a compact shared shell. Supporting analysis is available on demand instead of occupying the default screen.
 
 ## Accessibility
 
@@ -185,6 +196,12 @@ Because routing uses the URL hash and the vendored KaTeX distribution renders fo
 #/09-non-comparison-sorting/radix-sort
 #/09-non-comparison-sorting/msd-radix-sort
 #/09-non-comparison-sorting/american-flag-sort
+#/10-summary-extensions/strategy-connections
+#/10-summary-extensions/insertion-inversions
+#/10-summary-extensions/merge-inversions
+#/10-summary-extensions/sorting-lower-bound
+#/10-summary-extensions/hybrid-mergesort
+#/10-summary-extensions/choosing-algorithms
 ```
 
 Iframe-friendly link:
@@ -222,7 +239,8 @@ visualization/
 │   ├── 06-decrease-conquer/ # modules and lecture-specific drawings
 │   ├── 07-divide-conquer/   # recursive splits, merging, and product identities
 │   ├── 08-transform-conquer/ # presorting, Horner, BSTs, and AVL rotations
-│   └── 09-non-comparison-sorting/ # counting, LSD/MSD radix, and American flag sorts
+│   ├── 09-non-comparison-sorting/ # counting, LSD/MSD radix, and American flag sorts
+│   └── 10-summary-extensions/ # strategy synthesis, inversions, limits, and hybrids
 ├── docs/
 ├── templates/
 ├── tests/
