@@ -1,0 +1,102 @@
+/* Dynamic programming keeps the shared lesson layout and pane dimensions. */
+.dp-board { display:grid; gap:7px; width:100%; min-width:0; color:var(--brand); font-size:13px; line-height:1.3; }
+.dp-heading { display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:4px 10px; }
+.dp-heading strong { font-size:16px; }
+.dp-heading span,.dp-legend { color:var(--muted); font-size:12px; }
+.dp-scroll { min-width:0; max-width:100%; overflow:auto; }
+.dp-note { padding:6px 8px; border:1px solid var(--border-strong); background:var(--brand-soft); font-size:12px; }
+.dp-note.is-counted { border-left:3px solid var(--teal); background:var(--teal-soft); }
+.dp-row-table { width:100%; border-collapse:collapse; table-layout:fixed; font-family:var(--mono); text-align:center; }
+.dp-row-table th,.dp-row-table td { min-width:34px; height:27px; padding:2px 4px; border:1px solid var(--border-strong); font-size:16px; white-space:nowrap; background:var(--surface); }
+.dp-row-table th { font-size:12px; color:var(--muted); font-weight:500; }
+.dp-row-table thead th { height:18px; padding:0 4px; }
+.dp-row-table th:first-child { width:24px; }
+.dp-row-table td.is-source { outline:2px solid var(--brand); outline-offset:-2px; background:var(--brand-soft); }
+.dp-row-table td.is-current { outline:2px dashed var(--accent); outline-offset:-2px; background:var(--accent-soft); }
+.dp-row-table td.is-counted { outline:2px solid var(--teal); outline-offset:-2px; background:var(--teal-soft); }
+.dp-addition { display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:8px; }
+.dp-addition span { padding:7px 12px; border:1px solid var(--border-strong); background:var(--surface); font:16px var(--mono); }
+.dp-addition .is-counted { border:2px solid var(--teal); background:var(--teal-soft); }
+.dp-fib-tree { position:relative; margin-inline:auto; }
+.dp-fib-tree svg { position:absolute; inset:0; width:100%; height:100%; }
+.dp-fib-tree path { stroke:var(--border-strong); stroke-width:1; fill:none; }
+.dp-fib-call { position:absolute; display:grid; place-items:center; width:30px; height:28px; transform:translateX(-50%); border:1px solid var(--border-strong); background:var(--surface); font:12px/12px var(--mono); }
+.dp-fib-call b { font-weight:600; }
+.dp-fib-call.is-returned { color:var(--success); background:var(--success-soft); }
+.dp-fib-call.is-repeat { outline:3px double var(--brand); outline-offset:-3px; }
+.dp-fib-call.is-current { outline:2px dashed var(--accent); outline-offset:1px; }
+.dp-fib-call.is-counted { outline:2px solid var(--teal); background:var(--teal-soft); }
+.dp-fib-recursive { gap:5px; }
+.dp-coins { display:flex; gap:5px; width:max-content; min-width:100%; justify-content:space-evenly; }
+.dp-coin { flex:none; text-align:center; }
+.dp-coin small { display:block; height:15px; color:var(--muted); font:12px/14px var(--mono); }
+.dp-coin b { display:grid; place-items:center; min-width:38px; height:34px; padding:0 4px; border:1px solid var(--border-strong); border-radius:50%; background:var(--surface); font:16px var(--mono); }
+.dp-coin.is-current b { border:2px dashed var(--accent); background:var(--accent-soft); }
+.dp-coin.is-picked b { border:2px solid var(--success); color:var(--success); background:var(--success-soft); }
+.dp-choices { display:grid; grid-template-columns:1fr 1fr; gap:6px; min-width:0; }
+.dp-option { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:0 5px; padding:3px 6px; border:1px solid var(--brand); background:var(--surface); font-size:12px; min-width:0; }
+.dp-option strong { font-size:12px; }
+.dp-option span { grid-column:1; font:12px/15px var(--mono); overflow-wrap:anywhere; }
+.dp-option b { grid-column:2; grid-row:1/span 2; align-self:center; font:16px var(--mono); }
+.dp-option.dp-take { border-style:dashed; }
+.dp-option.is-winner { border-color:var(--success); background:var(--success-soft); }
+.dp-items { display:flex; gap:5px; width:max-content; min-width:100%; justify-content:space-evenly; }
+.dp-item { display:grid; justify-items:center; flex:none; padding:0 4px; min-width:47px; border:1px solid var(--border-strong); background:var(--surface); font:12px/14px var(--mono); }
+.dp-item strong { font-weight:600; }
+.dp-item.is-current { outline:2px dashed var(--accent); outline-offset:-2px; background:var(--accent-soft); }
+.dp-item.is-picked { border-color:var(--success); background:var(--success-soft); }
+.dp-matrix { width:100%; border-collapse:collapse; font-family:var(--mono); text-align:center; }
+.dp-matrix th,.dp-matrix td { min-width:30px; height:18px; padding:0 3px; border:1px solid var(--border-strong); font-size:14px; line-height:16px; white-space:nowrap; background:var(--surface); }
+.dp-matrix th { color:var(--muted); font-size:12px; font-weight:500; }
+.dp-matrix th:first-child { min-width:31px; }
+.dp-matrix td.dp-source-skip { outline:2px solid var(--brand); outline-offset:-2px; background:var(--brand-soft); }
+.dp-matrix td.dp-source-take { outline:2px dashed var(--brand); outline-offset:-2px; background:var(--brand-soft); }
+.dp-matrix td.is-current { outline:2px dashed var(--accent); outline-offset:-2px; background:var(--accent-soft); }
+.dp-matrix td.is-counted { outline:2px solid var(--teal); outline-offset:-2px; background:var(--teal-soft); }
+.dp-matrix td.is-path { color:var(--success); border-color:var(--success); font-weight:700; }
+.dp-matrix td.is-reused { outline:3px double var(--brand); outline-offset:-3px; }
+.dp-matrix td.is-answer { color:var(--success); outline:2px solid var(--success); outline-offset:-2px; background:var(--success-soft); font-weight:700; }
+.dp-stack { font:12px/16px var(--mono); white-space:nowrap; }
+.dp-knapsack { gap:3px; }
+.dp-knapsack .dp-legend { font-size:12px; line-height:14px; }
+@media(max-width:580px) {
+  .dp-board { gap:6px; }
+  .dp-knapsack { gap:3px; }
+  .dp-heading strong { font-size:14px; }
+  .dp-option { padding-inline:4px; }
+}
+
+.dp-addition .is-saved { border:2px solid var(--success); color:var(--success); background:var(--success-soft); }
+.dp-fib-call.is-pending { border-style:dashed; }
+
+/* Extensions retain the same shared pane; tables scroll only if they need to. */
+.dp-path-grid { max-width:390px; margin-inline:auto; table-layout:fixed; }
+.dp-path-grid th,.dp-path-grid td { height:29px; min-width:38px; }
+.dp-path-grid td { position:relative; font-size:17px; }
+.dp-path-grid td.is-wave { outline:2px dashed var(--accent); outline-offset:-3px; }
+.dp-path-grid td.is-previous-wave { background:var(--brand-soft); }
+.dp-path-grid td.dp-source-skip { outline:2px solid var(--brand); outline-offset:-2px; }
+.dp-path-grid td.dp-source-take { outline:2px dashed var(--brand); outline-offset:-2px; }
+.dp-path-grid td.is-current { outline:3px solid var(--accent); outline-offset:-3px; }
+.dp-path-grid td.is-counted { outline:3px solid var(--teal); outline-offset:-3px; }
+.dp-path-grid td.is-answer { outline:2px solid var(--success); outline-offset:-2px; }
+.dp-path-grid small { position:absolute; top:1px; right:2px; font:12px/12px var(--mono); }
+.dp-grid-paths .dp-legend { line-height:15px; }
+.dp-chain-items .dp-item { min-width:53px; }
+.dp-item.dp-chain-left { border:2px solid var(--brand); background:var(--brand-soft); }
+.dp-item.dp-chain-right { border:2px dashed var(--brand); background:var(--brand-soft); }
+.dp-chain-table th,.dp-chain-table td { height:20px; padding-inline:5px; }
+.dp-chain-table .dp-unused { color:var(--muted); background:transparent; border-color:transparent; }
+.dp-chain-table small { font-size:12px; }
+.dp-chain-costs { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:4px; }
+.dp-chain-costs>div { display:grid; justify-items:center; padding:2px 3px; border:1px solid var(--brand); background:var(--surface); min-width:0; }
+.dp-chain-costs>div:nth-child(2) { border-style:dashed; }
+.dp-chain-costs span { font:12px/14px var(--sans); overflow-wrap:anywhere; text-align:center; }
+.dp-chain-costs b { font:15px/18px var(--mono); }
+.dp-chain-total { padding-top:3px; font:13px/16px var(--mono); text-align:center; }
+.dp-chain-work.is-counted .dp-chain-total { color:var(--teal); border:1px solid var(--teal); background:var(--teal-soft); }
+.dp-chain-expression { padding:5px 6px; color:var(--success); background:var(--success-soft); border:1px solid var(--success); font:14px/18px var(--mono); overflow-wrap:anywhere; text-align:center; }
+.dp-matrix-chain { gap:4px; }
+.dp-matrix-chain .dp-heading strong { font-size:14px; }
+.dp-matrix-chain .dp-legend { line-height:14px; }
+.lesson-main[data-module="10-dynamic-programming/matrix-chain"] .code-indent-4 { padding-left:72px; }

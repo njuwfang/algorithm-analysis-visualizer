@@ -51,7 +51,14 @@ test("registry exposes unique lecture/module routes", () => {
     "10-summary-extensions/merge-inversions",
     "10-summary-extensions/sorting-lower-bound",
     "10-summary-extensions/hybrid-mergesort",
-    "10-summary-extensions/choosing-algorithms"
+    "10-summary-extensions/choosing-algorithms",
+    "10-dynamic-programming/fibonacci-recursive",
+    "10-dynamic-programming/fibonacci-bottom-up",
+    "10-dynamic-programming/coin-row",
+    "10-dynamic-programming/knapsack-bottom-up",
+    "10-dynamic-programming/knapsack-memory",
+    "10-dynamic-programming/grid-paths",
+    "10-dynamic-programming/matrix-chain"
   ];
   assert.deepEqual(keys, expectedRoutes);
   assert.ok(!keys.includes("03-analysis/max-element"));

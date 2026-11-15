@@ -1,6 +1,6 @@
 # Analysis of Algorithms Visualizations
 
-A reusable, self-contained static website for teaching algorithm execution and analysis. Lectures 03–09 and their summary/extension companion preserve one repeated workflow:
+A reusable, self-contained static website for teaching algorithm execution and analysis. Lectures 03–10 and the 06–09 review companion preserve one repeated workflow:
 
 > **Trace → Count → Generalize**
 
@@ -90,7 +90,21 @@ Lectures 06–09 Review — Summary and Extensions:
 - Hybrid mergesort with insertion-sort leaves
 - Guided algorithm selection and justification
 
-This instructor-requested synthesis uses the same layout, controls, deterministic examples, and equivalent text traces as earlier lectures. It is labeled **06–09 Review**, leaving Lecture 10 available for the next course section; the existing `10-summary-extensions` URLs remain stable. The new material connects insertion shifts to disorder, counts inversion batches during merge, distinguishes one decision path from worst-case tree height, and compares hybrid and standard mergesort using the same key-comparison definition. Selection cases ask for a written justification before revealing a worked candidate; they are learning practice with no required AI tool or answer submission. Quicksort is assumed already introduced. There is no new supplied deck: sources and authored conventions are recorded in [SOURCE_NOTES.md](docs/SOURCE_NOTES.md). Start at `#/10-summary-extensions/strategy-connections`.
+This instructor-requested synthesis uses the same layout, controls, deterministic examples, and equivalent text traces as earlier lectures. It is labeled **06–09 Review**, separate from the numbered Dynamic Programming lecture; the existing `10-summary-extensions` URLs remain stable. The new material connects insertion shifts to disorder, counts inversion batches during merge, distinguishes one decision path from worst-case tree height, and compares hybrid and standard mergesort using the same key-comparison definition. Selection cases ask for a written justification before revealing a worked candidate; they are learning practice with no required AI tool or answer submission. Quicksort is assumed already introduced. There is no new supplied deck: sources and authored conventions are recorded in [SOURCE_NOTES.md](docs/SOURCE_NOTES.md). Start at `#/10-summary-extensions/strategy-connections`.
+
+Lecture 10 — Dynamic Programming:
+
+- Fibonacci — repeated recursive subproblems
+- Fibonacci — bottom-up recording
+- Coin-row problem — take/skip choices and nonadjacent recovery
+- 0/1 knapsack — bottom-up table and subset recovery
+- 0/1 knapsack — demand-driven memory function
+- Counting grid paths — anti-diagonal dependencies (extension)
+- Matrix-chain multiplication — interval costs and optimal parentheses (extension)
+
+The first five modules follow all 69 pages of `10_Dynamic Programming.pdf`, including the coin-row worked example and exercise, both knapsack examples, the capacity-6 exercise, backtracking, and the final memory-function discussion. Fibonacci counts additions; coin-row counts forward max comparisons; knapsack counts newly evaluated nonbase DP updates. Table dependencies, actual selected coins/items, saved-answer reuse, and unrequested states have full equivalent text descriptions. Source terminology, reconstructed pseudocode, base/tie conventions, and cost assumptions are documented in [SOURCE_NOTES.md](docs/SOURCE_NOTES.md). Start at `#/10-dynamic-programming/fibonacci-recursive`.
+
+The two requested extensions follow the deck's five modules. Grid paths count right/down routes by coordinate sum: each interior cell reads two previous-diagonal counts, and cells within one diagonal are independent. Matrix-chain multiplication tries each final split, adds the two saved interval costs and the cost of joining their results, then recovers parentheses. They count additions and candidate split comparisons, respectively. The worked inputs yield 6 grid paths and a matrix-chain optimum of 1,000 scalar multiplications. Direct routes: `#/10-dynamic-programming/grid-paths` and `#/10-dynamic-programming/matrix-chain`.
 
 Each lesson keeps the custom input, one example chooser, visualization, lecture pseudocode or reasoning steps, selected-operation count, and mathematical model in a compact shared shell. Supporting analysis is available on demand instead of occupying the default screen.
 
@@ -202,6 +216,13 @@ Because routing uses the URL hash and the vendored KaTeX distribution renders fo
 #/10-summary-extensions/sorting-lower-bound
 #/10-summary-extensions/hybrid-mergesort
 #/10-summary-extensions/choosing-algorithms
+#/10-dynamic-programming/fibonacci-recursive
+#/10-dynamic-programming/fibonacci-bottom-up
+#/10-dynamic-programming/coin-row
+#/10-dynamic-programming/knapsack-bottom-up
+#/10-dynamic-programming/knapsack-memory
+#/10-dynamic-programming/grid-paths
+#/10-dynamic-programming/matrix-chain
 ```
 
 Iframe-friendly link:
@@ -240,7 +261,8 @@ visualization/
 │   ├── 07-divide-conquer/   # recursive splits, merging, and product identities
 │   ├── 08-transform-conquer/ # presorting, Horner, BSTs, and AVL rotations
 │   ├── 09-non-comparison-sorting/ # counting, LSD/MSD radix, and American flag sorts
-│   └── 10-summary-extensions/ # strategy synthesis, inversions, limits, and hybrids
+│   ├── 10-summary-extensions/ # 06–09 review: synthesis, inversions, limits, and hybrids
+│   └── 10-dynamic-programming/ # Fibonacci, coin-row, knapsack, grid paths, matrix chains
 ├── docs/
 ├── templates/
 ├── tests/
