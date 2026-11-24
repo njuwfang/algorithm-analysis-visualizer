@@ -1,6 +1,6 @@
 # Analysis of Algorithms Visualizations
 
-A reusable, self-contained static website for teaching algorithm execution and analysis. Lectures 03–10 and the 06–09 review companion preserve one repeated workflow:
+A reusable, self-contained static website for teaching algorithm execution and analysis. Lectures 03–11 and the 06–09 review companion preserve one repeated workflow:
 
 > **Trace → Count → Generalize**
 
@@ -105,6 +105,15 @@ Lecture 10 — Dynamic Programming:
 The first five modules follow all 69 pages of `10_Dynamic Programming.pdf`, including the coin-row worked example and exercise, both knapsack examples, the capacity-6 exercise, backtracking, and the final memory-function discussion. Fibonacci counts additions; coin-row counts forward max comparisons; knapsack counts newly evaluated nonbase DP updates. Table dependencies, actual selected coins/items, saved-answer reuse, and unrequested states have full equivalent text descriptions. Source terminology, reconstructed pseudocode, base/tie conventions, and cost assumptions are documented in [SOURCE_NOTES.md](docs/SOURCE_NOTES.md). Start at `#/10-dynamic-programming/fibonacci-recursive`.
 
 The two requested extensions follow the deck's five modules. Grid paths count right/down routes by coordinate sum: each interior cell reads two previous-diagonal counts, and cells within one diagonal are independent. Matrix-chain multiplication tries each final split, adds the two saved interval costs and the cost of joining their results, then recovers parentheses. They count additions and candidate split comparisons, respectively. The worked inputs yield 6 grid paths and a matrix-chain optimum of 1,000 scalar multiplications. Direct routes: `#/10-dynamic-programming/grid-paths` and `#/10-dynamic-programming/matrix-chain`.
+
+Lecture 11 — Greedy Technique:
+
+- Change-making — dynamic programming and saved-coin recovery
+- Change-making — largest fitting coin and a final DP comparison
+- Prim’s algorithm — crossing edges and nearest-tree labels
+- Kruskal’s algorithm — sorted edges, components, and rejected cycles
+
+These modules follow all 62 pages of `11_Greedy Technique.pdf`. They include the 6,5,1 minimum-coin table, the pictured USA/UAE/Tanzania coin systems, the shared six-vertex MST example, the introductory four-vertex graph, and both final exercises. Greedy change-making exposes the Tanzania 40 counterexample: 25+10+5 versus 20+20. Prim and Kruskal retain their selected edges and weight 15; Kruskal names the existing endpoint path when rejecting a cycle. Counts distinguish DP candidate comparisons, coin-fit tests, Prim weight comparisons, and Kruskal cycle checks. The chosen representations, tie rules, reconstructed executable outlines, and source ambiguities are documented in [SOURCE_NOTES.md](docs/SOURCE_NOTES.md). Start at `#/11-greedy/change-making-dp`.
 
 Each lesson keeps the custom input, one example chooser, visualization, lecture pseudocode or reasoning steps, selected-operation count, and mathematical model in a compact shared shell. Supporting analysis is available on demand instead of occupying the default screen.
 
@@ -223,6 +232,10 @@ Because routing uses the URL hash and the vendored KaTeX distribution renders fo
 #/10-dynamic-programming/knapsack-memory
 #/10-dynamic-programming/grid-paths
 #/10-dynamic-programming/matrix-chain
+#/11-greedy/change-making-dp
+#/11-greedy/greedy-change
+#/11-greedy/prim
+#/11-greedy/kruskal
 ```
 
 Iframe-friendly link:
@@ -262,7 +275,8 @@ visualization/
 │   ├── 08-transform-conquer/ # presorting, Horner, BSTs, and AVL rotations
 │   ├── 09-non-comparison-sorting/ # counting, LSD/MSD radix, and American flag sorts
 │   ├── 10-summary-extensions/ # 06–09 review: synthesis, inversions, limits, and hybrids
-│   └── 10-dynamic-programming/ # Fibonacci, coin-row, knapsack, grid paths, matrix chains
+│   ├── 10-dynamic-programming/ # Fibonacci, coin-row, knapsack, grid paths, matrix chains
+│   └── 11-greedy/            # change-making, Prim, Kruskal and source exercises
 ├── docs/
 ├── templates/
 ├── tests/

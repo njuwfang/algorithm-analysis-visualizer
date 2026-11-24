@@ -7,9 +7,10 @@ import { lecture08 } from "./08-transform-conquer/index.js?v=20261101-2";
 import { lecture09 } from "./09-non-comparison-sorting/index.js?v=20261109-3";
 import { lecture10 as reviewLecture } from "./10-summary-extensions/index.js?v=20261111-1";
 import { lecture10 } from "./10-dynamic-programming/index.js?v=20261115-1";
+import { lecture11 } from "./11-greedy/index.js?v=20261124-1";
 import { validateRegistry } from "../core/schema.js?v=20261024-4";
 
-export const lectures = [lecture03, lecture04, lecture05, lecture06, lecture07, lecture08, lecture09, reviewLecture, lecture10];
+export const lectures = [lecture03, lecture04, lecture05, lecture06, lecture07, lecture08, lecture09, reviewLecture, lecture10, lecture11];
 validateRegistry(lectures);
 
 export const routes = lectures.flatMap((lecture) =>

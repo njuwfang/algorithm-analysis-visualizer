@@ -1,0 +1,79 @@
+/* Lecture 11 drawings; the shared lesson geometry and controls are unchanged. */
+.gg-board { display:grid; gap:7px; min-width:0; width:100%; color:var(--brand); font-size:13px; line-height:1.3; }
+.gg-heading { display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:2px 8px; }
+.gg-heading strong { font-size:15px; }
+.gg-heading span,.gg-legend { color:var(--muted); font-size:12px; }
+.gg-scroll { min-width:0; max-width:100%; overflow:auto; }
+.gg-note { padding:7px 8px; border:1px solid var(--border-strong); background:var(--brand-soft); font-size:13px; }
+.gg-note.is-counted,.gg-candidate.is-counted { border-color:var(--teal); background:var(--teal-soft); }
+.gg-coins { display:flex; gap:7px; justify-content:center; min-width:max-content; }
+.gg-coin { display:grid; place-items:center; min-width:34px; height:32px; padding:0 5px; border:1px solid var(--brand); border-radius:50%; background:var(--surface); font:16px var(--mono); }
+.gg-coin.is-current { outline:2px dashed var(--accent); outline-offset:-2px; background:var(--accent-soft); }
+.gg-table { width:100%; border-collapse:collapse; text-align:center; font-family:var(--mono); }
+.gg-table th,.gg-table td { min-width:27px; padding:2px 4px; height:25px; border:1px solid var(--border-strong); font-size:15px; white-space:nowrap; background:var(--surface); }
+.gg-table th { font-size:12px; color:var(--muted); font-weight:500; }
+.gg-change-table th,.gg-change-table td { min-width:23px; padding-inline:2px; }
+.gg-table .is-source { outline:2px solid var(--brand); outline-offset:-2px; background:var(--brand-soft); }
+.gg-table .is-current { outline:2px dashed var(--accent); outline-offset:-2px; background:var(--accent-soft); }
+.gg-table .is-saved { color:var(--success); background:var(--success-soft); outline:2px solid var(--success); outline-offset:-2px; }
+.gg-candidate { display:grid; gap:3px; justify-items:center; padding:5px 7px; border:1px solid var(--brand); background:var(--surface); }
+.gg-candidate span { font-size:12px; }
+.gg-candidate strong { font:15px var(--mono); }
+.gg-result { display:grid; gap:5px; }
+.gg-picked { display:flex; flex-wrap:wrap; justify-content:center; gap:4px; padding:4px 0; font:14px/20px var(--mono); }
+.gg-picked span { padding:1px 6px; border:1px solid var(--success); color:var(--success); background:var(--success-soft); }
+.gg-money { display:flex; align-items:center; justify-content:center; gap:9px; }
+.gg-money>div { display:grid; justify-items:center; }
+.gg-money span { font-size:12px; color:var(--muted); }
+.gg-money strong { font:23px/30px var(--mono); }
+.gg-money b { font:15px var(--mono); }
+.gg-reference { display:grid; gap:3px; padding:6px 8px; font-size:13px; border:1px solid; }
+.gg-reference.is-valid { border-color:var(--success); background:var(--success-soft); color:var(--success); }
+.gg-reference.is-invalid { border-color:var(--danger); background:var(--danger-soft); color:var(--danger); }
+.gg-mst { gap:3px; }
+.gg-mst .gg-heading strong { font-size:14px; }
+.gg-graph { display:block; width:100%; height:166px; min-width:280px; }
+.gg-graph.is-large { min-width:380px; height:245px; }
+.gg-edge line { stroke:var(--border-strong); stroke-width:1.5; vector-effect:non-scaling-stroke; }
+.gg-edge rect { fill:var(--surface-subtle); }
+.gg-edge text { fill:var(--muted); font:16px var(--mono); }
+.gg-edge.is-crossing line { stroke:var(--brand); stroke-dasharray:5 3; }
+.gg-edge.is-accepted line { stroke:var(--success); stroke-width:3; }
+.gg-edge.is-accepted text { fill:var(--success); }
+.gg-edge.is-rejected line { stroke:var(--danger); stroke-dasharray:2 4; }
+.gg-edge.is-rejected text { fill:var(--danger); }
+.gg-edge.is-witness line { stroke:var(--brand); stroke-width:3; stroke-dasharray:5 3; }
+.gg-edge.is-current line { stroke:var(--accent); stroke-width:3; }
+.gg-edge.is-current rect { fill:var(--accent-soft); stroke:var(--accent); }
+.gg-edge.is-current text { fill:var(--ink); }
+.gg-edge.is-counted line { stroke:var(--teal); }
+.gg-edge.is-counted rect { fill:var(--teal-soft); stroke:var(--teal); }
+.gg-vertex circle { fill:var(--surface); stroke:var(--brand); stroke-width:1.4; vector-effect:non-scaling-stroke; }
+.gg-vertex text { fill:var(--brand); font:18px var(--mono); }
+.gg-vertex.is-in-tree circle { fill:var(--success-soft); stroke:var(--success); stroke-width:2; }
+.gg-vertex.is-in-tree text { fill:var(--success); }
+.gg-vertex .gg-check { font-size:16px; }
+.gg-vertex.is-current circle { stroke:var(--accent); stroke-width:3; }
+.gg-vertex.is-counted circle { stroke:var(--teal); stroke-width:3; }
+.gg-labels td { font-size:12px; height:22px; min-width:32px; }
+.gg-labels th { height:18px; padding:0 3px; }
+.gg-edge-queue { display:flex; gap:1px; width:max-content; min-width:100%; justify-content:space-between; }
+.gg-edge-chip { display:grid; place-items:center; min-width:25px; padding:1px 2px; border:1px solid var(--border-strong); background:var(--surface); font:12px/14px var(--mono); }
+.gg-edge-chip strong { font-weight:500; }
+.gg-edge-chip.is-saved { color:var(--success); border-color:var(--success); background:var(--success-soft); }
+.gg-edge-chip.is-rejected { color:var(--danger); border-style:dashed; border-color:var(--danger); }
+.gg-edge-chip.is-current { outline:2px solid var(--accent); outline-offset:-2px; background:var(--accent-soft); }
+.gg-edge-chip.is-counted { outline-color:var(--teal); background:var(--teal-soft); }
+.gg-component-list { font:12px/16px var(--mono); overflow-wrap:anywhere; }
+.gg-mst .gg-legend { font-size:12px; line-height:14px; }
+@media(max-width:580px) {
+  .gg-heading strong { font-size:14px; }
+  .gg-coins { gap:5px; }
+  .gg-coin { font-size:15px; min-width:32px; }
+  .gg-mst .gg-heading { flex-wrap:nowrap; }
+  .gg-mst .gg-heading strong { overflow-wrap:anywhere; }
+}
+@media(min-width:761px) and (max-height:820px) {
+  .gg-graph { height:146px; }
+  .gg-graph.is-large { height:245px; }
+}

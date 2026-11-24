@@ -58,7 +58,11 @@ test("registry exposes unique lecture/module routes", () => {
     "10-dynamic-programming/knapsack-bottom-up",
     "10-dynamic-programming/knapsack-memory",
     "10-dynamic-programming/grid-paths",
-    "10-dynamic-programming/matrix-chain"
+    "10-dynamic-programming/matrix-chain",
+    "11-greedy/change-making-dp",
+    "11-greedy/greedy-change",
+    "11-greedy/prim",
+    "11-greedy/kruskal"
   ];
   assert.deepEqual(keys, expectedRoutes);
   assert.ok(!keys.includes("03-analysis/max-element"));
